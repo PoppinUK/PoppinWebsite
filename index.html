@@ -45,23 +45,16 @@
             to { opacity: 1; transform: scale(1); }
         }
         .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-stone-50 text-slate-900 overflow-x-hidden">
-
-    <div id="paypalModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closePaypalModal()"></div>
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 p-8 text-center animate-scale-in border border-stone-100">
-            <div class="w-16 h-16 bg-pop-yellow rounded-full flex items-center justify-center mx-auto mb-6">
-                <i data-feather="truck" class="text-slate-900 w-8 h-8"></i>
-            </div>
-            <h3 class="font-brand text-xl text-slate-900 mb-4">Shipping Update</h3>
-            <p class="text-slate-500 text-sm mb-8 leading-relaxed">We aren't shipping right now, but we are working hard on sending items to you soon!</p>
-            <button onclick="closePaypalModal()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all-300">
-                Back to Cart
-            </button>
-        </div>
-    </div>
 
     <div id="cartModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 modal-overlay opacity-0" id="modalOverlay" onclick="closeCartModal()"></div>
@@ -124,8 +117,13 @@
                         
                         <div class="space-y-4">
                             <button type="button" onclick="handlePayPalClick()" class="w-full bg-white text-slate-900 border-2 border-slate-100 py-4 rounded-xl font-bold text-lg hover:bg-slate-50 hover:border-[#003087] transition-all-300 shadow-sm flex items-center justify-center gap-3 group relative overflow-hidden transform active:scale-95">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png" alt="PayPal" class="h-8 object-contain">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1280px-PayPal.svg.png" alt="PayPal" class="h-6 object-contain">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest group-hover:text-[#003087] transition-colors">Checkout</span>
                             </button>
+                            
+                            <div id="paypalMessage" class="hidden text-center bg-pop-yellow text-slate-900 p-4 rounded-xl text-xs font-bold border border-yellow-400 animate-fade-up shadow-sm">
+                                <p class="flex items-center justify-center gap-2">🌍 We are working on sending items to other locations!</p>
+                            </div>
                         </div>
 
                         <p class="text-center text-xs text-slate-400 mt-6 flex items-center justify-center gap-1 opacity-70">
@@ -195,7 +193,7 @@
                         </div>
                         <div class="flex-1 relative animate-fade-up" style="animation-delay: 300ms;">
                             <div class="bg-pop-yellow rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 blur-3xl opacity-50 -z-10 animate-pulse"></div>
-                            <img src="icon.png" alt="Poppin Icon" class="w-full max-w-sm mx-auto drop-shadow-2xl float-animation hover:scale-105 transition-transform duration-500" onerror="this.style.display='none'">
+                            <img src="icon.jpg" alt="Poppin Icon" class="w-full max-w-sm mx-auto drop-shadow-2xl float-animation hover:scale-105 transition-transform duration-500" onerror="this.style.display='none'">
                         </div>
                     </div>
                 </div>
@@ -233,24 +231,60 @@
                     </div>
                 </div>
             </section>
+
+            <section id="locations" class="py-24 bg-stone-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row items-center gap-12 bg-white rounded-[3rem] p-8 md:p-12 shadow-xl border border-stone-100 animate-fade-up">
+                        <div class="flex-1">
+                            <h2 class="font-brand text-4xl mb-6 uppercase tracking-tight">Delivery <span class="text-pop-red">Zone</span></h2>
+                            <p class="text-lg text-slate-600 mb-8">We deliver fresh popcorn nationwide with <strong>Royal Mail</strong>. Tracked and delivered when it's at its peak crunch.</p>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4 group">
+                                    <div class="bg-red-50 p-2 rounded-lg group-hover:scale-110 transition-transform"><img src="https://upload.wikimedia.org/wikipedia/en/6/69/Royal_Mail_logo_2024.svg" class="w-6 h-6 object-contain" alt="Royal Mail"></div>
+                                    <div>
+                                        <h4 class="font-bold">Shipping Options</h4>
+                                        <ul class="text-slate-500 text-sm space-y-1 mt-1">
+                                            <li>• Royal Mail 2nd Class from <strong>£0.87</strong></li>
+                                            <li>• Royal Mail Next Day from <strong>£1.70</strong></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="navigateTo('store')" class="mt-10 bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 hover:shadow-lg hover:-translate-y-1 transition-all-300">Order Now</button>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-stone-100 min-h-[300px] flex items-center justify-center relative hover:scale-[1.01] transition-transform duration-500">
+                                <img src="deliverymap.png" alt="Delivery Service Map" class="w-full h-auto object-cover relative z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-stone-100">
+                                    <i data-feather="map-pin" class="text-stone-300 w-12 h-12 mb-2 animate-bounce"></i>
+                                    <span class="text-stone-500 font-semibold">Map data unavailable</span>
+                                    <span class="text-stone-400 text-xs mt-1">Error loading deliverymap.png</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div id="storeView" class="view-content py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div class="text-center mb-16 animate-fade-up">
                 <h2 class="font-brand text-5xl text-slate-900 mb-4">Poppin Shop</h2>
                 <p class="text-slate-500 mb-8">Fast delivery from as little as £0.87</p>
+                
                 <div class="flex justify-center gap-2 mb-12">
                     <span class="bg-pop-yellow px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm transform hover:scale-105 transition-transform cursor-default">Popcorn</span>
                     <span class="bg-white border border-stone-200 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-slate-400 cursor-not-allowed hover:bg-stone-50 transition-colors">Merch (Coming Soon)</span>
                 </div>
             </div>
-            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            </div>
         </div>
     </main>
 
     <footer class="py-16 bg-white border-t border-stone-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-slate-900 font-bold mb-1">© 2026 Poppin</p>
+            <p class="text-slate-900 font-bold mb-1">© 2026 Poppin Inc.</p>
             <p class="text-slate-500 text-xs uppercase tracking-widest">Stay Crunchy</p>
         </div>
     </footer>
@@ -265,34 +299,40 @@
         let cart = [];
 
         function navigateTo(view) {
-            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.view-content').forEach(v => {
+                v.classList.remove('active');
+            });
             const targetView = document.getElementById(view + 'View');
             if (targetView) targetView.classList.add('active');
             
-            document.querySelectorAll('.nav-link').forEach(l => {
-                l.classList.remove('text-pop-red');
-                l.classList.add('text-slate-600');
-            });
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('text-pop-red'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.add('text-slate-600'));
+            
             const activeLink = document.getElementById('nav-' + view);
             if(activeLink) {
                 activeLink.classList.add('text-pop-red');
                 activeLink.classList.remove('text-slate-600');
             }
-            if(view === 'store') renderProducts();
+
+            if(view === 'store') {
+                renderProducts();
+            }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function handlePayPalClick() {
-            document.getElementById('paypalModal').classList.remove('hidden');
-        }
-
-        function closePaypalModal() {
-            document.getElementById('paypalModal').classList.add('hidden');
+            const msg = document.getElementById('paypalMessage');
+            msg.classList.remove('hidden');
+            msg.classList.remove('animate-shake');
+            void msg.offsetWidth;
+            msg.classList.add('animate-shake');
         }
 
         function renderProducts() {
             const grid = document.getElementById('productGrid');
             if (!grid) return;
+            
             grid.innerHTML = products.map((p, index) => `
                 <div class="bg-white rounded-[2.5rem] p-8 shadow-xl border border-stone-100 hover-lift flex flex-col items-center text-center relative overflow-hidden group animate-fade-up" style="animation-delay: ${index * 150}ms">
                     ${p.badge ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest shadow-md z-10">${p.badge}</div>` : ''}
@@ -315,31 +355,46 @@
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             const exists = cart.find(item => item.id === id);
-            if (exists) { exists.qty++; } else { cart.push({ ...product, qty: 1 }); }
+            if (exists) {
+                exists.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            
             const badge = document.getElementById('cartBadge');
-            badge.classList.remove('scale-0', 'hidden');
+            badge.classList.remove('scale-0');
+            badge.classList.remove('hidden');
             badge.classList.add('scale-125');
             setTimeout(() => badge.classList.remove('scale-125'), 200);
+
             const btn = document.getElementById(`add-btn-${id}`);
             if(btn) {
+                const originalHtml = btn.innerHTML;
                 const originalClass = btn.className;
+                
                 btn.innerHTML = '<i data-feather="check" class="w-5 h-5"></i>';
                 btn.classList.remove('bg-slate-900', 'hover:bg-pop-red');
-                btn.classList.add('bg-green-500', 'scale-110');
+                btn.classList.add('bg-green-500', 'scale-110', 'shadow-green-200');
                 feather.replace();
+
                 setTimeout(() => {
                     btn.innerHTML = '<i data-feather="plus" class="w-5 h-5"></i>';
                     btn.className = originalClass; 
                     feather.replace();
                 }, 1500);
             }
+            
             updateCartUI();
         }
 
         function removeFromCart(id) {
             const index = cart.findIndex(item => item.id === id);
             if (index !== -1) {
-                if(cart[index].qty > 1) { cart[index].qty--; } else { cart.splice(index, 1); }
+                if(cart[index].qty > 1) {
+                    cart[index].qty--;
+                } else {
+                    cart.splice(index, 1);
+                }
             }
             updateCartUI();
         }
@@ -355,15 +410,27 @@
                 badge.classList.remove('hidden');
                 setTimeout(() => badge.classList.remove('scale-0'), 10);
             }
+
             const list = document.getElementById('cartItemsList');
+            
             if (cart.length === 0) {
-                list.innerHTML = `<div class="text-center py-8 animate-fade-up"><div class="bg-stone-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300"><i data-feather="shopping-cart" class="w-8 h-8"></i></div><p class="text-slate-400 mb-2">Your cart is empty.</p><button onclick="closeCartModal(); navigateTo('store')" class="text-pop-red text-sm font-bold hover:underline">Start Shopping</button></div>`;
+                list.innerHTML = `
+                    <div class="text-center py-8 animate-fade-up">
+                        <div class="bg-stone-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                            <i data-feather="shopping-cart" class="w-8 h-8"></i>
+                        </div>
+                        <p class="text-slate-400 mb-2">Your cart is empty.</p>
+                        <button onclick="closeCartModal(); navigateTo('store')" class="text-pop-red text-sm font-bold hover:underline">Start Shopping</button>
+                    </div>`;
                 document.getElementById('checkoutDetails').classList.add('hidden');
+                document.getElementById('cartSubtotal').innerText = '£0.00';
             } else {
                 list.innerHTML = cart.map((item, idx) => `
                     <div class="flex justify-between items-center bg-stone-50 p-3 rounded-xl border border-stone-100 animate-fade-up" style="animation-delay: ${idx * 50}ms">
                         <div class="flex items-center gap-3">
-                            <div class="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-sm text-slate-400"><i data-feather="${item.icon}" class="w-4 h-4"></i></div>
+                            <div class="bg-white w-10 h-10 rounded-lg flex items-center justify-center shadow-sm text-slate-400">
+                                <i data-feather="${item.icon}" class="w-4 h-4"></i>
+                            </div>
                             <div class="text-left">
                                 <div class="font-bold text-sm text-slate-900">${item.name}</div>
                                 <div class="text-xs text-slate-500">£${item.price.toFixed(2)} each</div>
@@ -382,8 +449,10 @@
                 document.getElementById('checkoutDetails').classList.remove('hidden');
                 feather.replace();
             }
+
             const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
             document.getElementById('cartSubtotal').innerText = `£${subtotal.toFixed(2)}`;
+
             const shippingElem = document.querySelector('input[name="shipping"]:checked');
             const shipping = shippingElem ? parseFloat(shippingElem.value) : 0;
             const total = subtotal + shipping;
@@ -394,13 +463,16 @@
             const modal = document.getElementById('cartModal');
             const overlay = document.getElementById('modalOverlay');
             const content = document.getElementById('modalContent');
+            
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            
             setTimeout(() => {
                 overlay.classList.remove('opacity-0');
                 content.classList.remove('scale-95', 'opacity-0');
                 content.classList.add('scale-100', 'opacity-100');
             }, 10);
+            
             updateCartUI();
             feather.replace();
         }
@@ -409,12 +481,19 @@
             const modal = document.getElementById('cartModal');
             const overlay = document.getElementById('modalOverlay');
             const content = document.getElementById('modalContent');
+            
             overlay.classList.add('opacity-0');
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
+            
             setTimeout(() => {
                 modal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
+                
+                document.getElementById('checkoutDetails').classList.remove('hidden');
+                document.getElementById('orderSuccess').classList.add('hidden');
+                document.getElementById('cartSummary').classList.remove('hidden');
+                document.getElementById('paypalMessage').classList.add('hidden');
             }, 300);
         }
 
