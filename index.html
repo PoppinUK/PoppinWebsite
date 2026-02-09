@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin - The Ultimate Popcorn Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-brand {
+            font-family: 'Bungee', cursive;
+        }
+
+        .bg-pop-yellow {
+            background-color: #FFD93D;
+        }
+
+        .text-pop-red {
+            color: #FF2E63;
+        }
+
+        .popcorn-pattern {
+            background-image: radial-gradient(#FFD93D 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .hover-lift {
+            transition: transform 0.2s ease-out;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+
+        @keyframes soft-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .float-animation {
+            animation: soft-float 5s ease-in-out infinite;
+            will-change: transform;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-900">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center">
+                    <img src="text.jpg" alt="Poppin" class="h-10 w-auto">
+                </div>
+                <div class="hidden md:flex space-x-8 font-semibold">
+                    <a href="#flavors" class="hover:text-pop-red transition-colors">Flavors</a>
+                    <a href="#about" class="hover:text-pop-red transition-colors">Our Story</a>
+                    <a href="#locations" class="hover:text-pop-red transition-colors">Find Us</a>
+                </div>
+                <div class="flex items-center">
+                    <button class="bg-[#FF2E63] text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-red-200 hover:scale-105 transition-transform">
+                        Shop Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative overflow-hidden pt-16 pb-32 popcorn-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="flex-1 text-center lg:text-left">
+                    <h1 class="font-brand text-5xl md:text-7xl leading-tight text-slate-900 mb-6 uppercase">
+                        The Taste That <span class="text-pop-red">Pops</span>
+                    </h1>
+                    <p class="text-xl text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0">
+                        Artisanal popcorn crafted with premium kernels and extraordinary flavors. From classic butter to bold surprises.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button class="bg-slate-900 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-800 transition-colors inline-flex items-center justify-center">
+                            Order For Delivery <i data-feather="shopping-bag" class="ml-2 w-5 h-5"></i>
+                        </button>
+                        <button class="bg-white text-slate-900 border-2 border-slate-900 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 transition-colors">
+                            View Menu
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 relative">
+                    <div class="bg-pop-yellow rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 blur-3xl opacity-50 -z-10"></div>
+                    <img src="icon.jpg" alt="Poppin Icon" class="w-full max-w-sm mx-auto drop-shadow-2xl float-animation">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="flavors" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-brand text-4xl mb-4">Our Signature Flavors</h2>
+                <div class="w-24 h-2 bg-pop-red mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-stone-50 p-10 rounded-3xl border border-stone-100 hover-lift text-center">
+                    <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 text-orange-500">
+                        <i data-feather="star" class="w-10 h-10 fill-current"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Original</h3>
+                    <p class="text-slate-600">Pure sea salt and organic grass-fed butter. The gold standard of crunch.</p>
+                </div>
+
+                <div class="bg-stone-50 p-10 rounded-3xl border-2 border-red-500 hover-lift text-center relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-widest">Hot</div>
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <img src="https://static.thenounproject.com/png/1878520-200.png" alt="Dragon" class="w-12 h-12 grayscale brightness-0">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Dragon's Breath</h3>
+                    <p class="text-slate-600">Our hottest blend yet. Ghost pepper seasoning with a smokey finish.</p>
+                </div>
+
+                <div class="bg-stone-50 p-10 rounded-3xl border border-stone-100 hover-lift text-center">
+                    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 text-purple-500">
+                        <i data-feather="coffee" class="w-10 h-10 fill-current"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Caramel</h3>
+                    <p class="text-slate-600">Deep, dark house-made caramel with a pinch of Himalayan pink salt.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-slate-900 text-white overflow-hidden relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="font-brand text-4xl md:text-5xl mb-8 uppercase">Join the Pop-List</h2>
+            <p class="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">Subscribe for exclusive flavor drops and 15% off your first bucket!</p>
+            <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" onsubmit="event.preventDefault(); document.getElementById('success').classList.remove('hidden')">
+                <input type="email" placeholder="Email address" class="flex-1 px-6 py-4 rounded-xl text-slate-900 focus:outline-none focus:ring-4 focus:ring-pop-red/30" required>
+                <button type="submit" class="bg-pop-red px-8 py-4 rounded-xl font-bold hover:bg-red-500 transition-colors">
+                    Get Poppin
+                </button>
+            </form>
+            <p id="success" class="hidden mt-4 text-green-400 font-bold">Awesome! Check your inbox for the code.</p>
+        </div>
+    </section>
+
+    <footer class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex flex-col items-center md:items-start gap-4">
+                    <img src="text.jpg" alt="Logo" class="h-10 w-auto">
+                    <p class="text-slate-500 text-sm max-w-xs text-center md:text-left">Elevating the popcorn experience one kernel at a time.</p>
+                </div>
+                <div class="flex space-x-8 text-slate-400">
+                    <a href="#" class="hover:text-pop-red transition-colors"><i data-feather="instagram"></i></a>
+                    <a href="#" class="hover:text-pop-red transition-colors"><i data-feather="facebook"></i></a>
+                    <a href="#" class="hover:text-pop-red transition-colors"><i data-feather="twitter"></i></a>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-slate-900 font-bold mb-1">© 2026 Poppin Inc.</p>
+                    <p class="text-slate-500 text-xs uppercase tracking-widest">Stay Crunchy</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('load', function() {
+            feather.replace();
+        });
+    </script>
+</body>
+</html>
