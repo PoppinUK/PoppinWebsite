@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download | The Rise and Fall of ChocoLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .pop-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pop-shadow-sm {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .pop-shadow:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);
+        }
+        .bg-pop-yellow { background-color: #FFD23F; }
+        .bg-pop-pink { background-color: #EE4266; }
+        .bg-pop-blue { background-color: #3373FF; }
+        .bg-chocolate { background-color: #3d1c02; }
+        .border-black-3 { border: 3px solid black; }
+        
+        .download-card:hover .icon-box {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .icon-box {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-yellow-50 text-black min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b-4 border-black px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-black tracking-tighter flex items-center gap-2 group">
+                <i class="fa-solid fa-book-open text-pop-pink group-hover:rotate-12 transition-transform"></i>
+                POPPIN<span class="text-pop-blue">BOOKS</span>
+            </a>
+            <a href="/" class="font-black border-b-2 border-black hover:text-pop-pink transition-colors">
+                <i class="fa-solid fa-arrow-left mr-2"></i> BACK
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center py-12 md:py-24 px-6">
+        
+        <div class="max-w-4xl w-full text-center mb-16">
+            <span class="inline-block bg-pop-blue text-white px-6 py-2 rounded-full font-bold mb-6 pop-shadow-sm border-black-3 transform rotate-1">
+                Digital Access
+            </span>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 uppercase tracking-tight">
+                GET THE <span class="text-pop-pink italic underline decoration-black underline-offset-4">BOOK.</span>
+            </h1>
+            <p class="text-xl md:text-2xl font-medium text-gray-800">
+                Choose your preferred digital format for <strong>The Rise and Fall of ChocoLuxe</strong>.
+            </p>
+        </div>
+
+        <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            
+            <div class="bg-white border-black-3 p-10 pop-shadow flex flex-col items-center download-card group">
+                <div class="w-24 h-24 bg-pop-yellow border-black-3 flex items-center justify-center mb-8 icon-box pop-shadow-sm">
+                    <i class="fa-solid fa-file-lines text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-black mb-2 uppercase">PDF</h3>
+                <span class="text-xs font-black bg-black text-white px-2 py-0.5 mb-4">TEXT ONLY</span>
+                <p class="text-gray-600 font-bold mb-8 text-center">Clean, reflowable text layout optimized for mobile reading.</p>
+                <a href="/riseandfallofchocoluxe.pdf" download class="mt-auto w-full bg-black text-white py-4 font-black text-center uppercase tracking-widest hover:bg-pop-pink transition-colors border-black-3">
+                    Download
+                </a>
+            </div>
+
+            <div class="bg-white border-black-3 p-10 pop-shadow flex flex-col items-center download-card group">
+                <div class="w-24 h-24 bg-pop-blue border-black-3 flex items-center justify-center mb-8 icon-box pop-shadow-sm text-white">
+                    <i class="fa-solid fa-book-open-reader text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-black mb-2 uppercase">PDF</h3>
+                <span class="text-xs font-black bg-black text-white px-2 py-0.5 mb-4">BOOKLET READY</span>
+                <p class="text-gray-600 font-bold mb-8 text-center">Formatted as a physical booklet. Perfect for home printing.</p>
+                <a href="/BOOKLETriseandfallofchocoluxe.pdf" download class="mt-auto w-full bg-black text-white py-4 font-black text-center uppercase tracking-widest hover:bg-pop-blue transition-colors border-black-3">
+                    Download
+                </a>
+            </div>
+
+            <div class="bg-white border-black-3 p-10 pop-shadow flex flex-col items-center download-card group">
+                <div class="w-24 h-24 bg-pop-pink border-black-3 flex items-center justify-center mb-8 icon-box pop-shadow-sm">
+                    <i class="fa-solid fa-tablet-screen-button text-4xl text-white"></i>
+                </div>
+                <h3 class="text-3xl font-black mb-4">EPUB</h3>
+                <p class="text-gray-600 font-bold mb-8 text-center">Standard ebook format for Kindle and Apple Books.</p>
+                <a href="/riseandfallofchocoluxe.epub" download class="mt-auto w-full bg-black text-white py-4 font-black text-center uppercase tracking-widest hover:bg-pop-yellow hover:text-black transition-colors border-black-3">
+                    Download
+                </a>
+            </div>
+
+        </div>
+
+        <div class="bg-pop-yellow border-black-3 p-8 md:p-12 pop-shadow max-w-2xl w-full text-center relative overflow-hidden">
+            <div class="relative z-10">
+                <h2 class="text-3xl font-black mb-4 uppercase">Direct from the source.</h2>
+                <p class="text-lg font-bold">
+                    This book is distributed exclusively through Poppin Books. No middleman, just the unfiltered truth about ChocoLuxe.
+                </p>
+            </div>
+            <div class="absolute -right-10 -bottom-10 opacity-10">
+                <i class="fa-solid fa-crown text-[150px] rotate-12"></i>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t-4 border-black py-10 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-col items-center md:items-start">
+                <p class="font-black text-lg">&copy; 2026 Poppin Books Publishing.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
