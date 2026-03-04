@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin Books | The Rise and Fall of ChocoLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .pop-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pop-shadow-sm {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .pop-shadow:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);
+        }
+        .bg-pop-yellow { background-color: #FFD23F; }
+        .bg-pop-pink { background-color: #EE4266; }
+        .bg-pop-blue { background-color: #3373FF; }
+        .bg-chocolate { background-color: #3d1c02; }
+        .border-black-3 { border: 3px solid black; }
+        
+        .hero-bg-image {
+            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://static.wixstatic.com/media/0b1521_65506fc07062499ab98093583e0cb2a5~mv2.jpeg/v1/fill/w_3024,h_1264,al_c,q_90,enc_avif,quality_auto/0b1521_65506fc07062499ab98093583e0cb2a5~mv2.jpeg');
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.6s ease;
+        }
+
+        .book-container:hover .hero-bg-image {
+            transform: scale(1.05);
+        }
+
+        @keyframes float {
+            0% { transform: rotate(-6deg) translateY(0px); }
+            50% { transform: rotate(-4deg) translateY(-10px); }
+            100% { transform: rotate(-6deg) translateY(0px); }
+        }
+
+        .floating-book {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-yellow-50 text-black min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b-4 border-black px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-black tracking-tighter flex items-center gap-2 group">
+                <i class="fa-solid fa-book-open text-pop-pink group-hover:rotate-12 transition-transform"></i>
+                POPPIN<span class="text-pop-blue">BOOKS</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center py-12 md:py-20 px-6">
+        
+        <div id="home-page" class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div>
+                    <span class="inline-block bg-pop-pink text-white px-6 py-2 rounded-full font-bold mb-6 pop-shadow-sm border-black-3 transform -rotate-2">
+                        The Insider Account
+                    </span>
+                    <h1 class="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
+                        I OWNED IT. <br> <span class="text-pop-blue italic underline decoration-black underline-offset-8">I LEFT IT.</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl font-medium text-gray-800 leading-relaxed max-w-xl">
+                        The definitive account of the world's most exclusive chocolatier, written by the person who built the empire and then walked away.
+                    </p>
+                </div>
+                
+                <div>
+                    <a href="/downloads/riseandfall" class="bg-pop-yellow border-black-3 px-10 py-5 text-2xl font-black pop-shadow inline-flex items-center group uppercase tracking-tight">
+                        Visit Downloads Page 
+                        <i class="fa-solid fa-download ml-4 group-hover:translate-y-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="relative book-container">
+                <div class="w-full aspect-[4/3] md:h-[500px] overflow-hidden border-black-3 pop-shadow rotate-3 relative">
+                    <div class="hero-bg-image absolute inset-0"></div>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center z-10">
+                        <div class="bg-white p-5 border-black-3 floating-book pop-shadow w-64 md:w-72">
+                            <div class="aspect-[3/4] bg-chocolate mb-5 overflow-hidden flex items-center justify-center p-8 border-black-3 relative">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent pointer-events-none"></div>
+                                <div class="text-center relative z-10">
+                                    <i class="fa-solid fa-crown text-yellow-400 text-5xl mb-4 drop-shadow-md"></i>
+                                    <h3 class="text-white font-black text-2xl leading-tight uppercase tracking-tighter">
+                                        The Rise and Fall of ChocoLuxe
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center px-1">
+                                <p class="font-black text-xs uppercase tracking-widest text-gray-400">Digital Edition</p>
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 rounded-full bg-pop-pink"></div>
+                                    <div class="w-2 h-2 rounded-full bg-pop-blue"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-pop-blue border-black-3 rounded-full -z-10 animate-pulse opacity-50"></div>
+                <div class="absolute -top-8 -right-8 w-16 h-16 bg-pop-yellow border-black-3 -z-10 rotate-45"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t-4 border-black py-10 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-col items-center md:items-start">
+                <p class="font-black text-lg">&copy; 2026 Poppin Books Publishing.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
