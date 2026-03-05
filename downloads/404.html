@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 | Book Not Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .pop-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pop-shadow:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);
+        }
+        .bg-pop-yellow { background-color: #FFD23F; }
+        .bg-pop-pink { background-color: #EE4266; }
+        .bg-pop-blue { background-color: #3373FF; }
+        .border-black-3 { border: 3px solid black; }
+
+        @keyframes glitch {
+            0% { transform: translate(0) rotate(3deg); }
+            20% { transform: translate(-2px, 2px) rotate(3deg); }
+            40% { transform: translate(-2px, -2px) rotate(3deg); }
+            60% { transform: translate(2px, 2px) rotate(3deg); }
+            80% { transform: translate(2px, -2px) rotate(3deg); }
+            100% { transform: translate(0) rotate(3deg); }
+        }
+        .glitch-box {
+            animation: glitch 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-yellow-50 text-black min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b-4 border-black px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-black tracking-tighter flex items-center gap-2 group">
+                <i class="fa-solid fa-book-open text-pop-pink group-hover:rotate-12 transition-transform"></i>
+                POPPIN<span class="text-pop-blue">BOOKS</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center py-12 px-6 text-center">
+        
+        <div class="relative mb-12">
+            <div class="w-64 h-80 bg-gray-200 border-black-3 pop-shadow flex flex-col items-center justify-center rotate-3 glitch-box">
+                <i class="fa-solid fa-book-medical text-6xl text-gray-400 mb-4"></i>
+                <span class="text-8xl font-black opacity-20">404</span>
+            </div>
+            <div class="absolute -top-6 -right-6 w-16 h-16 bg-pop-pink border-black-3 rounded-full flex items-center justify-center text-white rotate-12">
+                <i class="fa-solid fa-question text-2xl"></i>
+            </div>
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-black mb-6 uppercase tracking-tight">
+            BOOK <span class="text-pop-blue italic underline decoration-black underline-offset-4">MISSING.</span>
+        </h1>
+        
+        <p class="text-xl md:text-2xl font-bold text-gray-800 max-w-lg mb-10">
+            The page you're looking for was either never written or has been redacted from our shelves.
+        </p>
+
+        <a href="/" class="bg-pop-yellow border-black-3 px-10 py-5 text-2xl font-black pop-shadow inline-flex items-center group uppercase tracking-tight hover:bg-pop-blue hover:text-white transition-colors">
+            <i class="fa-solid fa-house mr-4 group-hover:-translate-x-1 transition-transform"></i>
+            Back to Library
+        </a>
+
+        <div class="mt-20 opacity-20 hidden md:block">
+            <div class="flex gap-8 text-4xl">
+                <i class="fa-solid fa-ghost"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <i class="fa-solid fa-book"></i>
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t-4 border-black py-10 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex flex-col items-center md:items-start">
+                <p class="font-black text-lg">&copy; 2026 Poppin Books Publishing.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+
