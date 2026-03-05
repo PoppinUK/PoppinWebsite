@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | Poppin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-brand { font-family: 'Bungee', cursive; }
+        .bg-pop-yellow { background-color: #FFD93D; }
+        .text-pop-red { color: #FF2E63; }
+        .popcorn-pattern {
+            background-image: radial-gradient(#FFD93D 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        
+        @keyframes soft-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .float-animation { animation: soft-float 4s ease-in-out infinite; will-change: transform; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-900 min-h-screen flex flex-col popcorn-pattern relative overflow-hidden">
+    
+    <nav class="absolute top-0 w-full bg-white/90 backdrop-blur-md border-b border-stone-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="index.html" class="flex items-center group">
+                    <div class="relative">
+                        <img src="text.png" alt="Poppin" class="h-10 w-auto transition-transform duration-300 group-hover:scale-105" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden')">
+                        <div class="hidden flex flex-col items-center">
+                            <span class="font-brand text-2xl text-pop-red">POPPIN</span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Unable to load page</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-4 relative z-10 mt-20">
+        <div class="text-center bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-stone-100 max-w-lg w-full animate-fade-up">
+            <div class="mb-8 flex justify-center">
+                <div class="relative">
+                    <img src="IMG_5801.png" alt="404 Icon" class="w-32 h-32 object-contain float-animation" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden')">
+                    <div class="hidden flex flex-col items-center text-pop-red">
+                        <i class="fa-solid fa-ghost text-7xl mb-2 float-animation"></i>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Unable to load page</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h1 class="font-brand text-7xl md:text-8xl text-slate-900 mb-2 tracking-tight">404</h1>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4">Unpopped Kernel!</h2>
+            
+            <p class="text-slate-500 mb-10 text-lg leading-relaxed">
+                Oops! The page you are looking for didn't quite pop. It might have been moved or eaten.
+            </p>
+            
+            <a href="index.html" class="inline-flex items-center justify-center w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:bg-pop-red hover:shadow-xl hover:shadow-red-200 hover:-translate-y-1 transition-all duration-300 group">
+                <i class="fa-solid fa-arrow-left mr-3 group-hover:-translate-x-1 transition-transform"></i> Back to Store
+            </a>
+        </div>
+    </main>
+
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-pop-yellow rounded-full blur-[120px] opacity-30 pointer-events-none z-0"></div>
+</body>
+</html>
