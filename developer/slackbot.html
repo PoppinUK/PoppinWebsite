@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin | Slack Channel Management Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-brand { font-family: 'Bungee', cursive; }
+        .bg-pop-yellow { background-color: #FFD93D; }
+        .text-pop-red { color: #FF2E63; }
+        
+        .popcorn-pattern {
+            background-image: radial-gradient(#FFD93D 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .hover-lift:hover { transform: translateY(-8px) scale(1.02); }
+
+        pre {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            border-left: 4px solid #FFD93D;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #FF2E63;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            color: #4b5563;
+            transition: all 0.2s;
+        }
+
+        .sidebar-link:hover {
+            background: #fff9db;
+            color: #000;
+        }
+
+        .doc-section {
+            margin-bottom: 4rem;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-900 leading-relaxed">
+
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://github.com/user-attachments/assets/c306dc26-db65-4522-834d-ff5016aa3489" alt="Logo" class="h-8 w-auto">
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/PoppinUK/slackbot" target="_blank" class="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full font-semibold hover:bg-slate-800 transition-all">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-12">
+        <aside class="md:w-64 flex-shrink-0 hidden md:block">
+            <div class="sticky top-24 space-y-6">
+                <div>
+                    <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-4 px-3">Getting Started</h3>
+                    <nav class="space-y-1">
+                        <a href="#intro" class="sidebar-link">
+                            <i class="fas fa-info-circle w-4"></i> Introduction
+                        </a>
+                        <a href="#features" class="sidebar-link">
+                            <i class="fas fa-star w-4"></i> Key Features
+                        </a>
+                        <a href="#tech-stack" class="sidebar-link">
+                            <i class="fas fa-layer-group w-4"></i> Tech Stack
+                        </a>
+                    </nav>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-4 px-3">Commands</h3>
+                    <nav class="space-y-1">
+                        <a href="#slash-commands" class="sidebar-link">
+                            <i class="fas fa-terminal w-4"></i> Slash Commands
+                        </a>
+                        <a href="#archiving" class="sidebar-link">
+                            <i class="fas fa-check-circle w-4"></i> Reaction Archiving
+                        </a>
+                    </nav>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-4 px-3">Configuration</h3>
+                    <nav class="space-y-1">
+                        <a href="#setup" class="sidebar-link">
+                            <i class="fas fa-key w-4"></i> Environment Variables
+                        </a>
+                        <a href="#slack-app" class="sidebar-link">
+                            <i class="fab fa-slack-hash w-4"></i> Slack App Setup
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 max-w-4xl">
+            <section id="intro" class="doc-section scroll-mt-24">
+                <div class="popcorn-pattern rounded-3xl p-8 md:p-12 mb-12 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h1 class="font-brand text-4xl md:text-6xl mb-6 leading-tight">Slack Channel <span class="text-pop-red">Management</span> Bot</h1>
+                        <p class="text-lg md:text-xl text-slate-700 max-w-2xl mb-8">
+                            A lightweight, serverless Slack bot designed for moderation and administration. Built for speed and security on Cloudflare Workers.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <span class="bg-white border-2 border-slate-900 px-4 py-1 rounded-full text-sm font-bold shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">Cloudflare Workers</span>
+                            <span class="bg-white border-2 border-slate-900 px-4 py-1 rounded-full text-sm font-bold shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">Slack Events API</span>
+                            <span class="bg-white border-2 border-slate-900 px-4 py-1 rounded-full text-sm font-bold shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">Node.js</span>
+                        </div>
+                    </div>
+                    <div class="absolute -right-10 top-1/2 -translate-y-1/2 opacity-20 hidden lg:block">
+                        <i class="fab fa-slack text-[200px]"></i>
+                    </div>
+                </div>
+                
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 italic text-slate-600 text-sm">
+                    <i class="fas fa-user-secret mr-2"></i> Note: Sensitive information such as user IDs, internal URLs, and tokens has been replaced with placeholders in the repository for security.
+                </div>
+            </section>
+
+            <section id="features" class="doc-section scroll-mt-24">
+                <h2 class="font-brand text-2xl mb-8 flex items-center gap-3">
+                    <i class="fas fa-bolt text-pop-red"></i> Features
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-6 rounded-2xl border-2 border-slate-100 hover:border-pop-yellow transition-colors hover-lift bg-white">
+                        <div class="h-12 w-12 bg-pop-yellow rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Smart Message Clearing</h3>
+                        <p class="text-slate-600 text-sm">Efficiently delete recent messages for yourself or the entire channel with admin privileges.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-2 border-slate-100 hover:border-pop-yellow transition-colors hover-lift bg-white">
+                        <div class="h-12 w-12 bg-pop-yellow rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i class="fas fa-archive"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Reaction Archiving</h3>
+                        <p class="text-slate-600 text-sm">Confirm archiving tasks via emoji reactions. Safe, interactive, and transparent moderation.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-2 border-slate-100 hover:border-pop-yellow transition-colors hover-lift bg-white">
+                        <div class="h-12 w-12 bg-pop-yellow rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Channel Creation</h3>
+                        <p class="text-slate-600 text-sm">Automated channel provisioning with instant owner invitations via slash commands.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-2 border-slate-100 hover:border-pop-yellow transition-colors hover-lift bg-white">
+                        <div class="h-12 w-12 bg-pop-yellow rounded-xl flex items-center justify-center mb-4 text-xl">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Staff Resources</h3>
+                        <p class="text-slate-600 text-sm">Quick access buttons for internal staff lists and organizational websites.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="slash-commands" class="doc-section scroll-mt-24">
+                <h2 class="font-brand text-2xl mb-8 flex items-center gap-3">
+                    <i class="fas fa-terminal text-pop-red"></i> Slash Commands
+                </h2>
+                <div class="space-y-8">
+                    <div class="border-l-4 border-pop-yellow pl-6">
+                        <code class="text-lg font-bold block mb-2">/clear [all]</code>
+                        <p class="text-slate-600 mb-4">Without arguments, it deletes your own recent messages. Use <code>all</code> (Admins only) to wipe the channel history.</p>
+                    </div>
+                    <div class="border-l-4 border-pop-yellow pl-6">
+                        <code class="text-lg font-bold block mb-2">/createchannel [name]</code>
+                        <p class="text-slate-600 mb-4">Instantly creates a new channel and invites you to it. Example: <code>/createchannel dev-squad</code>.</p>
+                    </div>
+                    <div class="border-l-4 border-pop-yellow pl-6">
+                        <code class="text-lg font-bold block mb-2">/delchannel [number]</code>
+                        <p class="text-slate-600 mb-4">Opens an interactive menu or triggers a confirmation message to archive specific channels.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="archiving" class="doc-section scroll-mt-24">
+                <div class="bg-slate-900 text-white rounded-3xl p-8 md:p-12">
+                    <h2 class="font-brand text-2xl mb-6 text-pop-yellow">Reaction-Based Confirmation</h2>
+                    <p class="text-slate-300 mb-8">Prevent accidental data loss. Every archive request requires a manual seal of approval.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-white/10 p-4 rounded-xl flex items-center gap-4 border border-white/5">
+                            <span class="text-2xl">🟢</span>
+                            <div>
+                                <p class="font-bold">Confirm</p>
+                                <p class="text-xs text-slate-400">Proceed with archiving</p>
+                            </div>
+                        </div>
+                        <div class="bg-white/10 p-4 rounded-xl flex items-center gap-4 border border-white/5">
+                            <span class="text-2xl">🔴</span>
+                            <div>
+                                <p class="font-bold">Cancel</p>
+                                <p class="text-xs text-slate-400">Abort the operation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tech-stack" class="doc-section scroll-mt-24">
+                <h2 class="font-brand text-2xl mb-8 flex items-center gap-3">
+                    <i class="fas fa-microchip text-pop-red"></i> Tech Stack
+                </h2>
+                <div class="flex flex-wrap gap-8 grayscale opacity-70 hover:grayscale-0 transition-all duration-500">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fab fa-js text-4xl text-yellow-400"></i>
+                        <span class="text-xs font-bold">JavaScript</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fab fa-slack text-4xl text-purple-600"></i>
+                        <span class="text-xs font-bold">Slack API</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fas fa-cloud text-4xl text-orange-500"></i>
+                        <span class="text-xs font-bold">Cloudflare</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fas fa-server text-4xl text-slate-700"></i>
+                        <span class="text-xs font-bold">Serverless</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="setup" class="doc-section scroll-mt-24">
+                <h2 class="font-brand text-2xl mb-8">Environment Variables</h2>
+                <p class="mb-4 text-slate-600">Configure these in your Cloudflare dashboard or <code>.dev.vars</code> file.</p>
+                <pre><code>SLACK_BOT_TOKEN=your_slack_bot_token
+ADMIN_USER_ID=slack_admin_user_id</code></pre>
+                <div class="mt-4 p-4 bg-red-50 border-l-4 border-pop-red text-pop-red text-sm">
+                    <strong>Security Alert:</strong> Never commit your <code>.env</code> or secrets to public repositories.
+                </div>
+            </section>
+
+            <section id="slack-app" class="doc-section scroll-mt-24">
+                <h2 class="font-brand text-2xl mb-8">Slack App Setup</h2>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center font-bold">1</div>
+                        <div>
+                            <p class="font-bold">Create App</p>
+                            <p class="text-slate-600">Head to <a href="https://api.slack.com/apps" class="text-pop-red underline">api.slack.com</a> and create a new bot from scratch.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center font-bold">2</div>
+                        <div>
+                            <p class="font-bold">Events</p>
+                            <p class="text-slate-600">Enable "Event Subscriptions" and point to <code>/events</code> on your worker. Subscribe to <code>reaction_added</code>.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 h-8 w-8 bg-slate-100 rounded-full flex items-center justify-center font-bold">3</div>
+                        <div>
+                            <p class="font-bold">Slash Commands</p>
+                            <p class="text-slate-600">Register <code>/clear</code>, <code>/createchannel</code>, <code>/delchannel</code>, <code>/stafflist</code>, and <code>/website</code>.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="mt-20 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
+                <p>&copy; 2024 Poppin Channel Management Bot. Released under MIT License.</p>
+                <div class="flex gap-6">
+                    <a href="https://github.com/PoppinUK/slackbot" class="hover:text-pop-red transition-colors">GitHub</a>
+                    <a href="https://poppin.pages.dev" class="hover:text-pop-red transition-colors">Poppin Home</a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        const sections = document.querySelectorAll('.doc-section');
+        const navLinks = document.querySelectorAll('.sidebar-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('bg-pop-yellow', 'text-black', 'font-bold');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('bg-pop-yellow', 'text-black', 'font-bold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
