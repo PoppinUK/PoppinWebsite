@@ -36,6 +36,7 @@ The site is designed to be:
 /
 ├── [site files and assets]
 ├── downloads/
+├── developer/
 ├── internal/
 ```
 
