@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poppin - Engineering the Crunch</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-brand {
+            font-family: 'Bungee', cursive;
+        }
+
+        .bg-pop-yellow {
+            background-color: #FFD93D;
+        }
+
+        .text-pop-red {
+            color: #FF2E63;
+        }
+
+        .popcorn-pattern {
+            background-image: radial-gradient(#FFD93D 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .transition-all-300 {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes soft-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float-animation {
+            animation: soft-float 6s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-stone-50 text-slate-900 overflow-x-hidden min-h-screen">
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center cursor-pointer group" onclick="window.location.href='/'">
+                    <img src="text.png" alt="Poppin" class="h-10 w-auto transition-transform duration-300 group-hover:scale-105">
+                </div>
+                <div class="hidden md:flex items-center gap-8 font-semibold text-sm uppercase tracking-wider">
+                    <a href="#repos" class="text-slate-600 hover:text-pop-red transition-all-300">Repositories</a>
+                    <a href="#stack" class="text-slate-600 hover:text-pop-red transition-all-300">Tech Stack</a>
+                    <a href="https://github.com/PoppinUK" target="_blank" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-pop-red transition-all-300">
+                        <i class="fa-brands fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative overflow-hidden pt-20 pb-32 popcorn-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center lg:text-left">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="flex-1 animate-fade-up" style="animation-delay: 100ms;">
+                    <span class="inline-block bg-white border border-stone-200 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-pop-red mb-6 shadow-sm">
+                        Technical Operations
+                    </span>
+                    <h1 class="font-brand text-5xl md:text-7xl leading-tight text-slate-900 mb-6 uppercase">
+                        Engineering <br><span class="text-pop-red">The Crunch</span>
+                    </h1>
+                    <p class="text-xl text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                        Explore the source code behind our digital storefront and internal automation tools. Everything we build is made with fresh code and high-quality kernels.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="https://github.com/PoppinUK" target="_blank" class="bg-slate-900 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all-300 inline-flex items-center justify-center group">
+                            Explore Repos <i class="fa-solid fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                        <a href="#repos" class="bg-white border-2 border-stone-200 text-slate-700 px-8 py-4 rounded-2xl text-lg font-bold hover:border-pop-red hover:text-pop-red transition-all-300 inline-flex items-center justify-center">
+                            View Sources
+                        </a>
+                    </div>
+                </div>
+                <div class="flex-1 relative animate-fade-up" style="animation-delay: 300ms;">
+                    <div class="bg-pop-yellow rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 blur-3xl opacity-50 -z-10 animate-pulse"></div>
+                    <div class="w-full max-w-md mx-auto bg-slate-900 rounded-3xl p-1 shadow-2xl float-animation">
+                        <div class="bg-slate-800/50 rounded-t-[1.4rem] px-4 py-3 flex items-center justify-between border-b border-slate-700/50">
+                            <div class="flex gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 font-mono uppercase tracking-widest">zsh</span>
+                        </div>
+                        <div class="p-6 font-mono text-sm leading-relaxed">
+                            <div class="flex gap-3 mb-2">
+                                <span class="text-emerald-400">~</span>
+                                <span class="text-slate-300">git clone https://github.com/PoppinUK/PoppinWebsite</span>
+                            </div>
+                            <div class="text-slate-500">Cloning into 'PoppinWebsite'...</div>
+                            <div class="text-slate-500">remote: Counting objects: 100% (452/452), done.</div>
+                            <div class="text-slate-500">remote: Total 1204 (delta 312), reused 401</div>
+                            <div class="text-slate-300 mt-2">Receiving objects: 100% ... done.</div>
+                            <div class="flex items-center gap-2 mt-4">
+                                <span class="w-2 h-4 bg-pop-red animate-pulse"></span>
+                                <span class="text-xs text-pop-red font-bold uppercase tracking-tighter">System Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="repos" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-16 items-start">
+                <div class="lg:w-1/3 sticky top-32">
+                    <h2 class="font-brand text-4xl mb-6 text-slate-900 uppercase leading-tight">Our <br><span class="text-pop-red">Repositories</span></h2>
+                    <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+                        We maintain high standards for our codebase. From our public storefront to our internal automation, transparency is at the heart of our technical operations.
+                    </p>
+                    <div class="flex items-center gap-4 py-4 border-t border-stone-100">
+                        <div class="flex -space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-pop-yellow border-2 border-white flex items-center justify-center font-bold text-xs">P</div>
+                            <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center text-white"><i class="fa-brands fa-github text-[10px]"></i></div>
+                        </div>
+                        <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Active Development</span>
+                    </div>
+                </div>
+                
+                <div class="lg:w-2/3 space-y-6">
+                    <div class="bg-white border border-stone-200 rounded-2xl p-6 hover:border-blue-400 hover:shadow-md transition-all-300 group cursor-pointer" onclick="window.open('https://github.com/PoppinUK/PoppinWebsite', '_blank')">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-blue-600 hover:underline">PoppinWebsite</h3>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full border border-stone-200 text-[10px] text-slate-500 font-bold uppercase w-fit">Public</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-5 leading-relaxed">
+                            The open-source web project for the Poppin website
+                        </p>
+                        <div class="flex items-center gap-4 text-[11px] font-bold text-slate-500">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#e34c26]"></div>
+                                HTML
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-stone-200 rounded-2xl p-6 hover:border-blue-400 hover:shadow-md transition-all-300 group cursor-pointer" onclick="window.open('https://github.com/PoppinUK/slackbot', '_blank')">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-blue-600 hover:underline">slackbot</h3>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full border border-stone-200 text-[10px] text-slate-500 font-bold uppercase w-fit">Public</span>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-5 leading-relaxed">
+                            A lightweight Slack bot for managing channels and moderation tasks using the Slack Events API and Slash Commands.
+                        </p>
+                        <div class="flex items-center gap-4 text-[11px] font-bold text-slate-500">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-[#f1e05a]"></div>
+                                JavaScript
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 text-center lg:text-left">
+                        <a href="https://github.com/PoppinUK" target="_blank" class="text-slate-400 hover:text-pop-red font-bold text-xs uppercase tracking-[0.2em] transition-colors">
+                            View all on GitHub <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="stack" class="py-24 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-[3rem] p-12 shadow-xl border border-stone-100">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="font-brand text-4xl mb-4 uppercase leading-tight">Our Technical <span class="text-pop-red">Stack</span></h2>
+                    <p class="text-slate-600">
+                        We prioritize speed, simplicity, and scalability. Our stack allows us to iterate quickly while maintaining a "buttery smooth" experience.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="flex flex-col items-center p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group hover:border-pop-red transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-pop-red text-3xl mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-html5"></i>
+                        </div>
+                        <span class="font-bold text-slate-800">HTML5</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold mt-1">Semantic</span>
+                    </div>
+                    <div class="flex flex-col items-center p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group hover:border-pop-red transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-pop-red text-3xl mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-css3-alt"></i>
+                        </div>
+                        <span class="font-bold text-slate-800">Tailwind</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold mt-1">Utility-first</span>
+                    </div>
+                    <div class="flex flex-col items-center p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group hover:border-pop-red transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-pop-red text-3xl mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-js"></i>
+                        </div>
+                        <span class="font-bold text-slate-800">Modern JS</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold mt-1">ES6+</span>
+                    </div>
+                    <div class="flex flex-col items-center p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group hover:border-pop-red transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-emerald-500 text-3xl mb-4 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <span class="font-bold text-slate-800">Supabase</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold mt-1">Backend & Auth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <img src="text.png" alt="Poppin" class="h-8 mx-auto mb-8 opacity-50">
+            <p class="text-slate-900 font-bold mb-1">© 2026 Poppin UK</p>
+            <p class="text-slate-400 text-[10px] uppercase tracking-[0.3em] font-bold">
+                Developed in the UK • Open Source Hub
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>
