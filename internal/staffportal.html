@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Onboarding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f1eb;
+      --surface: #ffffff;
+      --surface-2: #f8f6f2;
+      --border: rgba(0,0,0,0.08);
+      --border-active: rgba(0,0,0,0.2);
+      --text: #1a1814;
+      --text-muted: #7a7268;
+      --text-dim: #4a4540;
+      --accent: #8b5e3c;
+      --accent-glow: rgba(139,94,60,0.1);
+      --accent-dim: rgba(139,94,60,0.7);
+      --red: #c0392b;
+      --green: #2e7d54;
+      --green-glow: rgba(46,125,84,0.1);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 85%, rgba(139,94,60,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 45% at 85% 10%, rgba(46,125,84,0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 500px 1fr;
+      align-items: center;
+    }
+
+    .deco {
+      padding: 3rem;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 4rem;
+      animation: fadeUp 0.45s ease 0.1s both;
+    }
+
+    .deco-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .deco-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border);
+      opacity: 0.35;
+      transition: opacity 0.4s ease;
+    }
+
+    .deco-step.active { opacity: 1; }
+    .deco-step.done { opacity: 0.55; }
+
+    .deco-step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      margin-top: 1px;
+      min-width: 20px;
+    }
+
+    .deco-step-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .deco-step.active .deco-step-text { color: var(--text); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04);
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 5%, var(--accent) 40%, #c8936a 60%, transparent 95%);
+      opacity: 0.6;
+    }
+
+    .card-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 1.5px;
+      background: var(--accent);
+    }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-title em { font-style: italic; color: var(--accent-dim); }
+
+    .card-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 2rem;
+    }
+
+    .divider { height: 1px; background: var(--border); margin-bottom: 2rem; }
+
+    .field { margin-bottom: 1.25rem; }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .field-label span {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .field-label .hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 18px;
+      padding-right: 48px;
+      font-family: 'DM Mono', monospace;
+      font-size: 14.5px;
+      letter-spacing: 0.07em;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-transform: uppercase;
+    }
+
+    .input-wrap input::placeholder { color: var(--text-muted); opacity: 0.45; font-size: 12.5px; letter-spacing: 0.04em; }
+    .input-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .input-icon {
+      position: absolute;
+      right: 15px; top: 50%;
+      transform: translateY(-50%);
+      width: 17px; height: 17px;
+      color: var(--text-muted);
+      opacity: 0.35;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(139,94,60,0.25);
+    }
+
+    .btn:hover { opacity: 0.91; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(139,94,60,0.3); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    .spinner {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn.loading .spinner { display: block; }
+    .btn.loading .btn-text { opacity: 0.7; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status {
+      margin-top: 0.9rem;
+      font-size: 12.5px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s, transform 0.25s;
+    }
+
+    .status.visible { opacity: 1; transform: translateY(0); }
+    .status.error { color: var(--red); }
+    .status.success { color: var(--green); }
+    .status.info { color: var(--text-muted); }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,24,20,0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+    }
+
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 420px;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      opacity: 0;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    .modal-overlay.active .modal { transform: translateY(0) scale(1); opacity: 1; }
+
+    .modal-header {
+      padding: 1.75rem 2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .modal-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 5%, var(--accent) 40%, #c8936a 60%, transparent 95%);
+      opacity: 0.5;
+    }
+
+    .modal-icon {
+      width: 42px; height: 42px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(139,94,60,0.15);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-icon svg { color: var(--accent); }
+
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-subtitle { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    .modal-close {
+      position: absolute;
+      top: 1.25rem; right: 1.25rem;
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover { background: var(--surface-2); }
+
+    .modal-body { padding: 1.5rem 2rem 2rem; }
+
+    .terms-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1.1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .terms-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .terms-item + .terms-item { border-top: 1px solid var(--border); }
+    .terms-item svg { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+
+    .agree-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+      cursor: pointer;
+    }
+
+    .agree-wrap input[type="checkbox"] { display: none; }
+
+    .custom-check {
+      width: 19px; height: 19px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border-active);
+      background: var(--surface-2);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+      margin-top: 2px;
+    }
+
+    .agree-label { font-size: 13px; color: var(--text-dim); line-height: 1.6; user-select: none; }
+
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2.5rem 2rem;
+      gap: 0.9rem;
+    }
+
+    .success-state.visible { display: flex; }
+
+    .success-ring {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--green-glow);
+      border: 1.5px solid rgba(46,125,84,0.2);
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse-green 2.2s ease-in-out infinite;
+    }
+
+    .success-ring svg { color: var(--green); }
+
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(46,125,84,0.15); }
+      50% { box-shadow: 0 0 0 10px rgba(46,125,84,0); }
+    }
+
+    .success-title { font-family: 'DM Serif Display', serif; font-size: 1.35rem; color: var(--text); }
+    .success-text { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 300px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    .btn.shake { animation: shake 0.32s ease; }
+
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; justify-items: center; height: auto; min-height: 100vh; padding: 2rem 1rem; overflow-y: auto; }
+      .deco { display: none; }
+      .card { width: 100%; max-width: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="deco">
+      <div class="deco-label">Onboarding Progress</div>
+      <div class="deco-steps">
+        <div class="deco-step active" id="step1">
+          <span class="deco-step-num">01</span>
+          <span class="deco-step-text">Verify your identity</span>
+        </div>
+        <div class="deco-step" id="step2">
+          <span class="deco-step-num">02</span>
+          <span class="deco-step-text">Review terms & conditions</span>
+        </div>
+        <div class="deco-step" id="step3">
+          <span class="deco-step-num">03</span>
+          <span class="deco-step-text">Onboarding complete</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-eyebrow">Staff Portal</div>
+      <h1 class="card-title">Welcome <em>aboard.</em></h1>
+      <p class="card-subtitle">Enter your full name in block capitals to locate your staff record and begin onboarding.</p>
+      <div class="divider"></div>
+      <div class="field">
+        <div class="field-label">
+          <span>Full Name</span>
+          <span class="hint">BLOCK CAPITALS</span>
+        </div>
+        <div class="input-wrap">
+          <input id="nameInput" type="text" placeholder="E.G. JANE SMITH" autocomplete="off" spellcheck="false" />
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+          </svg>
+        </div>
+      </div>
+      <button class="btn" id="submitBtn">
+        <div class="btn-inner">
+          <div class="spinner"></div>
+          <span class="btn-text">Continue →</span>
+        </div>
+      </button>
+      <div class="status" id="message"></div>
+    </div>
+
+    <div></div>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div id="modalNormal">
+        <div class="modal-header">
+          <button class="modal-close" id="closeBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+          <div class="modal-icon">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+            </svg>
+          </div>
+          <div class="modal-title">Terms & Conditions</div>
+          <div class="modal-subtitle">Please read and confirm the following before completing your onboarding.</div>
+        </div>
+        <div class="modal-body">
+          <div class="terms-box">
+            <div class="terms-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4.5 12.75 6 6 9-13.5"/></svg>
+              Your personal data will be stored securely and processed in line with company policy.
+            </div>
+            <div class="terms-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4.5 12.75 6 6 9-13.5"/></svg>
+              You confirm that all information provided is accurate and up to date.
+            </div>
+            <div class="terms-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m4.5 12.75 6 6 9-13.5"/></svg>
+              Onboarding completion is required for access to company systems.
+            </div>
+          </div>
+          <label class="agree-wrap" for="agreeBox">
+            <div class="custom-check" id="customCheck">
+              <svg id="checkIcon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" style="display:none">
+                <path d="m4.5 12.75 6 6 9-13.5"/>
+              </svg>
+            </div>
+            <input type="checkbox" id="agreeBox" />
+            <span class="agree-label">I have read and agree to the staff onboarding terms and conditions.</span>
+          </label>
+          <button class="btn" id="confirmBtn">
+            <div class="btn-inner">
+              <div class="spinner"></div>
+              <span class="btn-text">Complete Onboarding</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="success-state" id="modalSuccess">
+        <div class="success-ring">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="m4.5 12.75 6 6 9-13.5"/>
+          </svg>
+        </div>
+        <div class="success-title">Onboarding Complete</div>
+        <p class="success-text">You're all set. Welcome to the team — your account is now active and ready to use.</p>
+        <button class="btn" id="successClose" style="margin-top:0.5rem">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =============================================
+    // Direct REST fetch — avoids DataCloneError
+    // caused by Supabase JS v2 using Headers objects
+    // that can't be postMessage'd in sandboxed frames
+    // =============================================
+    const SB_URL = "https://rcatqhbpkwlktpmelwft.supabase.co";
+    const SB_KEY = "sb_publishable_9C4wNCT3YcvLf0NO8vJ1uQ_UHCsobT4";
+
+    async function sbGet(table, query) {
+      const params = new URLSearchParams({ select: '*', ...query });
+      const res = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, {
+        headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    async function sbPatch(table, idValue, data) {
+      const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(idValue)}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SB_KEY,
+          Authorization: `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    // DOM refs
+    const input        = document.getElementById("nameInput");
+    const statusEl     = document.getElementById("message");
+    const submitBtn    = document.getElementById("submitBtn");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const confirmBtn   = document.getElementById("confirmBtn");
+    const agreeBox     = document.getElementById("agreeBox");
+    const customCheck  = document.getElementById("customCheck");
+    const checkIcon    = document.getElementById("checkIcon");
+    const closeBtn     = document.getElementById("closeBtn");
+    const modalNormal  = document.getElementById("modalNormal");
+    const modalSuccess = document.getElementById("modalSuccess");
+    const successClose = document.getElementById("successClose");
+    const steps        = [document.getElementById("step1"), document.getElementById("step2"), document.getElementById("step3")];
+
+    let currentRow = null;
+
+    input.addEventListener("input", () => {
+      const pos = input.selectionStart;
+      input.value = input.value.toUpperCase();
+      input.setSelectionRange(pos, pos);
+    });
+
+    input.addEventListener("keydown", e => { if (e.key === "Enter") submitName(); });
+
+    agreeBox.addEventListener("change", () => {
+      const on = agreeBox.checked;
+      customCheck.style.background = on ? 'var(--accent)' : 'var(--surface-2)';
+      customCheck.style.borderColor = on ? 'var(--accent)' : 'var(--border-active)';
+      checkIcon.style.display = on ? 'block' : 'none';
+    });
+
+    function validateName(n) {
+      if (!n) return "Please enter your full name.";
+      if (n.length < 2) return "Name is too short.";
+      return null;
+    }
+
+    function showStatus(msg, type = 'info') {
+      statusEl.className = `status ${type} visible`;
+      statusEl.innerHTML = `<div class="status-dot"></div><span>${msg}</span>`;
+    }
+
+    function clearStatus() { statusEl.className = 'status'; statusEl.innerHTML = ''; }
+
+    function setLoading(btn, on) { btn.disabled = on; btn.classList.toggle('loading', on); }
+
+    function setStep(n) {
+      steps.forEach((s, i) => {
+        s.classList.remove('active', 'done');
+        if (i + 1 < n) s.classList.add('done');
+        else if (i + 1 === n) s.classList.add('active');
+      });
+    }
+
+    function openModal() {
+      agreeBox.checked = false;
+      customCheck.style.background = 'var(--surface-2)';
+      customCheck.style.borderColor = 'var(--border-active)';
+      checkIcon.style.display = 'none';
+      modalNormal.style.display = '';
+      modalSuccess.classList.remove('visible');
+      modalOverlay.classList.add("active");
+      setStep(2);
+    }
+
+    function closeModal() { modalOverlay.classList.remove("active"); setStep(1); }
+
+    function showSuccessModal() {
+      modalNormal.style.display = 'none';
+      modalSuccess.classList.add('visible');
+      setStep(3);
+    }
+
+    modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
+    closeBtn.addEventListener("click", closeModal);
+    successClose.addEventListener("click", () => { closeModal(); input.value = ""; clearStatus(); });
+
+    async function submitName() {
+      const name = input.value.trim().toUpperCase();
+      const err = validateName(name);
+      if (err) { showStatus(err, 'error'); return; }
+
+      setLoading(submitBtn, true);
+      showStatus("Checking staff record…", "info");
+
+      try {
+        const rows = await sbGet('staff', { name: `eq.${name}` });
+
+        if (!rows.length) {
+          showStatus("No staff record found for that name.", "error");
+          return;
+        }
+
+        currentRow = rows[0];
+
+        if (currentRow.onboarding === true) {
+          showStatus("Onboarding already completed — you're all set.", "success");
+          setStep(3);
+          return;
+        }
+
+        clearStatus();
+        openModal();
+      } catch (e) {
+        showStatus("Something went wrong: " + e.message, "error");
+      } finally {
+        setLoading(submitBtn, false);
+      }
+    }
+
+    submitBtn.addEventListener("click", submitName);
+
+    confirmBtn.addEventListener("click", async () => {
+      if (!agreeBox.checked) {
+        confirmBtn.classList.add('shake');
+        setTimeout(() => confirmBtn.classList.remove('shake'), 350);
+        return;
+      }
+
+      setLoading(confirmBtn, true);
+      try {
+        await sbPatch('staff', currentRow.id, { onboarding: true });
+        showSuccessModal();
+      } catch (e) {
+        alert("Error completing onboarding: " + e.message);
+      } finally {
+        setLoading(confirmBtn, false);
+      }
+    });
+  </script>
+</body>
+</html>
