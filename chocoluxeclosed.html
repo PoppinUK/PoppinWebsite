@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When One Door Closes, Another Pops | Poppin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .font-brand { font-family: 'Bungee', cursive; }
+        .bg-pop-yellow { background-color: #FFD93D; }
+        .text-pop-red { color: #FF2E63; }
+        .popcorn-pattern {
+            background-image: radial-gradient(#FFD93D 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+        
+        .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #475569; }
+        .blog-content h2 { font-family: 'Bungee', cursive; font-size: 1.875rem; margin-top: 2.5rem; margin-bottom: 1rem; color: #0f172a; }
+
+        .book-ad-gradient {
+            background: linear-gradient(135deg, #3d1c02 0%, #632c04 100%);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-10px) rotate(-1deg); }
+        }
+        .floating-book {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .interview-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #0f172a;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 0 1.5rem 1.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-900 overflow-x-hidden">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-center items-center h-20">
+                <a href="/" class="block">
+                    <img src="text.png" alt="Poppin" class="h-10 w-auto">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <header class="relative overflow-hidden pt-20 pb-12 popcorn-pattern">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                <div class="animate-fade-up">
+                    <span class="bg-pop-yellow text-slate-900 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 inline-block">The Origin Story</span>
+                    <h1 class="font-brand text-4xl md:text-6xl leading-tight text-slate-900 mb-6">When One Door Closes, Another <span class="text-pop-red">Pops</span></h1>
+                    <div class="flex items-center justify-center gap-4 text-slate-400 text-sm font-bold uppercase tracking-widest">
+                        <span>March 27, 2026</span>
+                        <span>•</span>
+                        <span>Founder's Note</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <article class="py-12 px-4">
+            <div class="max-w-3xl mx-auto bg-white rounded-[3rem] shadow-2xl border border-stone-100 p-8 md:p-16 animate-fade-up" style="animation-delay: 200ms;">
+                <div class="blog-content">
+                    <p class="text-xl text-slate-700 font-medium italic border-l-4 border-pop-red pl-6 mb-10">
+                        "They say you never forget the day the lights go out. For me, it happened twice: once when I left, and today, when the story finally reached its last chapter."
+                    </p>
+
+                    <p>
+                        When I decided to leave my previous company to start <strong>Poppin</strong>, it wasn't because I didn't care about where I had been. It was because I felt a different kind of energy—a need to build something from the ground up that was entirely my own. I handed over my keys, said my goodbyes, and focused every ounce of my effort into the perfect kernel.
+                    </p>
+
+                    <p>
+                        I left a piece of myself there, and I watched from the sidelines as a former colleague took the reins as the owner. For a long time, they kept the engine running. They fought the good fight and kept the legacy alive while I was busy learning the art of the crunch.
+                    </p>
+
+                    <a href="https://poppin.pages.dev/downloads/riseandfall" class="group block relative book-ad-gradient rounded-[2rem] p-6 md:p-10 overflow-hidden shadow-xl hover:scale-[1.01] transition-transform duration-500 my-10">
+                        <div class="absolute top-0 left-0 p-4">
+                            <span class="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/20">Ad</span>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row items-center gap-8">
+                            <div class="flex-1 text-center md:text-left mt-4 md:mt-0">
+                                <h3 class="font-brand text-white text-xl md:text-2xl mb-3 leading-tight">Read the founder's story: The rise and fall of ChocoLuxe.</h3>
+                                <p class="text-white/70 text-sm mb-6 max-w-sm mx-auto md:mx-0">From the first brick to the final closing. Get the digital edition of the tell-all account.</p>
+                                <div class="inline-flex items-center gap-2 bg-white text-[#3d1c02] px-5 py-2.5 rounded-xl font-bold group-hover:bg-[#FFD93D] transition-colors text-sm">
+                                    Download Now <i class="fa-solid fa-arrow-down-long"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="relative w-36 md:w-44 flex-shrink-0">
+                                <div class="bg-white p-2.5 rounded-lg shadow-2xl border-2 border-black/10 floating-book transform -rotate-3">
+                                    <div class="aspect-[3/4] bg-[#3d1c02] rounded flex items-center justify-center p-4 border border-white/10 relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent"></div>
+                                        <div class="text-center relative z-10">
+                                            <i class="fa-solid fa-crown text-yellow-400 text-2xl mb-2"></i>
+                                            <h4 class="text-white font-bold text-[10px] uppercase tracking-tighter leading-tight">The Rise and Fall of ChocoLuxe</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <h2>The Final Bell</h2>
+                    <p>
+                        Today, I heard the news. That chapter has officially closed. The doors are locked, the lights are off, and ChocoLuxe—the company that taught me so much—is now a part of history. It’s a strange feeling watching the place that once felt like home finally reach its conclusion.
+                    </p>
+
+                    <div class="interview-box">
+                        <h4 class="font-brand text-sm mb-4 tracking-widest text-slate-400 uppercase">The Final Interview (March 24, 2026)</h4>
+                        <p class="text-slate-800 font-bold mb-4">When asked about the closure last Tuesday, the owner of ChocoLuxe shared some sobering truths:</p>
+                        <ul class="space-y-4 italic text-slate-600">
+                            <li>"Money was an issue, yes."</li>
+                            <li>"Popularity had nothing to do with the closure."</li>
+                            <li>"One thing I would change is going back when I 'stole' the company and give you co-owner back."</li>
+                        </ul>
+                    </div>
+
+                    <p>
+                        Hearing those words—especially that final admission—is bittersweet. It validates the struggle of the early days and the complicated emotions that came with leaving. Popularity wasn't the problem; sometimes, the weight of a legacy is simply too heavy to carry without the right hands to hold it.
+                    </p>
+
+                    <p>
+                        It serves as a powerful reminder that nothing is permanent, but the lessons we take with us are. The pressure of the world can either crush you or it can turn you into something new. 
+                    </p>
+
+                    <h2>The Poppin Legacy</h2>
+                    <p>
+                        Poppin wouldn't exist without ChocoLuxe. It was the training ground that gave me the grit to strike out on my own. While it’s sad to see that era end today, it only makes me more determined to make Poppin a place that lasts—a place built on the foundations of what I learned there, but with a flavor that’s entirely new.
+                    </p>
+                    
+                    <p>
+                        To my former colleagues and the owner who kept it going until the end: thank you for the memories. One door has closed for good today, but here at Poppin, we're just getting started.
+                    </p>
+
+                    <div class="mt-12">
+                        <p class="font-brand text-pop-red text-2xl mb-2">
+                            Stay Crunchy,<br>
+                            James Theakston
+                        </p>
+                        <a href="https://github.com/jamestheakston1" target="_blank" class="text-slate-400 hover:text-slate-900 transition-colors">
+                            <i class="fa-brands fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer class="py-12 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-slate-900 font-bold">© 2026 Poppin</p>
+        </div>
+    </footer>
+
+</body>
+</html>
