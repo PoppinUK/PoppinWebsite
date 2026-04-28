@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        #protected-content { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-8">
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-90 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full text-center">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-lock text-slate-500 text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">Secure Correspondence</h2>
+            <p class="text-slate-500 text-sm mb-6">This document is encrypted. Please enter the access password provided in your email client to continue.</p>
+            
+            <div class="space-y-4">
+                <input type="password" id="password-input" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none transition-all" placeholder="Enter Access Password">
+                <button onclick="verifyPassword()" id="verify-btn" class="w-full bg-slate-800 text-white font-bold py-3 rounded-md hover:bg-slate-700 transition-colors flex items-center justify-center">
+                    <span>Verify Identity</span>
+                </button>
+                <p id="error-msg" class="text-red-500 text-xs hidden">Invalid password. Please try again or contact legal support.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="protected-content" class="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-green-100 border-b border-green-200 flex justify-start">
+            <div class="flex items-center text-green-800 px-4 py-2 text-xs font-bold cursor-default">
+                <i class="fas fa-check-circle mr-1.5 text-green-600"></i>
+                <span>OPEN</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-semibold tracking-tight">Legal Correspondence</h1>
+                <p class="text-slate-400 text-sm">Case Number: LEGAL-19257</p>
+            </div>
+            <i class="fas fa-gavel text-2xl text-slate-500"></i>
+        </div>
+
+        <div class="p-8 space-y-6 text-gray-700 leading-relaxed">
+            <p>Dear Adam,</p>
+
+            <p>Thank you for your correspondence regarding the settlement of the fidget toy inventory for Mr. James Theakston.</p>
+
+            <div id="status-alert" class="bg-red-50 border-l-4 border-red-400 p-4 my-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700 font-medium">
+                            Status Update: Delivery Not Received
+                        </p>
+                        <p class="text-sm text-red-600 mt-1">
+                            As of today, Tuesday, April 28, 2026, we have not yet received confirmation of the item transfer.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <p>To resolve this matter immediately, you may provide the items directly to him in school. Please note that for this specific resolution, <span class="font-bold">no additional documentation or formal receipts are required</span> to close Case Number <span class="font-bold">LEGAL-19257</span> once the items have been verified on-site.</p>
+
+            <div class="space-y-3">
+                <div class="flex items-start">
+                    <i class="fas fa-school mt-1.5 mr-3 text-slate-500"></i>
+                    <div>
+                        <span class="font-semibold block">Delivery Instruction:</span>
+                        <p class="text-sm font-medium">Items should be delivered directly to him at the school facility.</p>
+                    </div>
+                </div>
+            </div>
+
+            <p>We appreciate your willingness to satisfy this obligation. Upon verbal or written confirmation from the school staff that the three clicky fidget toys have been received, we will move to archive this case file.</p>
+
+            <div id="files-section" class="bg-slate-50 border border-slate-200 rounded-lg p-4 mt-6 hidden">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Related Files</h3>
+                <div id="files-container" class="space-y-2"></div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-100">
+                <p class="font-bold text-slate-900">Poppin Legal Team</p>
+                <p class="text-sm text-slate-500">Corporate Compliance & Dispute Resolution</p>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded text-xs text-gray-500 italic">
+                <p><i class="fas fa-reply mr-2"></i>Note: To respond to this correspondence, please use your standard email client. Direct replies to this notification system are not monitored.</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 text-center text-xs text-gray-400 border-t border-gray-200">
+            <p>Confidential Legal Communication. This email and any attachments are intended solely for the addressee.</p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://shguoopfpqcblkkdwesl.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_l_X0fho1RV96Cdi4hR-gzA_6A0O_Yej';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const currentCase = 'LEGAL-19257';
+
+        function getFileIcon(type) {
+            const icons = {
+                'pdf': { icon: 'fa-file-pdf', color: 'text-red-600' },
+                'doc': { icon: 'fa-file-word', color: 'text-blue-600' },
+                'docx': { icon: 'fa-file-word', color: 'text-blue-600' },
+                'xls': { icon: 'fa-file-excel', color: 'text-green-600' },
+                'xlsx': { icon: 'fa-file-excel', color: 'text-green-600' },
+                'png': { icon: 'fa-file-image', color: 'text-purple-600' },
+                'jpg': { icon: 'fa-file-image', color: 'text-purple-600' },
+                'jpeg': { icon: 'fa-file-image', color: 'text-purple-600' }
+            };
+            return icons[type?.toLowerCase()] || { icon: 'fa-file', color: 'text-slate-600' };
+        }
+
+        async function verifyPassword() {
+            const input = document.getElementById('password-input').value;
+            const btn = document.getElementById('verify-btn');
+            const error = document.getElementById('error-msg');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            error.classList.add('hidden');
+
+            try {
+                const { data, error: dbError } = await supabaseClient
+                    .from('passwords')
+                    .select('*')
+                    .eq('case_number', currentCase)
+                    .eq('password_value', input)
+                    .single();
+
+                if (data) {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('protected-content').style.display = 'block';
+                    await fetchCaseFiles();
+                    logAction('access_granted');
+                } else {
+                    throw new Error('Invalid');
+                }
+            } catch (err) {
+                error.classList.remove('hidden');
+                logAction('failed_attempt');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Verify Identity';
+            }
+        }
+
+        async function fetchCaseFiles() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('case_files')
+                    .select('file_name, file_url, file_type')
+                    .eq('case_number', currentCase);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const container = document.getElementById('files-container');
+                    const section = document.getElementById('files-section');
+                    section.classList.remove('hidden');
+                    container.innerHTML = '';
+
+                    data.forEach(file => {
+                        const fileInfo = getFileIcon(file.file_type);
+                        const fileEl = document.createElement('div');
+                        fileEl.className = "flex items-center space-x-3 p-2 bg-white border border-slate-200 rounded-md shadow-sm w-full cursor-pointer hover:bg-slate-50 transition-colors";
+                        fileEl.onclick = () => {
+                            logAction('download', file.file_name);
+                            window.open(file.file_url, '_blank');
+                        };
+                        fileEl.innerHTML = `
+                            <i class="fas ${fileInfo.icon} ${fileInfo.color} text-xl w-6 text-center"></i>
+                            <span class="text-sm font-medium text-slate-700">${file.file_name}</span>
+                        `;
+                        container.appendChild(fileEl);
+                    });
+                }
+            } catch (err) {
+                console.error('Error fetching files:', err);
+            }
+        }
+
+        async function logAction(action, fileName = null) {
+            try {
+                await supabaseClient
+                    .from('case_logs')
+                    .insert([
+                        { 
+                            case_number: currentCase, 
+                            action: action, 
+                            file_name: fileName,
+                            timestamp: new Date().toISOString() 
+                        }
+                    ]);
+            } catch (error) {
+                console.error('Logging failed:', error);
+            }
+        }
+
+        document.getElementById('password-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyPassword();
+        });
+    </script>
+</body>
+</html>
