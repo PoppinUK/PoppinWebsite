@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Feedback - Poppin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-brand { font-family: 'Bungee', cursive; }
+        .text-pop-red { color: #FF2E63; }
+        .bg-pop-red { background-color: #FF2E63; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeInUp 0.4s ease-out forwards; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .rating-btn.active {
+            background-color: #FF2E63;
+            color: white;
+            border-color: #FF2E63;
+            transform: scale(1.1);
+        }
+        .custom-radio:checked + .radio-tile {
+            border-color: #FF2E63;
+            background-color: #fff1f2;
+        }
+        .custom-radio:checked + .radio-tile .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .loading-spinner {
+            border: 3px solid rgba(255, 46, 99, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #FF2E63;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-900 min-h-screen flex flex-col">
+    <nav class="bg-white border-b border-stone-200 py-4">
+        <div class="max-w-4xl mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="text.png" alt="POPPIN" class="h-8 w-auto" onerror="this.outerHTML='<span class=\'font-brand text-2xl text-pop-red\'>POPPIN</span>'">
+                <span class="text-[10px] font-bold text-slate-400 border-l border-stone-200 pl-2 uppercase tracking-widest">Legal Dept</span>
+            </div>
+            <div id="caseDisplay" class="hidden text-xs font-mono bg-stone-100 px-3 py-1 rounded-full text-slate-500">
+                CASE: <span id="caseNumberDisplay" class="text-slate-900 font-bold"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+        <div class="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-stone-100 overflow-hidden">
+            <div class="h-2 bg-stone-100 w-full">
+                <div id="progress" class="h-full bg-pop-red progress-bar w-[0%]"></div>
+            </div>
+
+            <form id="feedbackForm" action="https://formspree.io/f/xkoyggnb" method="POST" class="p-8 md:p-12">
+                <input type="hidden" name="confirmed_case_id" id="hiddenCaseId">
+                
+                <div id="stepVerify" class="step-content">
+                    <div class="mb-8 text-center">
+                        <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-folder-open text-stone-400 text-xl"></i>
+                        </div>
+                        <h2 class="font-brand text-2xl text-slate-900 mb-2"><span id="verifyCaseNum" class="text-pop-red"></span> is the right case, right?</h2>
+                        <p class="text-slate-500 text-sm">We've detected a case reference from your link. Please confirm this is the file you are providing feedback for.</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" onclick="confirmCase(true)" class="flex-1 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all">Yes, that's correct</button>
+                        <button type="button" onclick="confirmCase(false)" class="flex-1 border-2 border-stone-200 text-slate-600 py-4 rounded-xl font-bold hover:bg-stone-50 transition-all">No, it's different</button>
+                    </div>
+                </div>
+
+                <div id="stepManualCase" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Case Reference</h2>
+                        <p class="text-slate-500">Please enter the specific case number assigned to your legal matter.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Case Number</label>
+                        <input type="text" id="manualCaseInput" name="manual_case_entry" placeholder="LEGAL-1234" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-4 focus:ring-pop-red/20 focus:border-pop-red outline-none transition-all font-mono uppercase">
+                        <p class="text-[10px] text-slate-400 mt-2 italic">Format: LEGAL- followed by your case number.</p>
+                    </div>
+                </div>
+
+                <div id="step1" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Hi, there!</h2>
+                        <p class="text-slate-500">Please provide your professional contact details for this inquiry.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Full Name</label>
+                            <input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-4 focus:ring-pop-red/20 focus:border-pop-red outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Email Address</label>
+                            <input type="email" name="email" id="emailInput" required class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-4 focus:ring-pop-red/20 focus:border-pop-red outline-none transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="step2" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">General Satisfaction</h2>
+                        <p class="text-slate-500">How satisfied are you with the overall service provided?</p>
+                    </div>
+                    <div class="flex justify-between items-center gap-2 mb-4">
+                        <input type="hidden" name="overall_rating" id="ratingValue" required>
+                        <button type="button" onclick="setRating(1)" class="rating-btn flex-1 py-4 border-2 border-stone-100 rounded-2xl text-2xl transition-all hover:border-pop-red/30">1</button>
+                        <button type="button" onclick="setRating(2)" class="rating-btn flex-1 py-4 border-2 border-stone-100 rounded-2xl text-2xl transition-all hover:border-pop-red/30">2</button>
+                        <button type="button" onclick="setRating(3)" class="rating-btn flex-1 py-4 border-2 border-stone-100 rounded-2xl text-2xl transition-all hover:border-pop-red/30">3</button>
+                        <button type="button" onclick="setRating(4)" class="rating-btn flex-1 py-4 border-2 border-stone-100 rounded-2xl text-2xl transition-all hover:border-pop-red/30">4</button>
+                        <button type="button" onclick="setRating(5)" class="rating-btn flex-1 py-4 border-2 border-stone-100 rounded-2xl text-2xl transition-all hover:border-pop-red/30">5</button>
+                    </div>
+                    <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 tracking-widest px-2">
+                        <span>Not Satisfied</span>
+                        <span>Very Satisfied</span>
+                    </div>
+                </div>
+
+                <div id="stepProfessionalism" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Professionalism</h2>
+                        <p class="text-slate-500">How would you rate the clarity and professionalism of our legal advisors?</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="professionalism" value="exceptional" class="hidden custom-radio peer" required>
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Exceptional & Clear</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="professionalism" value="adequate" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Met Expectations</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="professionalism" value="poor" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Needs Improvement</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="step3" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Resolution Speed</h2>
+                        <p class="text-slate-500">How swiftly did we solve the issue?</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="speed" value="very-fast" class="hidden custom-radio peer" required>
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Very Fast (Same Day)</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="speed" value="expected" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">As Expected</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="speed" value="slow" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Slower than Expected</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="stepQuality" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Quality of Advice</h2>
+                        <p class="text-slate-500">How helpful and accurate was the legal guidance provided?</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="advice_quality" value="very-high" class="hidden custom-radio peer" required>
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Highly Effective</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="advice_quality" value="average" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Acceptable</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="advice_quality" value="limited" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Not Helpful</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="step4" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">Brand Perception</h2>
+                        <p class="text-slate-500">Based on this experience, how likely are you to recommend Poppin as a company that prioritizes excellence in service?</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="perception" value="very-likely" class="hidden custom-radio peer" required>
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Highly Likely</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="perception" value="somewhat-likely" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Somewhat Likely</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="perception" value="unlikely" class="hidden custom-radio peer">
+                            <div class="radio-tile flex items-center p-4 border border-stone-200 rounded-xl transition-all group-hover:bg-stone-50">
+                                <div class="w-6 h-6 rounded-full border-2 border-stone-300 mr-4 flex items-center justify-center peer-checked:border-pop-red transition-colors">
+                                    <i class="fas fa-check text-pop-red text-xs opacity-0 scale-50 transition-all check-icon"></i>
+                                </div>
+                                <span class="font-semibold text-slate-700">Unlikely</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="step5" class="step-content">
+                    <div class="mb-8">
+                        <h2 class="font-brand text-3xl text-slate-900 mb-2">The Details</h2>
+                        <p class="text-slate-500">Please provide any additional comments regarding this matter.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Message Content</label>
+                        <textarea name="comments" rows="5" required class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-4 focus:ring-pop-red/20 focus:border-pop-red outline-none transition-all resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div id="stepSubmit" class="step-content text-center py-8">
+                    <div id="submittingState">
+                        <div class="loading-spinner mx-auto mb-6"></div>
+                        <h2 class="font-brand text-2xl text-slate-900 mb-2">Finalizing Submission</h2>
+                        <p class="text-slate-500">Please wait while we secure your data...</p>
+                    </div>
+                </div>
+
+                <div id="stepFinal" class="step-content text-center py-8">
+                    <div class="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-check-circle text-4xl"></i>
+                    </div>
+                    <h2 class="font-brand text-3xl text-slate-900 mb-2">Submission Received</h2>
+                    <p class="text-slate-500 mb-8">Our legal team has logged your feedback. We will contact you at the provided email address if further action is required.</p>
+                    <button type="button" onclick="window.location.reload()" class="text-pop-red font-bold hover:underline">Start New Submission</button>
+                </div>
+
+                <div id="navButtons" class="mt-10 pt-6 border-t border-stone-100 flex justify-between items-center">
+                    <button type="button" id="prevBtn" onclick="changeStep(-1)" class="px-6 py-3 font-bold text-slate-400 hover:text-slate-900 transition-all invisible">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <button type="button" id="nextBtn" onclick="changeStep(1)" class="bg-slate-900 text-white px-10 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all hover:-translate-y-0.5 active:translate-y-0">
+                        Continue <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="py-8 text-center text-slate-400 text-xs">
+        <p>&copy; 2026 Poppin</p>
+    </footer>
+
+    <script>
+        let currentStepId = 'step1';
+        let confirmedCaseId = null;
+        const mainFlow = ['step1', 'step2', 'stepProfessionalism', 'step3', 'stepQuality', 'step4', 'step5', 'stepSubmit', 'stepFinal'];
+        let activeSteps = [...mainFlow];
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const caseParam = urlParams.get('case');
+            
+            if (!caseParam) {
+                window.location.href = '403.html';
+                return;
+            }
+            
+            document.getElementById('verifyCaseNum').textContent = caseParam.toUpperCase();
+            currentStepId = 'stepVerify';
+            document.getElementById('navButtons').classList.add('hidden');
+            
+            updateUI();
+        };
+
+        function confirmCase(isCorrect) {
+            if (isCorrect) {
+                const urlParams = new URLSearchParams(window.location.search);
+                setCase(urlParams.get('case').toUpperCase());
+                activeSteps = [...mainFlow];
+                currentStepId = 'step1';
+            } else {
+                activeSteps = ['stepManualCase', ...mainFlow];
+                currentStepId = 'stepManualCase';
+            }
+            document.getElementById('navButtons').classList.remove('hidden');
+            updateUI();
+        }
+
+        function setCase(id) {
+            confirmedCaseId = id;
+            document.getElementById('hiddenCaseId').value = id;
+            document.getElementById('caseDisplay').classList.remove('hidden');
+            document.getElementById('caseNumberDisplay').textContent = id;
+        }
+
+        function setRating(val) {
+            document.getElementById('ratingValue').value = val;
+            document.querySelectorAll('.rating-btn').forEach((btn, idx) => {
+                if (idx + 1 === val) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
+            document.getElementById(currentStepId).classList.add('active');
+
+            const currentIndex = activeSteps.indexOf(currentStepId);
+            const progress = (currentIndex / (activeSteps.length - 1)) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const navButtons = document.getElementById('navButtons');
+
+            if (currentIndex <= 0) {
+                prevBtn.classList.add('invisible');
+            } else {
+                prevBtn.classList.remove('invisible');
+            }
+
+            if (currentStepId === 'step5') {
+                nextBtn.innerHTML = 'Submit Feedback <i class="fas fa-paper-plane ml-2"></i>';
+                nextBtn.classList.add('bg-pop-red');
+                nextBtn.classList.remove('bg-slate-900');
+            } else if (currentStepId === 'stepSubmit' || currentStepId === 'stepFinal') {
+                navButtons.classList.add('hidden');
+            } else {
+                nextBtn.innerHTML = 'Continue <i class="fas fa-arrow-right ml-2"></i>';
+                nextBtn.classList.remove('bg-pop-red');
+                nextBtn.classList.add('bg-slate-900');
+            }
+        }
+
+        function validateEmail(email) {
+            return String(email)
+                .toLowerCase()
+                .match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                );
+        }
+
+        function validateCurrentStep() {
+            const stepEl = document.getElementById(currentStepId);
+            const inputs = stepEl.querySelectorAll('input[required], textarea[required]');
+            let valid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('border-red-400');
+                    valid = false;
+                } else {
+                    input.classList.remove('border-red-400');
+                }
+            });
+
+            if (currentStepId === 'stepManualCase') {
+                const val = document.getElementById('manualCaseInput').value.trim().toUpperCase();
+                const regex = /^LEGAL-\d+$/;
+                if (!regex.test(val)) {
+                    showError(stepEl, "Case number must be in format LEGAL-1234");
+                    valid = false;
+                } else {
+                    setCase(val);
+                    removeError();
+                }
+            }
+            
+            if (currentStepId === 'step1') {
+                const email = document.getElementById('emailInput').value;
+                if (!validateEmail(email)) {
+                    showError(stepEl, "Please enter a valid professional email address.");
+                    valid = false;
+                } else {
+                    removeError();
+                }
+            }
+
+            if (currentStepId === 'step2') {
+                if (!document.getElementById('ratingValue').value) {
+                    showError(stepEl, "Please select a rating.");
+                    valid = false;
+                } else {
+                   removeError();
+                }
+            }
+
+            const radioGroups = ['professionalism', 'speed', 'advice_quality', 'perception'];
+            radioGroups.forEach(groupName => {
+                const groupStepId = findStepForRadio(groupName);
+                if (currentStepId === groupStepId) {
+                    if (!document.querySelector(`input[name="${groupName}"]:checked`)) {
+                        showError(stepEl, "Please select an option.");
+                        valid = false;
+                    } else {
+                       removeError();
+                    }
+                }
+            });
+            
+            return valid;
+        }
+
+        function findStepForRadio(name) {
+            const map = {
+                'professionalism': 'stepProfessionalism',
+                'speed': 'step3',
+                'advice_quality': 'stepQuality',
+                'perception': 'step4'
+            };
+            return map[name];
+        }
+
+        function showError(container, text) {
+            removeError();
+            const msg = document.createElement('p');
+            msg.id = "val-error";
+            msg.className = "text-pop-red text-xs mt-4 font-bold text-center animate-fade-up";
+            msg.innerText = text;
+            container.appendChild(msg);
+        }
+
+        function removeError() {
+            const error = document.getElementById("val-error");
+            if(error) error.remove();
+        }
+
+        async function submitForm() {
+            currentStepId = 'stepSubmit';
+            updateUI();
+            
+            const form = document.getElementById('feedbackForm');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    currentStepId = 'stepFinal';
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            } catch (error) {
+                currentStepId = 'step5';
+                showError(document.getElementById('step5'), "There was an error submitting your form. Please try again.");
+            }
+            updateUI();
+        }
+
+        function changeStep(n) {
+            if (n === 1 && !validateCurrentStep()) return;
+            
+            const currentIndex = activeSteps.indexOf(currentStepId);
+            
+            if (currentStepId === 'step5' && n === 1) {
+                submitForm();
+                return;
+            }
+
+            let nextIndex = currentIndex + n;
+            if (nextIndex >= 0 && nextIndex < activeSteps.length) {
+                currentStepId = activeSteps[nextIndex];
+                updateUI();
+            }
+        }
+    </script>
+</body>
+</html>
