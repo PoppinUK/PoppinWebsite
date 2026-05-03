@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .link-item { 
+            background: white; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border: 1px solid #ddd; 
+            cursor: pointer; 
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        .link-item:hover { background: #f9f9f9; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 5px; 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 300px;
+        }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #333; color: white; border: none; cursor: pointer; }
+        button:hover { background: #555; }
+        .cancel-btn { background: #999; margin-top: 5px; }
+        .cancel-btn:hover { background: #777; }
+        .back-link { display: block; text-align: center; margin-bottom: 20px; color: #666; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        
+        <div class="header">
+            <h1>Directory</h1>
+        </div>
+        
+        <a href="403.html" class="link-item">
+            403 Error Page
+        </a>
+        
+        <a href="404.html" class="link-item">
+            404 Error Page
+        </a>
+        
+        <a href="#" class="link-item" onclick="showCaseModal(); return false;">
+            Case feedback
+        </a>
+        
+        <a href="chocoluxe.html" class="link-item">
+            ChocoLuxe Offer
+        </a>
+        
+        <a href="chocoluxeclosed.html" class="link-item">
+            ChocoLuxe Interview
+        </a>
+        
+        <a href="books.html" class="link-item">
+            Books
+        </a>
+        
+        <a href="developer.html" class="link-item">
+            Developer
+        </a>
+        
+        <a href="index.html" class="link-item">
+            Home
+        </a>
+        
+        <a href="#" class="link-item" onclick="showMailModal(); return false;">
+            PoppinSecure Mail Service
+        </a>
+        
+        <a href="/developer/slackbot.html" class="link-item">
+            /developer/slackbot.html
+        </a>
+        
+        <a href="/downloads/404.html" class="link-item">
+            /downloads/404.html
+        </a>
+        
+        <a href="/downloads/BOOKLETriseandfallofchocoluxe.pdf" class="link-item">
+            /downloads/BOOKLETriseandfallofchocoluxe.pdf
+        </a>
+        
+        <a href="/downloads/riseandfallofchocoluxe.epub" class="link-item">
+            /downloads/riseandfallofchocoluxe.epub
+        </a>
+        
+        <a href="/downloads/riseandfallofchocoluxe.pdf" class="link-item">
+            /downloads/riseandfallofchocoluxe.pdf
+        </a>
+        
+        <a href="/downloads/riseandfall.html" class="link-item">
+            /downloads/riseandfall.html
+        </a>
+        
+        <div style="margin: 20px 0; padding: 10px 0; border-top: 1px solid #ddd;">
+            <h3 style="color: #666; font-size: 14px; margin-bottom: 10px;">OTHER FILES</h3>
+        </div>
+        
+        <a href="README.md" class="link-item">
+            📄 README.md
+        </a>
+        
+        <a href="text.png" class="link-item">
+            🖼️ text.png
+        </a>
+        
+        <a href="icon.png" class="link-item">
+            🖼️ icon.png
+        </a>
+        
+        <a href="IMG_5801.png" class="link-item">
+            🖼️ IMG_5801.png
+        </a>
+        
+        <a href="deliverymap.png" class="link-item">
+            🖼️ deliverymap.png
+        </a>
+        
+        <a href="emailsecurepoppin.png" class="link-item">
+            🖼️ emailsecurepoppin.png
+        </a>
+        
+        <a href="favicon.ico" class="link-item">
+            🎯 favicon.ico
+        </a>
+        
+        <a href="text&icon.png" class="link-item">
+            🖼️ text&icon.png
+        </a>
+    </div>
+
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Case Number</h3>
+            <input type="text" id="caseNumber" placeholder="Enter case number..." onkeypress="if(event.key === 'Enter') submitCase()">
+            <button onclick="submitCase()">Submit</button>
+            <button onclick="closeModal()" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <div id="mailModal" class="modal">
+        <div class="modal-content" style="width: 550px; max-width: 90vw;">
+            <h3>Mail Access</h3>
+            <p>You will know if you need to access this link if you got an email similar to the one below:</p>
+            <img src="emailsecurepoppin.png" alt="Secure Email Example" style="width: 100%; max-width: 500px; margin: 15px 0; border: 1px solid #ddd;">
+            <p style="margin-top: 15px; font-size: 14px; color: #666;"><strong>Please refer to the link in your email instead of accessing this directly.</strong></p>
+            <button onclick="closeMailModal()" class="cancel-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function showCaseModal() {
+            document.getElementById('caseModal').style.display = 'block';
+            document.getElementById('caseNumber').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('caseModal').style.display = 'none';
+            document.getElementById('caseNumber').value = '';
+        }
+
+        function showMailModal() {
+            document.getElementById('mailModal').style.display = 'block';
+        }
+
+        function closeMailModal() {
+            document.getElementById('mailModal').style.display = 'none';
+        }
+
+        function submitCase() {
+            const caseNumber = document.getElementById('caseNumber').value.trim();
+            if (caseNumber) {
+                window.location.href = '../casefeedback?case=' + encodeURIComponent(caseNumber);
+            } else {
+                alert('Please enter a case number');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const caseModal = document.getElementById('caseModal');
+            const mailModal = document.getElementById('mailModal');
+            if (event.target == caseModal) {
+                closeModal();
+            } else if (event.target == mailModal) {
+                closeMailModal();
+            }
+        }
+    </script>
+</body>
+</html>

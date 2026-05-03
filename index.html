@@ -50,15 +50,7 @@
 </head>
 <body class="bg-stone-50 text-slate-900 overflow-x-hidden">
 
-    <div class="bg-stone-100 border-b border-stone-200 py-2.5 px-4 text-center">
-        <p class="text-sm text-stone-600 font-medium">
-            ChocoLuxe has closed. 
-            <a href="/chocoluxeclosed.html" class="text-pop-red hover:underline ml-1 font-bold inline-flex items-center gap-1">
-                Read more <i class="fas fa-chevron-right text-[10px]"></i>
-            </a>
-        </p>
-    </div>
-
+    
     <div id="paypalModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closePaypalModal()"></div>
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 p-8 text-center animate-scale-in border border-stone-100">
@@ -171,6 +163,9 @@
                 <div class="hidden md:flex space-x-8 font-semibold">
                     <button onclick="navigateTo('home')" class="nav-link text-pop-red hover:text-pop-red transition-all-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-pop-red after:transition-all after:duration-300 hover:after:w-full" id="nav-home">Home</button>
                     <button onclick="navigateTo('store')" class="nav-link text-slate-600 hover:text-pop-red transition-all-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-pop-red after:transition-all after:duration-300 hover:after:w-full" id="nav-store">Store</button>
+                    <button onclick="navigateTo('about')" class="nav-link text-slate-600 hover:text-pop-red transition-all-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-pop-red after:transition-all after:duration-300 hover:after:w-full" id="nav-about">About</button>
+                    <button onclick="navigateTo('faq')" class="nav-link text-slate-600 hover:text-pop-red transition-all-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-pop-red after:transition-all after:duration-300 hover:after:w-full" id="nav-faq">FAQ</button>
+                    <button onclick="navigateTo('contact')" class="nav-link text-slate-600 hover:text-pop-red transition-all-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-pop-red after:transition-all after:duration-300 hover:after:w-full" id="nav-contact">Contact</button>
                 </div>
 
                 <div class="flex items-center gap-4">
@@ -242,7 +237,7 @@
                                 <i class="fas fa-coffee text-3xl"></i>
                             </div>
                             <h3 class="text-2xl font-bold mb-3 group-hover:text-pop-red transition-colors">Caramel</h3>
-                            <p class="text-slate-600">House-made caramel with Himalayan pink salt.</p>
+                            <p class="text-slate-600">Sweet, crunchy, and addictive.</p>
                         </div>
                     </div>
                 </div>
@@ -284,6 +279,150 @@
                     </div>
                 </div>
             </section>
+
+            <section id="about" class="py-24 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16 animate-fade-up">
+                        <h2 class="font-brand text-4xl mb-4">About Poppin</h2>
+                        <div class="w-24 h-2 bg-pop-red mx-auto rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div class="animate-fade-up" style="animation-delay: 200ms;">
+                            <h3 class="font-brand text-3xl text-slate-900 mb-6">Crafted with Passion</h3>
+                            <p class="text-slate-600 mb-6 leading-relaxed">
+                                Poppin was created by three people who had a passion for popcorn. We want to share that passion with you. Poppin uses 100% natural ingredients, and we offer UK wide delivery.
+                            </p>
+                            <p class="text-slate-600 mb-8 leading-relaxed">
+                                What started as three friends experimenting with popcorn recipes in our kitchens has grown into a mission to bring the perfect popcorn experience to everyone. We believe that great popcorn should be simple, natural, and absolutely delicious. That's why we spend countless hours testing different kernels, perfecting our seasoning blends, and refining our popping techniques until every batch is just right.
+                            </p>
+                            <p class="text-slate-600 mb-8 leading-relaxed">
+                                Our journey began when we realized that most popcorn available was either too processed, loaded with artificial ingredients, or just plain boring. We knew there had to be a better way. Through trial, error, and lots of taste testing (the best part!), we developed our signature flavors that celebrate the natural goodness of popcorn while adding exciting twists that keep you coming back for more.
+                            </p>
+                            <div class="grid grid-cols-3 gap-6 text-center">
+                                <div class="bg-stone-50 p-6 rounded-2xl hover-lift">
+                                    <div class="text-3xl font-brand text-pop-red mb-2">100%</div>
+                                    <div class="text-sm text-slate-600 font-semibold">Natural Ingredients</div>
+                                </div>
+                                <div class="bg-stone-50 p-6 rounded-2xl hover-lift">
+                                    <div class="text-3xl font-brand text-pop-red mb-2">3+</div>
+                                    <div class="text-sm text-slate-600 font-semibold">Signature Flavors</div>
+                                </div>
+                                <div class="bg-stone-50 p-6 rounded-2xl hover-lift">
+                                    <div class="text-3xl font-brand text-pop-red mb-2">UK</div>
+                                    <div class="text-sm text-slate-600 font-semibold">Wide Delivery</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="animate-fade-up" style="animation-delay: 400ms;">
+                            <div class="bg-pop-yellow rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 blur-3xl opacity-40 -z-10"></div>
+                            <div class="relative bg-stone-50 rounded-3xl p-8 border border-stone-100 text-center">
+                                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                    <i class="fas fa-heart text-4xl text-pop-red"></i>
+                                </div>
+                                <h4 class="font-brand text-2xl text-slate-900 mb-3">Made with Love</h4>
+                                <p class="text-slate-600">Every batch is crafted with care and attention to detail, ensuring you get the perfect popcorn experience every time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="faq" class="py-24 bg-stone-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16 animate-fade-up">
+                        <h2 class="font-brand text-4xl mb-4">Frequently Asked Questions</h2>
+                        <div class="w-24 h-2 bg-pop-red mx-auto rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="bg-white p-6 rounded-2xl border border-stone-100 hover-lift animate-fade-up" style="animation-delay: 200ms;">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-pop-yellow w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-question text-slate-900"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">How long does delivery take?</h4>
+                                    <p class="text-slate-600">Royal Mail 2nd Class typically takes 2-3 working days, while Next Day delivery arrives the next working day if ordered before 2pm.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-stone-100 hover-lift animate-fade-up" style="animation-delay: 300ms;">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-pop-yellow w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-question text-slate-900"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">How long does the popcorn stay fresh?</h4>
+                                    <p class="text-slate-600">Our popcorn stays fresh for up to 2 weeks when stored in an airtight container. For best taste, we recommend enjoying within 7 days.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-stone-100 hover-lift animate-fade-up" style="animation-delay: 400ms;">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-pop-yellow w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-question text-slate-900"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">Do you offer international shipping?</h4>
+                                    <p class="text-slate-600">Currently we ship within the UK only. We're working on expanding our delivery zones soon!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-stone-100 hover-lift animate-fade-up" style="animation-delay: 500ms;">
+                            <div class="flex items-start gap-4">
+                                <div class="bg-pop-yellow w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-question text-slate-900"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-2">Are your ingredients allergen-free?</h4>
+                                    <p class="text-slate-600">Our Original flavor contains dairy. Please check individual product descriptions for full allergen information.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="py-24 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16 animate-fade-up">
+                        <h2 class="font-brand text-4xl mb-4">Get in Touch</h2>
+                        <div class="w-24 h-2 bg-pop-red mx-auto rounded-full"></div>
+                        <p class="text-slate-600 mt-4 max-w-2xl mx-auto">Have questions about our popcorn or want to share your Poppin experience? We'd love to hear from you!</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="text-center animate-fade-up" style="animation-delay: 200ms;">
+                            <div class="bg-stone-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 hover-lift">
+                                <i class="fas fa-envelope text-2xl text-pop-red"></i>
+                            </div>
+                            <h3 class="font-bold text-xl mb-2">Email Us</h3>
+                            <p class="text-slate-600 mb-4">ukie.poppin@gmail.com</p>
+                            <p class="text-sm text-slate-500">We respond within 24 hours</p>
+                        </div>
+
+                        <div class="text-center animate-fade-up" style="animation-delay: 300ms;">
+                            <div class="bg-stone-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 hover-lift">
+                                <i class="fas fa-share-alt text-2xl text-pop-red"></i>
+                            </div>
+                            <h3 class="font-bold text-xl mb-2">Follow Us</h3>
+                            <div class="flex justify-center gap-4 mb-4">
+                                <a href="https://github.com/PoppinUK" target="_blank" class="w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-pop-red transition-colors">
+                                    <i class="fab fa-github text-sm"></i>
+                                </a>
+                                <a href="https://www.youtube.com/@poppinuk" target="_blank" class="w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-pop-red transition-colors">
+                                    <i class="fab fa-youtube text-sm"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-slate-500">@poppinuk</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div id="storeView" class="view-content py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -301,6 +440,9 @@
 
     <footer class="py-16 bg-white border-t border-stone-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="mb-4">
+                <a href="directory.html" class="text-pop-red hover:underline font-medium transition-colors">More Links</a>
+            </p>
             <p class="text-slate-900 font-bold mb-1">© 2026 Poppin</p>
             <p class="text-slate-500 text-xs uppercase tracking-widest">Stay Crunchy</p>
         </div>
@@ -316,9 +458,19 @@
         let cart = [];
 
         function navigateTo(view) {
-            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
-            const targetView = document.getElementById(view + 'View');
-            if (targetView) targetView.classList.add('active');
+            if (view === 'store') {
+                document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+                const targetView = document.getElementById(view + 'View');
+                if (targetView) targetView.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+                document.getElementById('homeView').classList.add('active');
+                const section = document.getElementById(view);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
             
             document.querySelectorAll('.nav-link').forEach(l => {
                 l.classList.remove('text-pop-red');
@@ -330,7 +482,6 @@
                 activeLink.classList.remove('text-slate-600');
             }
             if(view === 'store') renderProducts();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function handlePayPalClick() {
