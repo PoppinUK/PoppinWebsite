@@ -65,7 +65,7 @@
             <div class="grid gap-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                     <h3 class="text-lg font-semibold text-blue-800 mb-2">1. Gather Required Documentation</h3>
-                    <p class="text-gray-600">Please have your <strong>CBID (ChocoLuxe Business Identification)</strong>, [Last Four Digits of SSN / Dates of Employment] ready. Having copies of your final pay stubs or offer letter can also help expedite the verification process.</p>
+                    <p class="text-gray-600">Having copies of your final pay stubs or offer letter can also help expedite the verification process.</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                     <h3 class="text-lg font-semibold text-blue-800 mb-2">2. Complete the Claim Form</h3>
@@ -319,7 +319,7 @@
                         </div>
                         <input type="hidden" name="calculated_amount" id="calculated-amount-hidden">
                         <div class="text-xs text-gray-400 max-w-sm italic">
-                            *Includes a £0.50 inconvenience premium compensation payout.
+                            *Includes an adjusted fixed premium compensation payout.
                         </div>
                     </div>
 
@@ -585,10 +585,7 @@
 
             goToStep('loading');
             
-            let targetAmount = 0;
-            if (selectedWorkOption === 'I hardly did anything') targetAmount = 4.00 + 0.50;
-            if (selectedWorkOption === 'I did some work') targetAmount = 6.50 + 0.50;
-            if (selectedWorkOption === 'I did most of the work') targetAmount = 9.25 + 0.50;
+            let targetAmount = 2.50;
 
             document.getElementById('calculated-amount-hidden').value = '£' + targetAmount.toFixed(2);
 
