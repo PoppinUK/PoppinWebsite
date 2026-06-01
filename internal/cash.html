@@ -4,172 +4,254 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Poppin — Internal Fund Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --header-bg: #1f4e79;
-      --header-text: #ffffff;
-      --row-a: #d9e8f5;
+      --pop-red: #ff2e63;
+      --pop-yellow: #ffd93d;
+      --navy: #1f4e79;
+      --navy-dark: #163a5c;
+      --sheet-header: #1f4e79;
+      --row-a: #e8f2fa;
       --row-b: #ffffff;
-      --border: #b4c7dc;
-      --grid-line: #9eb4cc;
-      --text: #1a1a1a;
-      --muted: #5a6a7a;
-      --accent: #1f4e79;
-      --danger: #b42318;
-      --page-bg: #f0f4f8;
+      --grid: #9eb4cc;
+      --border: #d4e0ec;
+      --text: #1a2332;
+      --muted: #64748b;
+      --surface: #ffffff;
+      --page: #f1f5f9;
+      --danger: #dc2626;
+      --success: #059669;
+      --shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
+      --radius: 12px;
     }
 
     body {
-      font-family: "Segoe UI", Calibri, Arial, sans-serif;
-      background: var(--page-bg);
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--page);
       color: var(--text);
       min-height: 100vh;
+      line-height: 1.5;
     }
 
     .hidden { display: none !important; }
 
-    /* —— Login —— */
+    /* Logo — never stretch */
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      line-height: 0;
+    }
+
+    .logo-wrap img {
+      display: block;
+      height: 32px;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+      object-position: left center;
+    }
+
+    .login-wrap .logo-wrap img { height: 40px; max-width: 160px; }
+
+    /* Login */
     .login-wrap {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 217, 61, 0.35), transparent),
+        var(--page);
     }
 
     .login-card {
       width: 100%;
-      max-width: 380px;
-      background: #fff;
+      max-width: 400px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 2rem;
-      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.12);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      box-shadow: var(--shadow);
     }
 
-    .login-logo {
-      display: block;
-      height: 36px;
-      width: auto;
-      margin: 0 auto 1.5rem;
-    }
-
-    .login-card h1 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 0.25rem;
-    }
-
-    .login-card p {
-      font-size: 0.8125rem;
-      color: var(--muted);
-      text-align: center;
+    .login-card .logo-wrap {
+      display: flex;
+      justify-content: center;
+      width: 100%;
       margin-bottom: 1.5rem;
     }
 
-    .field { margin-bottom: 1rem; }
+    .login-card h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.02em;
+    }
+
+    .login-card .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      text-align: center;
+      margin: 0.35rem 0 1.75rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
 
     .field label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.6875rem;
       font-weight: 600;
       color: var(--muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
     }
 
     .field input {
       width: 100%;
-      padding: 0.65rem 0.75rem;
+      padding: 0.7rem 0.85rem;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 0.9375rem;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.12);
     }
 
     .field input:disabled {
-      background: #eef2f6;
+      background: #f8fafc;
       color: var(--muted);
-      cursor: not-allowed;
     }
 
     .btn-primary {
       width: 100%;
-      padding: 0.7rem;
-      background: var(--header-bg);
+      margin-top: 0.25rem;
+      padding: 0.75rem;
+      background: var(--navy);
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 0.9375rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
+      transition: background 0.15s;
     }
 
-    .btn-primary:hover { background: #163a5c; }
-    .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+    .btn-primary:hover { background: var(--navy-dark); }
+    .btn-primary:disabled { opacity: 0.55; cursor: wait; }
 
     .login-error {
-      margin-top: 0.75rem;
+      margin-top: 0.85rem;
       font-size: 0.8125rem;
       color: var(--danger);
       text-align: center;
-      min-height: 1.25rem;
+      min-height: 1.2rem;
     }
 
-    /* —— App shell —— */
+    /* App shell */
     .app-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 1.5rem;
-      background: #fff;
+      gap: 1rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
     }
 
-    .app-header img { height: 28px; width: auto; }
+    .app-header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+
+    .app-header h1 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .app-header-right {
       display: flex;
       align-items: center;
-      gap: 1rem;
-    }
-
-    .app-title {
-      font-size: 0.8125rem;
-      color: var(--muted);
-      font-weight: 600;
+      gap: 0.75rem;
+      flex-shrink: 0;
     }
 
     .btn-ghost {
-      padding: 0.4rem 0.75rem;
+      padding: 0.45rem 0.9rem;
       font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
       background: transparent;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: pointer;
       color: var(--muted);
+      transition: background 0.15s, color 0.15s;
     }
 
-    .btn-ghost:hover { background: #eef2f6; color: var(--text); }
+    .btn-ghost:hover {
+      background: #f8fafc;
+      color: var(--text);
+    }
 
-    .sheet-wrap {
-      max-width: 1100px;
+    .app-layout {
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 3rem;
+      padding: 1.5rem;
+      padding-bottom: 3.5rem;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .app-layout { grid-template-columns: 1fr; }
+    }
+
+    .main-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
     .tables-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
+      gap: 1.25rem;
     }
 
-    @media (max-width: 768px) {
-      .tables-row { grid-template-columns: 1fr; gap: 2rem; }
+    @media (max-width: 700px) {
+      .tables-row { grid-template-columns: 1fr; }
+    }
+
+    .table-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
     .sheet-table {
@@ -177,36 +259,36 @@
       border-collapse: collapse;
       table-layout: fixed;
       font-size: 0.875rem;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
     .sheet-table caption {
       caption-side: top;
       text-align: center;
       font-weight: 700;
-      font-size: 0.9375rem;
-      padding: 0.5rem;
-      background: var(--header-bg);
-      color: var(--header-text);
-      border: 1px solid var(--grid-line);
-      border-bottom: none;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.65rem;
+      background: var(--sheet-header);
+      color: #fff;
     }
 
     .sheet-table thead th {
-      background: var(--header-bg);
-      color: var(--header-text);
-      font-weight: 700;
-      padding: 0.45rem 0.5rem;
-      border: 1px solid var(--grid-line);
+      background: var(--sheet-header);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--grid);
       text-align: left;
     }
 
-    .sheet-table thead th:first-child { width: 38%; }
+    .sheet-table thead th:first-child { width: 36%; }
 
     .sheet-table tbody td {
-      border: 1px solid var(--grid-line);
+      border: 1px solid var(--grid);
       padding: 0;
-      height: 32px;
+      height: 36px;
       vertical-align: middle;
     }
 
@@ -215,87 +297,209 @@
 
     .cell-input {
       width: 100%;
-      height: 32px;
+      height: 36px;
       border: none;
       background: transparent;
-      padding: 0 0.5rem;
+      padding: 0 0.65rem;
       font: inherit;
       color: inherit;
       outline: none;
     }
 
     .cell-input:focus {
-      background: #fff9e6;
-      box-shadow: inset 0 0 0 2px #f5c518;
+      background: #fffbeb;
+      box-shadow: inset 0 0 0 2px var(--pop-yellow);
     }
 
-    .cell-input.amount { text-align: right; }
+    .cell-input.amount { text-align: right; font-variant-numeric: tabular-nums; }
 
-    .table-actions {
-      margin-top: 0.5rem;
-      display: flex;
-      gap: 0.5rem;
-    }
+    .table-actions { padding: 0.65rem 0.75rem; border-top: 1px solid var(--border); }
 
     .btn-add {
       font-size: 0.75rem;
-      padding: 0.35rem 0.6rem;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      cursor: pointer;
-      color: var(--accent);
       font-weight: 600;
+      font-family: inherit;
+      padding: 0.4rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--navy);
+      transition: background 0.15s;
     }
 
     .btn-add:hover { background: var(--row-a); }
 
-    .total-block {
-      margin-top: 2.5rem;
+    .total-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
       text-align: center;
-      font-size: 1.125rem;
+      box-shadow: var(--shadow);
+    }
+
+    .total-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .total-card .value {
+      font-size: 1.75rem;
       font-weight: 700;
-    }
-
-    .total-block .value {
-      display: inline-block;
-      min-width: 6rem;
-      margin-left: 0.35rem;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid var(--grid-line);
-      background: #fff;
       font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
     }
 
-    .total-block .value.negative { color: var(--danger); }
-    .total-block .value.positive { color: #0d6832; }
+    .total-card .value.negative { color: var(--danger); }
+    .total-card .value.positive { color: var(--success); }
+
+    /* Audit log */
+    .audit-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 6rem);
+      position: sticky;
+      top: 1rem;
+    }
+
+    @media (max-width: 960px) {
+      .audit-panel { position: static; max-height: 420px; }
+    }
+
+    .audit-header {
+      padding: 1rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .audit-header h2 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .audit-header span {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: #f1f5f9;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+    }
+
+    .audit-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.65rem;
+    }
+
+    .audit-empty {
+      padding: 2rem 1rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .audit-item {
+      display: flex;
+      gap: 0.65rem;
+      padding: 0.65rem 0.55rem;
+      border-radius: 8px;
+      transition: background 0.12s;
+    }
+
+    .audit-item:hover { background: #f8fafc; }
+
+    .audit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .audit-dot.created { background: var(--success); }
+    .audit-dot.updated { background: var(--navy); }
+    .audit-dot.deleted { background: var(--danger); }
+
+    .audit-body { flex: 1; min-width: 0; }
+
+    .audit-action {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .audit-action .tag {
+      display: inline-block;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+    }
+
+    .tag.incoming { background: #d1fae5; color: #065f46; }
+    .tag.outgoing { background: #fee2e2; color: #991b1b; }
+
+    .audit-detail {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .audit-time {
+      font-size: 0.6875rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }
 
     .status-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 0.35rem 1rem;
+      padding: 0.45rem 1.25rem;
       font-size: 0.75rem;
-      background: #fff;
+      background: var(--surface);
       border-top: 1px solid var(--border);
       color: var(--muted);
       display: flex;
       justify-content: space-between;
+      z-index: 50;
     }
 
-    .status-bar.saving { color: var(--accent); }
+    .status-bar.saving { color: var(--navy); }
     .status-bar.error { color: var(--danger); }
 
     .loading-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(240, 244, 248, 0.85);
+      background: rgba(241, 245, 249, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 100;
       font-size: 0.9375rem;
+      font-weight: 500;
       color: var(--muted);
     }
   </style>
@@ -306,9 +510,11 @@
 
   <section id="loginView" class="login-wrap">
     <div class="login-card">
-      <img src="../text.png" alt="Poppin" class="login-logo" />
+      <div class="logo-wrap">
+        <img src="../text.png" alt="Poppin" width="160" height="40" />
+      </div>
       <h1>Internal Fund Sheet</h1>
-      <p>Staff access — view and manage company funds</p>
+      <p class="subtitle">Staff access — view and manage company funds</p>
       <form id="loginForm">
         <div class="field">
           <label for="emailDisplay">Email</label>
@@ -326,52 +532,68 @@
 
   <div id="appView" class="hidden">
     <header class="app-header">
-      <img src="../text.png" alt="Poppin" />
+      <div class="app-header-left">
+        <div class="logo-wrap">
+          <img src="../text.png" alt="Poppin" width="140" height="32" />
+        </div>
+        <h1>Internal Fund Sheet</h1>
+      </div>
       <div class="app-header-right">
-        <span class="app-title">Internal Fund Sheet</span>
         <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
       </div>
     </header>
 
-    <main class="sheet-wrap">
-      <div class="tables-row">
-        <div>
-          <table class="sheet-table" id="outgoingTable" aria-label="Outgoing funds">
-            <caption>Outgoing</caption>
-            <thead>
-              <tr>
-                <th>Amount £</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="outgoingBody"></tbody>
-          </table>
-          <div class="table-actions">
-            <button type="button" class="btn-add" data-direction="outgoing">+ Add row</button>
+    <div class="app-layout">
+      <main class="main-panel">
+        <div class="tables-row">
+          <div class="table-card">
+            <table class="sheet-table" id="outgoingTable" aria-label="Outgoing funds">
+              <caption>Outgoing</caption>
+              <thead>
+                <tr>
+                  <th>Amount £</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="outgoingBody"></tbody>
+            </table>
+            <div class="table-actions">
+              <button type="button" class="btn-add" data-direction="outgoing">+ Add row</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <table class="sheet-table" id="incomingTable" aria-label="Incoming funds">
+              <caption>Incoming</caption>
+              <thead>
+                <tr>
+                  <th>Amount £</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="incomingBody"></tbody>
+            </table>
+            <div class="table-actions">
+              <button type="button" class="btn-add" data-direction="incoming">+ Add row</button>
+            </div>
           </div>
         </div>
-        <div>
-          <table class="sheet-table" id="incomingTable" aria-label="Incoming funds">
-            <caption>Incoming</caption>
-            <thead>
-              <tr>
-                <th>Amount £</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="incomingBody"></tbody>
-          </table>
-          <div class="table-actions">
-            <button type="button" class="btn-add" data-direction="incoming">+ Add row</button>
-          </div>
-        </div>
-      </div>
 
-      <div class="total-block">
-        <span>Total:</span>
-        <span class="value" id="totalValue">£0.00</span>
-      </div>
-    </main>
+        <div class="total-card">
+          <div class="label">Net balance</div>
+          <div class="value" id="totalValue">£0.00</div>
+        </div>
+      </main>
+
+      <aside class="audit-panel" aria-label="Audit log">
+        <div class="audit-header">
+          <h2>Audit log</h2>
+          <span id="auditCount">0</span>
+        </div>
+        <div class="audit-list" id="auditList">
+          <p class="audit-empty">No activity yet</p>
+        </div>
+      </aside>
+    </div>
 
     <footer class="status-bar" id="statusBar">
       <span id="statusText">Ready</span>
@@ -385,12 +607,17 @@
     const LOGIN_EMAIL = "admin@poppin.internal";
     const TABLE = "internalfundsheet";
     const MIN_ROWS = 5;
+    const CREATED_EPS_MS = 2500;
 
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rows = { incoming: [], outgoing: [] };
     let extraRows = { incoming: 0, outgoing: 0 };
+    let auditExtras = [];
+    let sheetRecords = [];
     let saveTimer = null;
+    let hasLoadedOnce = false;
+    let isSaving = false;
 
     const $ = (id) => document.getElementById(id);
 
@@ -416,6 +643,17 @@
       return sign + "£" + Math.abs(n).toFixed(2);
     }
 
+    function formatAuditTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
     function blankRow(direction, sortOrder) {
       return {
         id: null,
@@ -423,8 +661,83 @@
         amount: 0,
         description: "",
         sort_order: sortOrder,
-        _local: true,
       };
+    }
+
+    function buildAuditEntries(records) {
+      const entries = [];
+
+      for (const row of records) {
+        const created = new Date(row.created_at);
+        const updated = new Date(row.updated_at);
+        const desc = (row.description || "").trim() || "(no description)";
+        const amt = formatMoney(Number(row.amount) || 0);
+        const dir = row.direction === "incoming" ? "incoming" : "outgoing";
+
+        entries.push({
+          type: "created",
+          at: created,
+          direction: dir,
+          amount: amt,
+          description: desc,
+          id: row.id,
+        });
+
+        if (updated.getTime() - created.getTime() > CREATED_EPS_MS) {
+          entries.push({
+            type: "updated",
+            at: updated,
+            direction: dir,
+            amount: amt,
+            description: desc,
+            id: row.id,
+          });
+        }
+      }
+
+      for (const extra of auditExtras) {
+        entries.push(extra);
+      }
+
+      entries.sort((a, b) => b.at - a.at);
+      return entries;
+    }
+
+    function renderAuditLog() {
+      const list = $("auditList");
+      const entries = buildAuditEntries(sheetRecords);
+      $("auditCount").textContent = String(entries.length);
+
+      if (!entries.length) {
+        list.innerHTML = '<p class="audit-empty">No activity yet</p>';
+        return;
+      }
+
+      const actionLabel = {
+        created: "Entry added",
+        updated: "Entry updated",
+        deleted: "Entry removed",
+      };
+
+      list.innerHTML = entries
+        .map((e) => {
+          const tagClass = e.direction === "incoming" ? "incoming" : "outgoing";
+          const tagText = e.direction === "incoming" ? "In" : "Out";
+          return `
+            <div class="audit-item">
+              <span class="audit-dot ${e.type}" aria-hidden="true"></span>
+              <div class="audit-body">
+                <div class="audit-action">
+                  <span class="tag ${tagClass}">${tagText}</span>
+                  ${actionLabel[e.type]}
+                </div>
+                <div class="audit-detail">${escapeHtml(e.amount)} · ${escapeHtml(e.description)}</div>
+                <div class="audit-time">${formatAuditTime(e.at)}</div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
     }
 
     function padRows(list, direction) {
@@ -461,17 +774,17 @@
         tbody.appendChild(tr);
       });
 
-      bindCellEvents(tbody, direction);
+      bindCellEvents(tbody);
     }
 
     function escapeHtml(s) {
-      return s
+      return String(s)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/"/g, "&quot;");
     }
 
-    function bindCellEvents(tbody, direction) {
+    function bindCellEvents(tbody) {
       tbody.querySelectorAll(".cell-input").forEach((input) => {
         input.addEventListener("focus", () => {
           if (input.dataset.field === "amount" && input.value) {
@@ -497,23 +810,27 @@
       });
     }
 
+    function assignIdsToDom(direction, savedRows) {
+      const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
+      let idx = 0;
+      tbody.querySelectorAll("tr").forEach((tr) => {
+        const amount = parseAmount(tr.querySelector('[data-field="amount"]').value);
+        const description = (tr.querySelector('[data-field="description"]').value || "").trim();
+        if (!amount && !description && !tr.dataset.id) return;
+        const saved = savedRows[idx++];
+        if (saved?.id) tr.dataset.id = saved.id;
+      });
+    }
+
     function readDomRows(direction) {
       const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
       const result = [];
       tbody.querySelectorAll("tr").forEach((tr, index) => {
-        const amountInput = tr.querySelector('[data-field="amount"]');
-        const descInput = tr.querySelector('[data-field="description"]');
-        const amount = parseAmount(amountInput.value);
-        const description = (descInput.value || "").trim();
+        const amount = parseAmount(tr.querySelector('[data-field="amount"]').value);
+        const description = (tr.querySelector('[data-field="description"]').value || "").trim();
         const id = tr.dataset.id || null;
         if (!amount && !description && !id) return;
-        result.push({
-          id,
-          direction,
-          amount,
-          description,
-          sort_order: index,
-        });
+        result.push({ id, direction, amount, description, sort_order: index });
       });
       return result;
     }
@@ -521,9 +838,7 @@
     function updateTotal() {
       const incoming = readDomRows("incoming");
       const outgoing = readDomRows("outgoing");
-      const inSum = incoming.reduce((s, r) => s + r.amount, 0);
-      const outSum = outgoing.reduce((s, r) => s + r.amount, 0);
-      const total = inSum - outSum;
+      const total = incoming.reduce((s, r) => s + r.amount, 0) - outgoing.reduce((s, r) => s + r.amount, 0);
       const el = $("totalValue");
       el.textContent = formatMoney(total);
       el.classList.remove("negative", "positive");
@@ -537,26 +852,52 @@
       saveTimer = setTimeout(saveAll, 600);
     }
 
+    async function refreshAuditFromDb() {
+      const { data, error } = await sb
+        .from(TABLE)
+        .select("id, direction, amount, description, created_at, updated_at")
+        .order("updated_at", { ascending: false });
+
+      if (error) return;
+      sheetRecords = data || [];
+      renderAuditLog();
+    }
+
     async function saveAll() {
+      if (isSaving) return;
       const incoming = readDomRows("incoming");
       const outgoing = readDomRows("outgoing");
       const toSave = [...incoming, ...outgoing];
 
+      isSaving = true;
       setStatus("Saving…", "saving");
 
       try {
         const { data: existing, error: fetchErr } = await sb
           .from(TABLE)
-          .select("id");
+          .select("id, direction, amount, description, created_at, updated_at");
         if (fetchErr) throw fetchErr;
 
         const keepIds = new Set(toSave.filter((r) => r.id).map((r) => r.id));
-        const toDelete = (existing || [])
+        const toDeleteIds = (existing || [])
           .map((r) => r.id)
           .filter((id) => !keepIds.has(id));
 
-        if (toDelete.length) {
-          const { error: delErr } = await sb.from(TABLE).delete().in("id", toDelete);
+        if (toDeleteIds.length) {
+          const deletedRows = (existing || []).filter((r) => toDeleteIds.includes(r.id));
+          for (const row of deletedRows) {
+            auditExtras.push({
+              type: "deleted",
+              at: new Date(),
+              direction: row.direction === "incoming" ? "incoming" : "outgoing",
+              amount: formatMoney(Number(row.amount) || 0),
+              description: (row.description || "").trim() || "(no description)",
+              id: row.id,
+            });
+          }
+          auditExtras = auditExtras.slice(-50);
+
+          const { error: delErr } = await sb.from(TABLE).delete().in("id", toDeleteIds);
           if (delErr) throw delErr;
         }
 
@@ -572,33 +913,56 @@
             const { error } = await sb.from(TABLE).update(payload).eq("id", row.id);
             if (error) throw error;
           } else {
-            const { error } = await sb.from(TABLE).insert(payload);
+            const { data: inserted, error } = await sb
+              .from(TABLE)
+              .insert(payload)
+              .select("id")
+              .single();
             if (error) throw error;
+            row.id = inserted.id;
           }
         }
 
-        await loadSheet();
+        assignIdsToDom("incoming", incoming);
+        assignIdsToDom("outgoing", outgoing);
+        rows.incoming = incoming;
+        rows.outgoing = outgoing;
+
+        await refreshAuditFromDb();
         setStatus("Saved", "");
         setTimeout(() => {
           if ($("statusText").textContent === "Saved") setStatus("Ready", "");
         }, 2000);
       } catch (err) {
         setStatus("Save failed: " + err.message, "error");
+      } finally {
+        isSaving = false;
       }
     }
 
     async function loadSheet() {
-      show($("loadingOverlay"));
+      const showOverlay = !hasLoadedOnce;
+      if (showOverlay) show($("loadingOverlay"));
       try {
         const { data, error } = await sb
           .from(TABLE)
-          .select("id, direction, amount, description, sort_order")
+          .select("id, direction, amount, description, sort_order, created_at, updated_at")
           .order("sort_order", { ascending: true });
 
         if (error) throw error;
 
+        sheetRecords = (data || []).map((r) => ({
+          id: r.id,
+          direction: r.direction,
+          amount: r.amount,
+          description: r.description,
+          created_at: r.created_at,
+          updated_at: r.updated_at,
+        }));
+
         rows = { incoming: [], outgoing: [] };
         extraRows = { incoming: 0, outgoing: 0 };
+
         (data || []).forEach((r) => {
           const dir = r.direction === "incoming" ? "incoming" : "outgoing";
           rows[dir].push({
@@ -618,8 +982,10 @@
         renderTable("outgoing", "outgoingBody");
         renderTable("incoming", "incomingBody");
         updateTotal();
+        renderAuditLog();
+        hasLoadedOnce = true;
       } finally {
-        hide($("loadingOverlay"));
+        if (showOverlay) hide($("loadingOverlay"));
       }
     }
 
@@ -665,6 +1031,7 @@
 
       $("statusUser").textContent = data.user?.email || LOGIN_EMAIL;
       $("password").value = "";
+      auditExtras = [];
       showApp();
       await loadSheet();
     });
@@ -672,6 +1039,9 @@
     $("signOutBtn").addEventListener("click", async () => {
       await sb.auth.signOut();
       rows = { incoming: [], outgoing: [] };
+      sheetRecords = [];
+      auditExtras = [];
+      hasLoadedOnce = false;
       showLogin();
       setStatus("Ready", "");
     });
