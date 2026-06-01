@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poppin — Internal Fund Sheet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --header-bg: #1f4e79;
+      --header-text: #ffffff;
+      --row-a: #d9e8f5;
+      --row-b: #ffffff;
+      --border: #b4c7dc;
+      --grid-line: #9eb4cc;
+      --text: #1a1a1a;
+      --muted: #5a6a7a;
+      --accent: #1f4e79;
+      --danger: #b42318;
+      --page-bg: #f0f4f8;
+    }
+
+    body {
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .hidden { display: none !important; }
+
+    /* —— Login —— */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 380px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.12);
+    }
+
+    .login-logo {
+      display: block;
+      height: 36px;
+      width: auto;
+      margin: 0 auto 1.5rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .login-card p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.9375rem;
+    }
+
+    .field input:disabled {
+      background: #eef2f6;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--header-bg);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover { background: #163a5c; }
+    .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+
+    .login-error {
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--danger);
+      text-align: center;
+      min-height: 1.25rem;
+    }
+
+    /* —— App shell —— */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-header img { height: 28px; width: auto; }
+
+    .app-header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .app-title {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .btn-ghost {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8125rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover { background: #eef2f6; color: var(--text); }
+
+    .sheet-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    .tables-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .tables-row { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 0.875rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .sheet-table caption {
+      caption-side: top;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      padding: 0.5rem;
+      background: var(--header-bg);
+      color: var(--header-text);
+      border: 1px solid var(--grid-line);
+      border-bottom: none;
+    }
+
+    .sheet-table thead th {
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 700;
+      padding: 0.45rem 0.5rem;
+      border: 1px solid var(--grid-line);
+      text-align: left;
+    }
+
+    .sheet-table thead th:first-child { width: 38%; }
+
+    .sheet-table tbody td {
+      border: 1px solid var(--grid-line);
+      padding: 0;
+      height: 32px;
+      vertical-align: middle;
+    }
+
+    .sheet-table tbody tr:nth-child(odd) td { background: var(--row-a); }
+    .sheet-table tbody tr:nth-child(even) td { background: var(--row-b); }
+
+    .cell-input {
+      width: 100%;
+      height: 32px;
+      border: none;
+      background: transparent;
+      padding: 0 0.5rem;
+      font: inherit;
+      color: inherit;
+      outline: none;
+    }
+
+    .cell-input:focus {
+      background: #fff9e6;
+      box-shadow: inset 0 0 0 2px #f5c518;
+    }
+
+    .cell-input.amount { text-align: right; }
+
+    .table-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-add {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.6rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-add:hover { background: var(--row-a); }
+
+    .total-block {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .total-block .value {
+      display: inline-block;
+      min-width: 6rem;
+      margin-left: 0.35rem;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--grid-line);
+      background: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .total-block .value.negative { color: var(--danger); }
+    .total-block .value.positive { color: #0d6832; }
+
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.35rem 1rem;
+      font-size: 0.75rem;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .status-bar.saving { color: var(--accent); }
+    .status-bar.error { color: var(--danger); }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(240, 244, 248, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      font-size: 0.9375rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">Loading fund sheet…</div>
+
+  <section id="loginView" class="login-wrap">
+    <div class="login-card">
+      <img src="../text.png" alt="Poppin" class="login-logo" />
+      <h1>Internal Fund Sheet</h1>
+      <p>Staff access — view and manage company funds</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="emailDisplay">Email</label>
+          <input type="text" id="emailDisplay" value="admin" disabled autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
+        <p class="login-error" id="loginError" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="appView" class="hidden">
+    <header class="app-header">
+      <img src="../text.png" alt="Poppin" />
+      <div class="app-header-right">
+        <span class="app-title">Internal Fund Sheet</span>
+        <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
+      </div>
+    </header>
+
+    <main class="sheet-wrap">
+      <div class="tables-row">
+        <div>
+          <table class="sheet-table" id="outgoingTable" aria-label="Outgoing funds">
+            <caption>Outgoing</caption>
+            <thead>
+              <tr>
+                <th>Amount £</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="outgoingBody"></tbody>
+          </table>
+          <div class="table-actions">
+            <button type="button" class="btn-add" data-direction="outgoing">+ Add row</button>
+          </div>
+        </div>
+        <div>
+          <table class="sheet-table" id="incomingTable" aria-label="Incoming funds">
+            <caption>Incoming</caption>
+            <thead>
+              <tr>
+                <th>Amount £</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="incomingBody"></tbody>
+          </table>
+          <div class="table-actions">
+            <button type="button" class="btn-add" data-direction="incoming">+ Add row</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="total-block">
+        <span>Total:</span>
+        <span class="value" id="totalValue">£0.00</span>
+      </div>
+    </main>
+
+    <footer class="status-bar" id="statusBar">
+      <span id="statusText">Ready</span>
+      <span id="statusUser"></span>
+    </footer>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jijawenoxizwwnpgnbsw.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR";
+    const LOGIN_EMAIL = "admin@poppin.internal";
+    const TABLE = "internalfundsheet";
+    const MIN_ROWS = 5;
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let rows = { incoming: [], outgoing: [] };
+    let extraRows = { incoming: 0, outgoing: 0 };
+    let saveTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function show(el) { el.classList.remove("hidden"); }
+    function hide(el) { el.classList.add("hidden"); }
+
+    function setStatus(text, type = "") {
+      const bar = $("statusBar");
+      bar.className = "status-bar" + (type ? " " + type : "");
+      $("statusText").textContent = text;
+    }
+
+    function parseAmount(raw) {
+      if (raw == null) return 0;
+      const cleaned = String(raw).replace(/[£,\s]/g, "").trim();
+      if (!cleaned) return 0;
+      const n = parseFloat(cleaned);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatMoney(n) {
+      const sign = n < 0 ? "-" : "";
+      return sign + "£" + Math.abs(n).toFixed(2);
+    }
+
+    function blankRow(direction, sortOrder) {
+      return {
+        id: null,
+        direction,
+        amount: 0,
+        description: "",
+        sort_order: sortOrder,
+        _local: true,
+      };
+    }
+
+    function padRows(list, direction) {
+      const out = [...list].sort((a, b) => a.sort_order - b.sort_order);
+      const target = MIN_ROWS + extraRows[direction];
+      while (out.length < target) {
+        out.push(blankRow(direction, out.length));
+      }
+      return out;
+    }
+
+    function renderTable(direction, tbodyId) {
+      const tbody = $(tbodyId);
+      tbody.innerHTML = "";
+      const list = padRows(rows[direction], direction);
+
+      list.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.dataset.direction = direction;
+        tr.dataset.index = String(index);
+        if (row.id) tr.dataset.id = row.id;
+
+        tr.innerHTML = `
+          <td>
+            <input type="text" class="cell-input amount" data-field="amount"
+              value="${row.amount ? "£ " + Math.abs(parseAmount(row.amount)).toFixed(2) : ""}"
+              placeholder="£ 0.00" inputmode="decimal" />
+          </td>
+          <td>
+            <input type="text" class="cell-input" data-field="description"
+              value="${escapeHtml(row.description || "")}" placeholder="" />
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      bindCellEvents(tbody, direction);
+    }
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function bindCellEvents(tbody, direction) {
+      tbody.querySelectorAll(".cell-input").forEach((input) => {
+        input.addEventListener("focus", () => {
+          if (input.dataset.field === "amount" && input.value) {
+            const n = parseAmount(input.value);
+            input.value = n ? n.toFixed(2) : "";
+          }
+        });
+
+        input.addEventListener("blur", () => {
+          if (input.dataset.field === "amount") {
+            const n = parseAmount(input.value);
+            input.value = n ? "£ " + n.toFixed(2) : "";
+          }
+          queueSaveFromDom();
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+          }
+        });
+      });
+    }
+
+    function readDomRows(direction) {
+      const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
+      const result = [];
+      tbody.querySelectorAll("tr").forEach((tr, index) => {
+        const amountInput = tr.querySelector('[data-field="amount"]');
+        const descInput = tr.querySelector('[data-field="description"]');
+        const amount = parseAmount(amountInput.value);
+        const description = (descInput.value || "").trim();
+        const id = tr.dataset.id || null;
+        if (!amount && !description && !id) return;
+        result.push({
+          id,
+          direction,
+          amount,
+          description,
+          sort_order: index,
+        });
+      });
+      return result;
+    }
+
+    function updateTotal() {
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const inSum = incoming.reduce((s, r) => s + r.amount, 0);
+      const outSum = outgoing.reduce((s, r) => s + r.amount, 0);
+      const total = inSum - outSum;
+      const el = $("totalValue");
+      el.textContent = formatMoney(total);
+      el.classList.remove("negative", "positive");
+      if (total < 0) el.classList.add("negative");
+      else if (total > 0) el.classList.add("positive");
+    }
+
+    function queueSaveFromDom() {
+      updateTotal();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveAll, 600);
+    }
+
+    async function saveAll() {
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const toSave = [...incoming, ...outgoing];
+
+      setStatus("Saving…", "saving");
+
+      try {
+        const { data: existing, error: fetchErr } = await sb
+          .from(TABLE)
+          .select("id");
+        if (fetchErr) throw fetchErr;
+
+        const keepIds = new Set(toSave.filter((r) => r.id).map((r) => r.id));
+        const toDelete = (existing || [])
+          .map((r) => r.id)
+          .filter((id) => !keepIds.has(id));
+
+        if (toDelete.length) {
+          const { error: delErr } = await sb.from(TABLE).delete().in("id", toDelete);
+          if (delErr) throw delErr;
+        }
+
+        for (const row of toSave) {
+          const payload = {
+            direction: row.direction,
+            amount: row.amount,
+            description: row.description,
+            sort_order: row.sort_order,
+          };
+
+          if (row.id) {
+            const { error } = await sb.from(TABLE).update(payload).eq("id", row.id);
+            if (error) throw error;
+          } else {
+            const { error } = await sb.from(TABLE).insert(payload);
+            if (error) throw error;
+          }
+        }
+
+        await loadSheet();
+        setStatus("Saved", "");
+        setTimeout(() => {
+          if ($("statusText").textContent === "Saved") setStatus("Ready", "");
+        }, 2000);
+      } catch (err) {
+        setStatus("Save failed: " + err.message, "error");
+      }
+    }
+
+    async function loadSheet() {
+      show($("loadingOverlay"));
+      try {
+        const { data, error } = await sb
+          .from(TABLE)
+          .select("id, direction, amount, description, sort_order")
+          .order("sort_order", { ascending: true });
+
+        if (error) throw error;
+
+        rows = { incoming: [], outgoing: [] };
+        extraRows = { incoming: 0, outgoing: 0 };
+        (data || []).forEach((r) => {
+          const dir = r.direction === "incoming" ? "incoming" : "outgoing";
+          rows[dir].push({
+            id: r.id,
+            direction: dir,
+            amount: Number(r.amount) || 0,
+            description: r.description || "",
+            sort_order: r.sort_order ?? 0,
+          });
+        });
+
+        const maxIncoming = rows.incoming.length;
+        const maxOutgoing = rows.outgoing.length;
+        if (maxIncoming >= MIN_ROWS) extraRows.incoming = maxIncoming - MIN_ROWS + 1;
+        if (maxOutgoing >= MIN_ROWS) extraRows.outgoing = maxOutgoing - MIN_ROWS + 1;
+
+        renderTable("outgoing", "outgoingBody");
+        renderTable("incoming", "incomingBody");
+        updateTotal();
+      } finally {
+        hide($("loadingOverlay"));
+      }
+    }
+
+    function showApp() {
+      hide($("loginView"));
+      show($("appView"));
+    }
+
+    function showLogin() {
+      show($("loginView"));
+      hide($("appView"));
+    }
+
+    async function initSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        $("statusUser").textContent = session.user.email || "";
+        showApp();
+        await loadSheet();
+      } else {
+        showLogin();
+      }
+    }
+
+    $("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("loginBtn");
+      const errEl = $("loginError");
+      errEl.textContent = "";
+      btn.disabled = true;
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: LOGIN_EMAIL,
+        password: $("password").value,
+      });
+
+      btn.disabled = false;
+
+      if (error) {
+        errEl.textContent = error.message;
+        return;
+      }
+
+      $("statusUser").textContent = data.user?.email || LOGIN_EMAIL;
+      $("password").value = "";
+      showApp();
+      await loadSheet();
+    });
+
+    $("signOutBtn").addEventListener("click", async () => {
+      await sb.auth.signOut();
+      rows = { incoming: [], outgoing: [] };
+      showLogin();
+      setStatus("Ready", "");
+    });
+
+    document.querySelectorAll(".btn-add").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const direction = btn.dataset.direction;
+        extraRows[direction]++;
+        renderTable(direction, direction === "incoming" ? "incomingBody" : "outgoingBody");
+        updateTotal();
+      });
+    });
+
+    sb.auth.onAuthStateChange((_event, session) => {
+      if (!session) showLogin();
+    });
+
+    initSession();
+  </script>
+</body>
+</html>
