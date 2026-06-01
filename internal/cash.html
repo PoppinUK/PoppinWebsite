@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -137,6 +138,52 @@
       color: var(--muted);
     }
 
+    .field select {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field select:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.12);
+    }
+
+    .field select option:disabled {
+      color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .login-link {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .login-link:hover { color: var(--navy); }
+
+    .header-user {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
     .btn-primary {
       width: 100%;
       margin-top: 0.25rem;
@@ -217,18 +264,10 @@
     }
 
     .app-layout {
-      max-width: 1280px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 1.5rem;
       padding-bottom: 3.5rem;
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 1.5rem;
-      align-items: start;
-    }
-
-    @media (max-width: 960px) {
-      .app-layout { grid-template-columns: 1fr; }
     }
 
     .main-panel {
@@ -411,50 +450,60 @@
     .total-card .value.positive { color: var(--success); }
 
     /* Audit log */
-    .audit-panel {
+    .audit-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      max-height: calc(100vh - 6rem);
-      position: sticky;
-      top: 1rem;
-    }
-
-    @media (max-width: 960px) {
-      .audit-panel { position: static; max-height: 420px; }
-    }
-
-    .audit-header {
       padding: 1rem 1.15rem;
-      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-view-audit {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-    }
-
-    .audit-header h2 {
-      font-size: 0.875rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .audit-header span {
-      font-size: 0.6875rem;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 0.9375rem;
       font-weight: 600;
-      color: var(--muted);
-      background: #f1f5f9;
-      padding: 0.2rem 0.5rem;
-      border-radius: 999px;
+      font-family: inherit;
+      color: var(--navy);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
     }
 
-    .audit-list {
+    .btn-view-audit:hover {
+      background: var(--row-a);
+      border-color: var(--grid);
+    }
+
+    .btn-view-audit i {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    .audit-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      min-width: 1.25rem;
+      text-align: center;
+    }
+
+    .audit-modal-list {
       overflow-y: auto;
       flex: 1;
-      padding: 0.65rem;
+      padding: 0.65rem 1rem 1rem;
+      min-height: 200px;
+      max-height: min(60vh, 520px);
     }
 
     .audit-empty {
@@ -485,6 +534,10 @@
     .audit-dot.created { background: var(--success); }
     .audit-dot.updated { background: var(--navy); }
     .audit-dot.deleted { background: var(--danger); }
+
+    .audit-item.audit-deleted .audit-action {
+      color: var(--danger);
+    }
 
     .audit-body { flex: 1; min-width: 0; }
 
@@ -524,6 +577,13 @@
       margin-top: 0.2rem;
     }
 
+    .audit-user {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 0.2rem;
+    }
+
     .status-bar {
       position: fixed;
       bottom: 0;
@@ -544,80 +604,109 @@
 
     .toast-container {
       position: fixed;
-      top: 1rem;
+      bottom: 2.75rem;
       left: 1rem;
       z-index: 300;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      max-width: min(360px, calc(100vw - 2rem));
+      gap: 0.65rem;
+      width: min(420px, calc(100vw - 2rem));
       pointer-events: none;
     }
 
     .toast {
       display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text);
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
       pointer-events: auto;
-      transform: translateX(-120%);
+      transform: translateY(1.25rem);
       opacity: 0;
-      transition: transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.28s ease;
+      transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.3s ease;
     }
 
     .toast.show {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
 
     .toast.hide {
-      transform: translateX(-120%);
+      transform: translateY(0.75rem);
       opacity: 0;
     }
 
-    .toast-success {
-      border-left: 4px solid var(--success);
-    }
-
-    .toast-error {
-      border-left: 4px solid var(--danger);
+    .toast-info {
+      background: var(--navy);
+      color: #fff;
     }
 
     .toast-destructive {
-      border-left: 4px solid var(--danger);
-      background: #fffbfb;
+      background: #dc2626;
+      color: #fff;
     }
 
-    .toast-message {
-      flex: 1;
-      line-height: 1.35;
+    .toast-error {
+      background: #991b1b;
+      color: #fff;
     }
 
-    .toast-undo {
+    .toast-icon {
       flex-shrink: 0;
-      padding: 0.35rem 0.65rem;
-      font-size: 0.75rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+    }
+
+    .toast-body {
+      flex: 1;
+      min-width: 0;
+      padding-top: 0.1rem;
+    }
+
+    .toast-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .toast-description {
+      font-size: 0.875rem;
+      line-height: 1.45;
+      margin-top: 0.35rem;
+      opacity: 0.92;
+    }
+
+    .toast-action {
+      flex-shrink: 0;
+      align-self: center;
+      padding: 0.55rem 1rem;
+      font-size: 0.8125rem;
       font-weight: 700;
       font-family: inherit;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--navy);
-      background: #e8f2fa;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      color: #dc2626;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: transform 0.12s, box-shadow 0.12s;
+      white-space: nowrap;
     }
 
-    .toast-undo:hover {
-      background: var(--row-a);
+    .toast-action:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    td.cell-remove-empty {
+      background: inherit !important;
     }
 
     .loading-overlay {
@@ -821,8 +910,13 @@
       <p class="subtitle">Staff access — view and manage company funds</p>
       <form id="loginForm">
         <div class="field">
-          <label for="emailDisplay">Email</label>
-          <input type="text" id="emailDisplay" value="admin" disabled autocomplete="username" />
+          <label for="userSelect">Who are you?</label>
+          <select id="userSelect" required autocomplete="username">
+            <option value="" disabled selected>Select your name</option>
+            <option value="james">James</option>
+            <option value="thomas">Thomas</option>
+            <option value="none" disabled>Name not listed? You may not have access to this document. Speak to James for more information.</option>
+          </select>
         </div>
         <div class="field">
           <label for="password">Password</label>
@@ -830,6 +924,7 @@
         </div>
         <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
         <p class="login-error" id="loginError" role="alert"></p>
+        <button type="button" class="login-link" id="loginChangePasswordBtn">Change password</button>
       </form>
     </div>
   </section>
@@ -843,6 +938,8 @@
         <h1>Internal Fund Sheet</h1>
       </div>
       <div class="app-header-right">
+        <span class="header-user" id="headerUserName"></span>
+        <button type="button" class="btn-ghost" id="changePasswordBtn">Change password</button>
         <button type="button" class="btn-export" id="exportExcelBtn">Export Excel</button>
         <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
       </div>
@@ -889,23 +986,70 @@
           <div class="label">Net balance</div>
           <div class="value" id="totalValue">£0.00</div>
         </div>
-      </main>
 
-      <aside class="audit-panel" aria-label="Audit log">
-        <div class="audit-header">
-          <h2>Audit log</h2>
-          <span id="auditCount">0</span>
+        <div class="audit-card">
+          <button type="button" class="btn-view-audit" id="viewAuditBtn">
+            <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+            View audit log
+            <span class="audit-badge" id="auditCount">0</span>
+          </button>
         </div>
-        <div class="audit-list" id="auditList">
-          <p class="audit-empty">No activity yet</p>
-        </div>
-      </aside>
+      </main>
     </div>
 
     <footer class="status-bar" id="statusBar">
       <span id="statusText">Ready</span>
       <span id="statusUser"></span>
     </footer>
+  </div>
+
+  <div id="auditModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="auditModalTitle">
+    <div class="export-dialog">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="auditModalTitle">Audit log</h2>
+          <p id="auditModalSubtitle">Activity on this fund sheet</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="auditCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="audit-modal-list" id="auditList">
+        <p class="audit-empty">No activity yet</p>
+      </div>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-ghost" id="auditDoneBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="passwordModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+    <div class="export-dialog" style="max-width: 420px;">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="passwordModalTitle">Change password</h2>
+          <p>Update your portal sign-in password</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="passwordCloseBtn" aria-label="Close">×</button>
+      </div>
+      <form id="passwordForm" style="padding: 1rem 1.25rem 0;">
+        <div class="field">
+          <label for="currentPassword">Current password</label>
+          <input type="password" id="currentPassword" required autocomplete="current-password" />
+        </div>
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" required autocomplete="new-password" minlength="8" />
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm new password</label>
+          <input type="password" id="confirmPassword" required autocomplete="new-password" minlength="8" />
+        </div>
+        <p class="login-error" id="passwordError" role="alert"></p>
+      </form>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-ghost" id="passwordCancelBtn">Cancel</button>
+        <button type="submit" form="passwordForm" class="btn-download" id="passwordSaveBtn">Update password</button>
+      </div>
+    </div>
   </div>
 
   <div id="exportModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
@@ -930,8 +1074,13 @@
   <script>
     const SUPABASE_URL = "https://jijawenoxizwwnpgnbsw.supabase.co";
     const SUPABASE_KEY = "sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR";
-    const LOGIN_EMAIL = "admin@poppin.internal";
     const TABLE = "internalfundsheet";
+    const USER_COL = "User";
+
+    const PORTAL_USERS = {
+      james: { name: "James", email: "james.admin@poppin.internal" },
+      thomas: { name: "Thomas", email: "thomas.admin@poppin.internal" },
+    };
     const MIN_ROWS = 5;
     const CREATED_EPS_MS = 2500;
 
@@ -946,8 +1095,50 @@
     let isSaving = false;
     let pendingExport = null;
     let pendingRemoveSaveTimer = null;
+    let currentUserName = "";
 
     const $ = (id) => document.getElementById(id);
+
+    function rowUserField(row) {
+      return row?.[USER_COL] ?? row?.user ?? "";
+    }
+
+    function emailToDisplayName(email) {
+      if (!email) return "";
+      const lower = email.toLowerCase();
+      if (lower.startsWith("james.")) return "James";
+      if (lower.startsWith("thomas.")) return "Thomas";
+      return "";
+    }
+
+    function getSelectedPortalUser() {
+      const key = $("userSelect").value;
+      if (!key || key === "none") return null;
+      return PORTAL_USERS[key] || null;
+    }
+
+    function setSignedInUser(displayName) {
+      currentUserName = displayName;
+      $("headerUserName").textContent = displayName ? `Signed in as ${displayName}` : "";
+      $("statusUser").textContent = displayName || "";
+      if (displayName) {
+        sessionStorage.setItem("poppin_fund_user", displayName);
+      } else {
+        sessionStorage.removeItem("poppin_fund_user");
+      }
+    }
+
+    function resolveUserFromSession(session) {
+      const stored = sessionStorage.getItem("poppin_fund_user");
+      if (stored === "James" || stored === "Thomas") return stored;
+      return emailToDisplayName(session?.user?.email);
+    }
+
+    function syncUserSelectToName(name) {
+      const select = $("userSelect");
+      if (name === "James") select.value = "james";
+      else if (name === "Thomas") select.value = "thomas";
+    }
 
     function show(el) { el.classList.remove("hidden"); }
     function hide(el) { el.classList.add("hidden"); }
@@ -965,33 +1156,46 @@
       setTimeout(() => el.remove(), 280);
     }
 
-    function showToast({ message, type = "success", undo = null, duration = null }) {
-      const hasUndo = typeof undo === "function";
-      const toastType = type === "destructive" ? "destructive" : type === "error" ? "error" : "success";
-      const ms = duration ?? (hasUndo ? 8000 : 4000);
+    const TOAST_ICONS = {
+      info: "fa-solid fa-circle-check",
+      destructive: "fa-solid fa-trash-can",
+      error: "fa-solid fa-circle-xmark",
+    };
+
+    function showToast(opts) {
+      const title = opts.title || opts.message || "Notice";
+      const description = opts.description || "";
+      const type = opts.type === "destructive" ? "destructive" : opts.type === "error" ? "error" : "info";
+      const onAction = opts.onAction || opts.undo || null;
+      const hasAction = typeof onAction === "function";
+      const ms = opts.duration ?? (hasAction ? 10000 : 5000);
+      const iconClass = opts.icon || TOAST_ICONS[type];
 
       const el = document.createElement("div");
-      el.className = `toast toast-${toastType}`;
-      el.setAttribute("role", toastType === "error" ? "alert" : "status");
+      el.className = `toast toast-${type}`;
+      el.setAttribute("role", type === "error" ? "alert" : "status");
 
-      const msg = document.createElement("span");
-      msg.className = "toast-message";
-      msg.textContent = message;
-      el.appendChild(msg);
+      el.innerHTML = `
+        <div class="toast-icon" aria-hidden="true"><i class="${iconClass}"></i></div>
+        <div class="toast-body">
+          <div class="toast-title">${escapeHtml(title)}</div>
+          ${description ? `<div class="toast-description">${escapeHtml(description)}</div>` : ""}
+        </div>
+      `;
 
       let dismissTimer = setTimeout(() => dismissToast(el), ms);
 
-      if (hasUndo) {
-        const undoBtn = document.createElement("button");
-        undoBtn.type = "button";
-        undoBtn.className = "toast-undo";
-        undoBtn.textContent = "Undo";
-        undoBtn.addEventListener("click", () => {
+      if (hasAction) {
+        const actionBtn = document.createElement("button");
+        actionBtn.type = "button";
+        actionBtn.className = "toast-action";
+        actionBtn.textContent = opts.actionLabel || "Undo";
+        actionBtn.addEventListener("click", () => {
           clearTimeout(dismissTimer);
-          undo();
+          onAction();
           dismissToast(el);
         });
-        el.appendChild(undoBtn);
+        el.appendChild(actionBtn);
       }
 
       $("toastContainer").appendChild(el);
@@ -1043,6 +1247,8 @@
         const amt = formatMoney(Number(row.amount) || 0);
         const dir = row.direction === "incoming" ? "incoming" : "outgoing";
 
+        const userName = rowUserField(row);
+
         entries.push({
           type: "created",
           at: created,
@@ -1050,6 +1256,7 @@
           amount: amt,
           description: desc,
           id: row.id,
+          user: userName,
         });
 
         if (updated.getTime() - created.getTime() > CREATED_EPS_MS) {
@@ -1060,6 +1267,7 @@
             amount: amt,
             description: desc,
             id: row.id,
+            user: userName,
           });
         }
       }
@@ -1072,11 +1280,32 @@
       return entries;
     }
 
+    function logRowPairDeletion(snapshot) {
+      const at = new Date();
+      const sides = [
+        { direction: "outgoing", data: snapshot.outgoing },
+        { direction: "incoming", data: snapshot.incoming },
+      ];
+
+      for (const { direction, data } of sides) {
+        if (!data.amount && !data.description && !data.id) continue;
+        auditExtras.push({
+          type: "deleted",
+          at,
+          direction,
+          amount: formatMoney(data.amount),
+          description: (data.description || "").trim() || "(no description)",
+          user: currentUserName,
+        });
+      }
+      auditExtras = auditExtras.slice(-80);
+    }
+
     function renderAuditLog() {
-      const list = $("auditList");
       const entries = buildAuditEntries(sheetRecords);
       $("auditCount").textContent = String(entries.length);
 
+      const list = $("auditList");
       if (!entries.length) {
         list.innerHTML = '<p class="audit-empty">No activity yet</p>';
         return;
@@ -1085,28 +1314,41 @@
       const actionLabel = {
         created: "Entry added",
         updated: "Entry updated",
-        deleted: "Entry removed",
+        deleted: "Row deleted",
       };
 
       list.innerHTML = entries
         .map((e) => {
           const tagClass = e.direction === "incoming" ? "incoming" : "outgoing";
           const tagText = e.direction === "incoming" ? "In" : "Out";
+          const deletedClass = e.type === "deleted" ? " audit-deleted" : "";
           return `
-            <div class="audit-item">
+            <div class="audit-item${deletedClass}">
               <span class="audit-dot ${e.type}" aria-hidden="true"></span>
               <div class="audit-body">
                 <div class="audit-action">
                   <span class="tag ${tagClass}">${tagText}</span>
-                  ${actionLabel[e.type]}
+                  ${actionLabel[e.type] || e.type}
                 </div>
                 <div class="audit-detail">${escapeHtml(e.amount)} · ${escapeHtml(e.description)}</div>
+                ${e.user ? `<div class="audit-user">${escapeHtml(e.user)}</div>` : ""}
                 <div class="audit-time">${formatAuditTime(e.at)}</div>
               </div>
             </div>
           `;
         })
         .join("");
+    }
+
+    function openAuditModal() {
+      renderAuditLog();
+      show($("auditModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeAuditModal() {
+      hide($("auditModal"));
+      document.body.style.overflow = "";
     }
 
     function padRows(list, direction) {
@@ -1134,7 +1376,11 @@
       extraBlankRows++;
       renderBothTables();
       updateTotal();
-      showToast({ message: "Row added to both tables" });
+      showToast({
+        title: "Row added",
+        description: "A new row was added to both outgoing and incoming tables.",
+        type: "info",
+      });
     }
 
     function getTrRowData(tr) {
@@ -1182,11 +1428,10 @@
           <input type="text" class="cell-input" data-field="description"
             value="${escapeHtml(rowData.description || "")}" placeholder="" />
         </td>
-        <td class="cell-remove">
-          <button type="button" class="btn-remove-row"
-            aria-label="Remove row ${index + 1}" title="Remove row"
-            ${canRemove ? "" : "disabled"}>×</button>
-        </td>
+        <td class="cell-remove${canRemove ? "" : " cell-remove-empty"}">${canRemove
+          ? `<button type="button" class="btn-remove-row"
+              aria-label="Remove row ${index + 1}" title="Remove row">×</button>`
+          : ""}</td>
       `;
       return tr;
     }
@@ -1250,12 +1495,16 @@
 
       refreshRemoveButtons();
       updateTotal();
+      logRowPairDeletion(snapshot);
+      renderAuditLog();
       scheduleSaveAfterRemove();
 
       showToast({
-        message: "Row removed from both tables",
+        title: "Row removed",
+        description: "This row was removed from both outgoing and incoming tables.",
         type: "destructive",
-        undo: async () => {
+        actionLabel: "Undo",
+        onAction: async () => {
           clearTimeout(pendingRemoveSaveTimer);
           pendingRemoveSaveTimer = null;
           clearTimeout(saveTimer);
@@ -1279,9 +1528,27 @@
           }
 
           queueSaveFromDom();
-          showToast({ message: "Row restored" });
+          showToast({
+            title: "Row restored",
+            description: "The removed row has been added back to both tables.",
+            type: "info",
+          });
         },
       });
+    }
+
+    function updateRemoveCell(tr, index, canRemove) {
+      const cell = tr.querySelector(".cell-remove");
+      if (!cell) return;
+      cell.classList.toggle("cell-remove-empty", !canRemove);
+      if (canRemove) {
+        if (!cell.querySelector(".btn-remove-row")) {
+          cell.innerHTML = `<button type="button" class="btn-remove-row"
+            aria-label="Remove row ${index + 1}" title="Remove row">×</button>`;
+        }
+      } else {
+        cell.innerHTML = "";
+      }
     }
 
     function refreshRemoveButtons() {
@@ -1290,19 +1557,15 @@
       const canRemoveAny = outTrs.length > MIN_ROWS;
 
       outTrs.forEach((tr, index) => {
-        const btn = tr.querySelector(".btn-remove-row");
-        if (!btn) return;
         const canRemove =
           canRemoveAny || rowHasContent(tr) || rowHasContent(inTrs[index]);
-        btn.disabled = !canRemove;
+        updateRemoveCell(tr, index, canRemove);
       });
 
       inTrs.forEach((tr, index) => {
-        const btn = tr.querySelector(".btn-remove-row");
-        if (!btn) return;
         const canRemove =
           canRemoveAny || rowHasContent(tr) || rowHasContent(outTrs[index]);
-        btn.disabled = !canRemove;
+        updateRemoveCell(tr, index, canRemove);
       });
     }
 
@@ -1542,7 +1805,11 @@
 
     function openExportModal() {
       if (typeof XLSX === "undefined") {
-        showToast({ message: "Excel library failed to load", type: "error" });
+        showToast({
+          title: "Export unavailable",
+          description: "The Excel library failed to load. Refresh the page and try again.",
+          type: "error",
+        });
         return;
       }
 
@@ -1563,7 +1830,12 @@
     function downloadExportFile() {
       if (!pendingExport?.wb) return;
       XLSX.writeFile(pendingExport.wb, pendingExport.filename);
-      showToast({ message: "Excel file downloaded" });
+      showToast({
+        title: "Excel downloaded",
+        description: "Your fund sheet export has been saved to your device.",
+        type: "info",
+        icon: "fa-solid fa-file-excel",
+      });
       closeExportModal();
     }
 
@@ -1576,7 +1848,7 @@
     async function refreshAuditFromDb() {
       const { data, error } = await sb
         .from(TABLE)
-        .select("id, direction, amount, description, created_at, updated_at")
+        .select(`id, direction, amount, description, created_at, updated_at, ${USER_COL}`)
         .order("updated_at", { ascending: false });
 
       if (error) return;
@@ -1596,7 +1868,7 @@
       try {
         const { data: existing, error: fetchErr } = await sb
           .from(TABLE)
-          .select("id, direction, amount, description, created_at, updated_at");
+          .select(`id, direction, amount, description, sort_order, created_at, updated_at, ${USER_COL}`);
         if (fetchErr) throw fetchErr;
 
         const keepIds = new Set(toSave.filter((r) => r.id).map((r) => r.id));
@@ -1613,6 +1885,7 @@
             amount: Number(r.amount) || 0,
             description: r.description || "",
             sort_order: r.sort_order ?? 0,
+            [USER_COL]: rowUserField(r) || currentUserName,
           }));
 
           for (const row of deletedRows) {
@@ -1623,6 +1896,7 @@
               amount: formatMoney(Number(row.amount) || 0),
               description: (row.description || "").trim() || "(no description)",
               id: row.id,
+              user: rowUserField(row) || currentUserName,
             });
           }
           auditExtras = auditExtras.slice(-50);
@@ -1637,6 +1911,7 @@
             amount: row.amount,
             description: row.description,
             sort_order: row.sort_order,
+            [USER_COL]: currentUserName,
           };
 
           if (row.id) {
@@ -1664,28 +1939,47 @@
         if (deletedSnapshot?.length) {
           const n = deletedSnapshot.length;
           showToast({
-            message: n === 1 ? "1 entry deleted from records" : `${n} entries deleted from records`,
+            title: n === 1 ? "Entry deleted" : `${n} entries deleted`,
+            description:
+              n === 1
+                ? "One saved record was removed from the fund sheet."
+                : `${n} saved records were removed from the fund sheet.`,
             type: "destructive",
-            undo: async () => {
+            actionLabel: "Undo",
+            onAction: async () => {
               try {
                 const { error } = await sb.from(TABLE).insert(deletedSnapshot);
                 if (error) throw error;
                 auditExtras = auditExtras.filter((e) => e.type !== "deleted");
                 await loadSheet();
                 showToast({
-                  message: n === 1 ? "Entry restored" : `${n} entries restored`,
+                  title: n === 1 ? "Entry restored" : `${n} entries restored`,
+                  description: "Deleted records have been added back to the fund sheet.",
+                  type: "info",
                 });
               } catch (undoErr) {
-                showToast({ message: "Undo failed: " + undoErr.message, type: "error" });
+                showToast({
+                  title: "Undo failed",
+                  description: undoErr.message,
+                  type: "error",
+                });
               }
             },
           });
         } else {
-          showToast({ message: "Changes saved" });
+          showToast({
+            title: "Changes saved",
+            description: "Your updates have been saved to the fund sheet.",
+            type: "info",
+          });
         }
       } catch (err) {
         setStatus("Save failed", "error");
-        showToast({ message: "Save failed: " + err.message, type: "error" });
+        showToast({
+          title: "Save failed",
+          description: err.message,
+          type: "error",
+        });
       } finally {
         isSaving = false;
       }
@@ -1697,7 +1991,7 @@
       try {
         const { data, error } = await sb
           .from(TABLE)
-          .select("id, direction, amount, description, sort_order, created_at, updated_at")
+          .select(`id, direction, amount, description, sort_order, created_at, updated_at, ${USER_COL}`)
           .order("sort_order", { ascending: true });
 
         if (error) throw error;
@@ -1747,10 +2041,53 @@
       hide($("appView"));
     }
 
+    function openPasswordModal() {
+      $("passwordForm").reset();
+      $("passwordError").textContent = "";
+      show($("passwordModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePasswordModal() {
+      hide($("passwordModal"));
+      document.body.style.overflow = "";
+      $("passwordForm").reset();
+      $("passwordError").textContent = "";
+    }
+
+    async function updatePassword(currentPassword, newPassword, confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        throw new Error("New passwords do not match.");
+      }
+      if (newPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters.");
+      }
+
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user?.email) {
+        throw new Error("You must be signed in to change your password.");
+      }
+
+      const { error: signInErr } = await sb.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (signInErr) {
+        throw new Error("Current password is incorrect.");
+      }
+
+      const { error } = await sb.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+    }
+
     async function initSession() {
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        $("statusUser").textContent = session.user.email || "";
+        const name = resolveUserFromSession(session);
+        if (name) {
+          setSignedInUser(name);
+          syncUserSelectToName(name);
+        }
         showApp();
         await loadSheet();
       } else {
@@ -1763,10 +2100,17 @@
       const btn = $("loginBtn");
       const errEl = $("loginError");
       errEl.textContent = "";
+
+      const portalUser = getSelectedPortalUser();
+      if (!portalUser) {
+        errEl.textContent = "Please select your name to sign in.";
+        return;
+      }
+
       btn.disabled = true;
 
       const { data, error } = await sb.auth.signInWithPassword({
-        email: LOGIN_EMAIL,
+        email: portalUser.email,
         password: $("password").value,
       });
 
@@ -1777,11 +2121,60 @@
         return;
       }
 
-      $("statusUser").textContent = data.user?.email || LOGIN_EMAIL;
+      setSignedInUser(portalUser.name);
       $("password").value = "";
       auditExtras = [];
       showApp();
       await loadSheet();
+    });
+
+    $("passwordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = $("passwordError");
+      const saveBtn = $("passwordSaveBtn");
+      errEl.textContent = "";
+      saveBtn.disabled = true;
+
+      const current = $("currentPassword").value;
+      const next = $("newPassword").value;
+      const confirm = $("confirmPassword").value;
+      const onLoginScreen = $("appView").classList.contains("hidden");
+
+      try {
+        if (onLoginScreen) {
+          const portalUser = getSelectedPortalUser();
+          if (!portalUser) {
+            throw new Error("Select your name on the sign-in screen first.");
+          }
+          if (next !== confirm) throw new Error("New passwords do not match.");
+          if (next.length < 8) throw new Error("Password must be at least 8 characters.");
+
+          const { error: signInErr } = await sb.auth.signInWithPassword({
+            email: portalUser.email,
+            password: current,
+          });
+          if (signInErr) throw new Error("Current password is incorrect.");
+
+          const { error } = await sb.auth.updateUser({ password: next });
+          if (error) throw error;
+          await sb.auth.signOut();
+        } else {
+          await updatePassword(current, next, confirm);
+        }
+
+        closePasswordModal();
+        showToast({
+          title: "Password updated",
+          description: onLoginScreen
+            ? "You can now sign in with your new password."
+            : "Your sign-in password has been changed successfully.",
+          type: "info",
+        });
+      } catch (err) {
+        errEl.textContent = err.message;
+      } finally {
+        saveBtn.disabled = false;
+      }
     });
 
     $("signOutBtn").addEventListener("click", async () => {
@@ -1791,6 +2184,22 @@
 
     document.querySelectorAll(".btn-add").forEach((btn) => {
       btn.addEventListener("click", addRowPair);
+    });
+
+    $("changePasswordBtn").addEventListener("click", openPasswordModal);
+    $("loginChangePasswordBtn").addEventListener("click", openPasswordModal);
+    $("passwordCloseBtn").addEventListener("click", closePasswordModal);
+    $("passwordCancelBtn").addEventListener("click", closePasswordModal);
+    $("passwordModal").addEventListener("click", (e) => {
+      if (e.target === $("passwordModal")) closePasswordModal();
+    });
+
+    $("viewAuditBtn").addEventListener("click", openAuditModal);
+    $("auditCloseBtn").addEventListener("click", closeAuditModal);
+    $("auditDoneBtn").addEventListener("click", closeAuditModal);
+
+    $("auditModal").addEventListener("click", (e) => {
+      if (e.target === $("auditModal")) closeAuditModal();
     });
 
     $("exportExcelBtn").addEventListener("click", openExportModal);
@@ -1803,13 +2212,15 @@
     });
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !$("exportModal").classList.contains("hidden")) {
-        closeExportModal();
-      }
+      if (e.key !== "Escape") return;
+      if (!$("passwordModal").classList.contains("hidden")) closePasswordModal();
+      else if (!$("auditModal").classList.contains("hidden")) closeAuditModal();
+      else if (!$("exportModal").classList.contains("hidden")) closeExportModal();
     });
 
     sb.auth.onAuthStateChange((_event, session) => {
       if (!session && !$("appView").classList.contains("hidden")) {
+        setSignedInUser("");
         showLogin();
       }
     });
