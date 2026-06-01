@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signed out — Poppin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1f4e79;
+      --navy-dark: #163a5c;
+      --success: #059669;
+      --text: #1a2332;
+      --muted: #64748b;
+      --border: #d4e0ec;
+      --surface: #ffffff;
+      --page: #f1f5f9;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 217, 61, 0.35), transparent),
+        var(--page);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.1);
+      text-align: center;
+    }
+
+    .logo-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      line-height: 0;
+    }
+
+    .logo-wrap img {
+      display: block;
+      height: 40px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+    }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.25rem;
+      border-radius: 50%;
+      background: #d1fae5;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 1.375rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .lead {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .notice {
+      font-size: 0.875rem;
+      color: var(--text);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      text-align: left;
+      margin-bottom: 1.75rem;
+    }
+
+    .notice strong {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .btn-signin {
+      display: inline-block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: var(--navy);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-signin:hover {
+      background: var(--navy-dark);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo-wrap">
+      <img src="../../text.png" alt="Poppin" width="160" height="40" />
+    </div>
+
+    <div class="success-icon" aria-hidden="true">✓</div>
+
+    <h1>Signed out successfully</h1>
+    <p class="lead">Your internal fund sheet session has ended.</p>
+
+    <div class="notice">
+      <strong>Important</strong>
+      For your security, please close <em>all</em> browser windows that were used to access Poppin internal tools — not just this tab.
+    </div>
+
+    <a class="btn-signin" href="https://poppin.pages.dev/internal/cash">Sign back in</a>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://jijawenoxizwwnpgnbsw.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    sb.auth.signOut();
+  </script>
+</body>
+</html>
