@@ -912,10 +912,7 @@
         <div class="field">
           <label for="userSelect">Who are you?</label>
           <select id="userSelect" required autocomplete="username">
-            <option value="" disabled selected>Select your name</option>
-            <option value="james">James</option>
-            <option value="thomas">Thomas</option>
-            <option value="none" disabled>Name not listed? You may not have access to this document. Speak to James for more information.</option>
+            <option value="" disabled selected>Loading users...</option>
           </select>
         </div>
         <div class="field">
@@ -1077,17 +1074,13 @@
     const TABLE = "internalfundsheet";
     const USER_COL = "User";
 
-    const PORTAL_USERS = {
-      james: { name: "James", email: "james.admin@poppin.internal" },
-      thomas: { name: "Thomas", email: "thomas.admin@poppin.internal" },
-    };
     const MIN_ROWS = 5;
     const CREATED_EPS_MS = 2500;
 
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rows = { incoming: [], outgoing: [] };
-    let extraBlankRows = 0;
+    let extraBlankRows = { incoming: 0, outgoing: 0 };
     let auditExtras = [];
     let sheetRecords = [];
     let saveTimer = null;
@@ -1106,15 +1099,20 @@
     function emailToDisplayName(email) {
       if (!email) return "";
       const lower = email.toLowerCase();
-      if (lower.startsWith("james.")) return "James";
-      if (lower.startsWith("thomas.")) return "Thomas";
-      return "";
+      const match = lower.match(/^([^.]+)\.admin@poppin\.internal$/);
+      if (!match) return "";
+      const name = match[1];
+      return name.charAt(0).toUpperCase() + name.slice(1);
     }
 
     function getSelectedPortalUser() {
-      const key = $("userSelect").value;
-      if (!key || key === "none") return null;
-      return PORTAL_USERS[key] || null;
+      const select = $("userSelect");
+      const selectedOption = select.selectedOptions[0];
+      if (!selectedOption || selectedOption.disabled || selectedOption.value === "none") return null;
+      const email = selectedOption.dataset.email;
+      const name = selectedOption.textContent;
+      if (!email || !name) return null;
+      return { name, email };
     }
 
     function setSignedInUser(displayName) {
@@ -1130,14 +1128,18 @@
 
     function resolveUserFromSession(session) {
       const stored = sessionStorage.getItem("poppin_fund_user");
-      if (stored === "James" || stored === "Thomas") return stored;
+      if (stored) return stored;
       return emailToDisplayName(session?.user?.email);
     }
 
     function syncUserSelectToName(name) {
       const select = $("userSelect");
-      if (name === "James") select.value = "james";
-      else if (name === "Thomas") select.value = "thomas";
+      for (const option of select.options) {
+        if (option.textContent === name && !option.disabled) {
+          select.value = option.value;
+          return;
+        }
+      }
     }
 
     function show(el) { el.classList.remove("hidden"); }
@@ -1280,24 +1282,16 @@
       return entries;
     }
 
-    function logRowPairDeletion(snapshot) {
-      const at = new Date();
-      const sides = [
-        { direction: "outgoing", data: snapshot.outgoing },
-        { direction: "incoming", data: snapshot.incoming },
-      ];
-
-      for (const { direction, data } of sides) {
-        if (!data.amount && !data.description && !data.id) continue;
-        auditExtras.push({
-          type: "deleted",
-          at,
-          direction,
-          amount: formatMoney(data.amount),
-          description: (data.description || "").trim() || "(no description)",
-          user: currentUserName,
-        });
-      }
+    function logRowDeletion(direction, data) {
+      if (!data.amount && !data.description && !data.id) return;
+      auditExtras.push({
+        type: "deleted",
+        at: new Date(),
+        direction,
+        amount: formatMoney(data.amount),
+        description: (data.description || "").trim() || "(no description)",
+        user: currentUserName,
+      });
       auditExtras = auditExtras.slice(-80);
     }
 
@@ -1353,11 +1347,15 @@
 
     function padRows(list, direction) {
       const out = [...list].sort((a, b) => a.sort_order - b.sort_order);
-      const target = MIN_ROWS + extraBlankRows;
+      const target = MIN_ROWS + extraBlankRows[direction];
       while (out.length < target) {
         out.push(blankRow(direction, out.length));
       }
       return out;
+    }
+
+    function tbodyIdForDirection(direction) {
+      return direction === "incoming" ? "incomingBody" : "outgoingBody";
     }
 
     function rowHasContent(tr) {
@@ -1372,13 +1370,14 @@
       renderTable("incoming", "incomingBody");
     }
 
-    function addRowPair() {
-      extraBlankRows++;
-      renderBothTables();
+    function addRow(direction) {
+      extraBlankRows[direction]++;
+      renderTable(direction, tbodyIdForDirection(direction));
       updateTotal();
+      const label = direction === "incoming" ? "incoming" : "outgoing";
       showToast({
         title: "Row added",
-        description: "A new row was added to both outgoing and incoming tables.",
+        description: `A new row was added to the ${label} table.`,
         type: "info",
       });
     }
@@ -1391,14 +1390,14 @@
       };
     }
 
-    function captureRowPairAt(index) {
-      const outTrs = $("outgoingBody").querySelectorAll("tr");
-      const inTrs = $("incomingBody").querySelectorAll("tr");
+    function captureRowAt(direction, index) {
+      const tbodyId = tbodyIdForDirection(direction);
+      const tr = $(tbodyId).querySelectorAll("tr")[index];
       return {
+        direction,
         index,
-        outgoing: getTrRowData(outTrs[index]),
-        incoming: getTrRowData(inTrs[index]),
-        extraBlankRows,
+        data: getTrRowData(tr),
+        extraBlankRows: extraBlankRows[direction],
       };
     }
 
@@ -1436,28 +1435,24 @@
       return tr;
     }
 
-    function insertRowPairAt(snapshot) {
-      const outBody = $("outgoingBody");
-      const inBody = $("incomingBody");
-      const outRef = outBody.querySelectorAll("tr")[snapshot.index] || null;
-      const inRef = inBody.querySelectorAll("tr")[snapshot.index] || null;
-      const canRemoveAny = outBody.querySelectorAll("tr").length + 1 > MIN_ROWS;
+    function insertRowAt(snapshot) {
+      const direction = snapshot.direction;
+      const tbodyId = tbodyIdForDirection(direction);
+      const tbody = $(tbodyId);
+      const ref = tbody.querySelectorAll("tr")[snapshot.index] || null;
+      const canRemoveAny = tbody.querySelectorAll("tr").length + 1 > MIN_ROWS;
 
-      extraBlankRows = snapshot.extraBlankRows;
+      extraBlankRows[direction] = snapshot.extraBlankRows;
 
-      const outTr = createRowElement("outgoing", snapshot.outgoing, snapshot.index, canRemoveAny);
-      const inTr = createRowElement("incoming", snapshot.incoming, snapshot.index, canRemoveAny);
+      const tr = createRowElement(direction, snapshot.data, snapshot.index, canRemoveAny);
 
-      if (outRef) {
-        outBody.insertBefore(outTr, outRef);
-        inBody.insertBefore(inTr, inRef);
+      if (ref) {
+        tbody.insertBefore(tr, ref);
       } else {
-        outBody.appendChild(outTr);
-        inBody.appendChild(inTr);
+        tbody.appendChild(tr);
       }
 
-      bindCellEvents(outBody);
-      bindCellEvents(inBody);
+      bindCellEvents(tbody);
       refreshRemoveButtons();
       updateTotal();
     }
@@ -1471,58 +1466,47 @@
       }, 600);
     }
 
-    function removeRowAtIndex(index) {
-      const outTrs = $("outgoingBody").querySelectorAll("tr");
-      const inTrs = $("incomingBody").querySelectorAll("tr");
-      if (index < 0 || index >= outTrs.length || index >= inTrs.length) return;
+    function removeRowAtIndex(index, direction) {
+      const tbodyId = tbodyIdForDirection(direction);
+      const trs = $(tbodyId).querySelectorAll("tr");
+      if (index < 0 || index >= trs.length) return;
 
-      const canRemove =
-        outTrs.length > MIN_ROWS ||
-        rowHasContent(outTrs[index]) ||
-        rowHasContent(inTrs[index]);
-
+      const canRemove = trs.length > MIN_ROWS || rowHasContent(trs[index]);
       if (!canRemove) return;
 
-      const snapshot = captureRowPairAt(index);
+      const snapshot = captureRowAt(direction, index);
+      const label = direction === "incoming" ? "incoming" : "outgoing";
 
-      outTrs[index].remove();
-      inTrs[index].remove();
+      trs[index].remove();
 
-      const remaining = $("outgoingBody").querySelectorAll("tr").length;
-      if (remaining < MIN_ROWS + extraBlankRows) {
-        extraBlankRows = Math.max(0, remaining - MIN_ROWS);
+      const remaining = $(tbodyId).querySelectorAll("tr").length;
+      if (remaining < MIN_ROWS + extraBlankRows[direction]) {
+        extraBlankRows[direction] = Math.max(0, remaining - MIN_ROWS);
       }
 
       refreshRemoveButtons();
       updateTotal();
-      logRowPairDeletion(snapshot);
+      logRowDeletion(direction, snapshot.data);
       renderAuditLog();
       scheduleSaveAfterRemove();
 
       showToast({
         title: "Row removed",
-        description: "This row was removed from both outgoing and incoming tables.",
+        description: `This row was removed from the ${label} table.`,
         type: "destructive",
         actionLabel: "Undo",
         onAction: async () => {
           clearTimeout(pendingRemoveSaveTimer);
           pendingRemoveSaveTimer = null;
           clearTimeout(saveTimer);
-          insertRowPairAt(snapshot);
+          insertRowAt(snapshot);
 
-          const outTr = $("outgoingBody").querySelectorAll("tr")[snapshot.index];
-          const inTr = $("incomingBody").querySelectorAll("tr")[snapshot.index];
-          const pairs = [
-            [outTr, snapshot.outgoing],
-            [inTr, snapshot.incoming],
-          ];
-
-          for (const [tr, data] of pairs) {
-            if (!tr?.dataset.id || !data.id) continue;
+          const tr = $(tbodyId).querySelectorAll("tr")[snapshot.index];
+          if (tr?.dataset.id && snapshot.data.id) {
             const { data: found } = await sb
               .from(TABLE)
               .select("id")
-              .eq("id", data.id)
+              .eq("id", snapshot.data.id)
               .maybeSingle();
             if (!found) delete tr.dataset.id;
           }
@@ -1530,7 +1514,7 @@
           queueSaveFromDom();
           showToast({
             title: "Row restored",
-            description: "The removed row has been added back to both tables.",
+            description: `The removed row has been added back to the ${label} table.`,
             type: "info",
           });
         },
@@ -1552,20 +1536,14 @@
     }
 
     function refreshRemoveButtons() {
-      const outTrs = [...$("outgoingBody").querySelectorAll("tr")];
-      const inTrs = [...$("incomingBody").querySelectorAll("tr")];
-      const canRemoveAny = outTrs.length > MIN_ROWS;
+      ["outgoing", "incoming"].forEach((direction) => {
+        const trs = [...$(tbodyIdForDirection(direction)).querySelectorAll("tr")];
+        const canRemoveAny = trs.length > MIN_ROWS;
 
-      outTrs.forEach((tr, index) => {
-        const canRemove =
-          canRemoveAny || rowHasContent(tr) || rowHasContent(inTrs[index]);
-        updateRemoveCell(tr, index, canRemove);
-      });
-
-      inTrs.forEach((tr, index) => {
-        const canRemove =
-          canRemoveAny || rowHasContent(tr) || rowHasContent(outTrs[index]);
-        updateRemoveCell(tr, index, canRemove);
+        trs.forEach((tr, index) => {
+          const canRemove = canRemoveAny || rowHasContent(tr);
+          updateRemoveCell(tr, index, canRemove);
+        });
       });
     }
 
@@ -1596,13 +1574,14 @@
       if (bindRemoveButtonsOnce.done) return;
       bindRemoveButtonsOnce.done = true;
 
-      ["outgoingBody", "incomingBody"].forEach((id) => {
+      ["outgoing", "incoming"].forEach((direction) => {
+        const id = tbodyIdForDirection(direction);
         $(id).addEventListener("click", (e) => {
           const btn = e.target.closest(".btn-remove-row");
           if (!btn || btn.disabled) return;
           const tr = btn.closest("tr");
           const index = [...$(id).querySelectorAll("tr")].indexOf(tr);
-          if (index >= 0) removeRowAtIndex(index);
+          if (index >= 0) removeRowAtIndex(index, direction);
         });
       });
     }
@@ -2006,7 +1985,7 @@
         }));
 
         rows = { incoming: [], outgoing: [] };
-        extraBlankRows = 0;
+        extraBlankRows = { incoming: 0, outgoing: 0 };
 
         (data || []).forEach((r) => {
           const dir = r.direction === "incoming" ? "incoming" : "outgoing";
@@ -2019,8 +1998,11 @@
           });
         });
 
-        const maxLen = Math.max(rows.incoming.length, rows.outgoing.length);
-        if (maxLen >= MIN_ROWS) extraBlankRows = maxLen - MIN_ROWS + 1;
+        for (const dir of ["incoming", "outgoing"]) {
+          if (rows[dir].length >= MIN_ROWS) {
+            extraBlankRows[dir] = rows[dir].length - MIN_ROWS + 1;
+          }
+        }
 
         renderBothTables();
         updateTotal();
@@ -2080,7 +2062,58 @@
       if (error) throw error;
     }
 
+    async function loadUsersFromSupabase() {
+      try {
+        const { data, error } = await sb
+          .from('profiles')
+          .select('email')
+          .ilike('email', '%.admin@poppin.internal');
+        
+        if (error) throw error;
+        
+        const users = (data || []).map(user => {
+          const name = emailToDisplayName(user.email);
+          return { name, email: user.email };
+        }).filter(u => u.name);
+        
+        return users;
+      } catch (err) {
+        console.error('Failed to load users:', err);
+        return [];
+      }
+    }
+
+    async function populateUserDropdown() {
+      const users = await loadUsersFromSupabase();
+      const select = $("userSelect");
+      
+      select.innerHTML = '<option value="" disabled selected>Select your name</option>';
+      
+      users.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.email;
+        option.textContent = user.name;
+        option.dataset.email = user.email;
+        select.appendChild(option);
+      });
+      
+      if (users.length === 0) {
+        const option = document.createElement('option');
+        option.value = "none";
+        option.disabled = true;
+        option.textContent = "No users found. Please contact an administrator.";
+        select.appendChild(option);
+      } else {
+        const option = document.createElement('option');
+        option.value = "none";
+        option.disabled = true;
+        option.textContent = "Name not listed? You may not have access to this document. Speak to James for more information.";
+        select.appendChild(option);
+      }
+    }
+
     async function initSession() {
+      await populateUserDropdown();
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
         const name = resolveUserFromSession(session);
@@ -2183,7 +2216,7 @@
     });
 
     document.querySelectorAll(".btn-add").forEach((btn) => {
-      btn.addEventListener("click", addRowPair);
+      btn.addEventListener("click", () => addRow(btn.dataset.direction));
     });
 
     $("changePasswordBtn").addEventListener("click", openPasswordModal);
