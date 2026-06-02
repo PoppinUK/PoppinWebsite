@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -244,6 +245,184 @@
       gap: 0.75rem;
       flex-shrink: 0;
     }
+
+    .app-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-tab {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .app-tab:hover { color: var(--text); }
+
+    .app-tab.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    .tab-picker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 360px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .tab-picker h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tab-picker p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      max-width: 360px;
+    }
+
+    .tab-picker-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-picker-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 140px;
+      padding: 1.35rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+
+    .tab-picker-btn:hover {
+      border-color: var(--navy);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(31, 78, 121, 0.12);
+    }
+
+    .tab-picker-btn i {
+      font-size: 1.5rem;
+      color: var(--navy);
+    }
+
+    .tab-picker-btn span {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .charts-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .charts-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 800px) {
+      .charts-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 420px) {
+      .charts-summary { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.375rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-card .stat-value.positive { color: var(--success); }
+    .stat-card .stat-value.negative { color: var(--danger); }
+    .stat-card .stat-value.incoming { color: var(--success); }
+    .stat-card .stat-value.outgoing { color: var(--danger); }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 800px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-card.wide { grid-column: 1 / -1; }
+
+    .chart-card h3 {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+
+    .chart-wrap.tall { height: 300px; }
 
     .btn-ghost {
       padding: 0.45rem 0.9rem;
@@ -942,8 +1121,28 @@
       </div>
     </header>
 
+    <nav class="app-tabs" role="tablist" aria-label="Fund sheet views">
+      <button type="button" class="app-tab" id="tabSheet" role="tab" aria-selected="false" aria-controls="sheetPanel">Sheet</button>
+      <button type="button" class="app-tab" id="tabCharts" role="tab" aria-selected="false" aria-controls="chartsPanel">Charts</button>
+    </nav>
+
     <div class="app-layout">
-      <main class="main-panel">
+      <section id="tabPicker" class="tab-picker">
+        <h2>Choose a view</h2>
+        <p>Select Sheet to edit the fund sheet, or Charts to explore analytics.</p>
+        <div class="tab-picker-actions">
+          <button type="button" class="tab-picker-btn" data-tab="sheet">
+            <i class="fa-solid fa-table" aria-hidden="true"></i>
+            <span>Sheet</span>
+          </button>
+          <button type="button" class="tab-picker-btn" data-tab="charts">
+            <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+            <span>Charts</span>
+          </button>
+        </div>
+      </section>
+
+      <main id="sheetPanel" class="main-panel hidden" role="tabpanel" aria-labelledby="tabSheet">
         <div class="tables-row">
           <div class="table-card">
             <table class="sheet-table" id="outgoingTable" aria-label="Outgoing funds">
@@ -992,6 +1191,49 @@
           </button>
         </div>
       </main>
+
+      <section id="chartsPanel" class="charts-panel hidden" role="tabpanel" aria-labelledby="tabCharts">
+        <div class="charts-summary">
+          <div class="stat-card">
+            <div class="stat-label">Total incoming</div>
+            <div class="stat-value incoming" id="statIncoming">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total outgoing</div>
+            <div class="stat-value outgoing" id="statOutgoing">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Net balance</div>
+            <div class="stat-value" id="statNet">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active entries</div>
+            <div class="stat-value" id="statCount">0</div>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Incoming vs outgoing</h3>
+            <div class="chart-wrap"><canvas id="chartFlowBar"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Fund split</h3>
+            <div class="chart-wrap"><canvas id="chartSplitDoughnut"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <h3>Top entries by amount</h3>
+            <div class="chart-wrap tall"><canvas id="chartTopEntries"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Activity by month</h3>
+            <div class="chart-wrap"><canvas id="chartActivityLine"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Entries by user</h3>
+            <div class="chart-wrap"><canvas id="chartByUser"></canvas></div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <footer class="status-bar" id="statusBar">
@@ -1089,8 +1331,18 @@
     let pendingExport = null;
     let pendingRemoveSaveTimer = null;
     let currentUserName = "";
+    let activeTab = null;
+    let chartInstances = {};
 
     const $ = (id) => document.getElementById(id);
+
+    const CHART_COLORS = {
+      incoming: "#059669",
+      outgoing: "#dc2626",
+      navy: "#1f4e79",
+      yellow: "#ffd93d",
+      muted: "#94a3b8",
+    };
 
     function rowUserField(row) {
       return row?.[USER_COL] ?? row?.user ?? "";
@@ -1144,6 +1396,248 @@
 
     function show(el) { el.classList.remove("hidden"); }
     function hide(el) { el.classList.add("hidden"); }
+
+    function updateTabUi() {
+      const isSheet = activeTab === "sheet";
+      const isCharts = activeTab === "charts";
+      const hasTab = isSheet || isCharts;
+
+      $("tabSheet").classList.toggle("active", isSheet);
+      $("tabCharts").classList.toggle("active", isCharts);
+      $("tabSheet").setAttribute("aria-selected", isSheet ? "true" : "false");
+      $("tabCharts").setAttribute("aria-selected", isCharts ? "true" : "false");
+
+      if (hasTab) hide($("tabPicker"));
+      else show($("tabPicker"));
+
+      $("sheetPanel").classList.toggle("hidden", !isSheet);
+      $("chartsPanel").classList.toggle("hidden", !isCharts);
+    }
+
+    function setActiveTab(tab) {
+      if (tab !== "sheet" && tab !== "charts") return;
+      activeTab = tab;
+      updateTabUi();
+      if (tab === "charts") renderCharts();
+    }
+
+    function resetActiveTab() {
+      activeTab = null;
+      destroyCharts();
+      updateTabUi();
+    }
+
+    function destroyCharts() {
+      Object.values(chartInstances).forEach((chart) => chart?.destroy());
+      chartInstances = {};
+    }
+
+    function getAnalyticsData() {
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const totalIncoming = incoming.reduce((s, r) => s + r.amount, 0);
+      const totalOutgoing = outgoing.reduce((s, r) => s + r.amount, 0);
+      const net = totalIncoming - totalOutgoing;
+      const entryCount = incoming.length + outgoing.length;
+
+      const topEntries = [...incoming, ...outgoing]
+        .filter((r) => r.amount > 0)
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 8)
+        .map((r) => ({
+          label: (r.description || "(no description)").slice(0, 28),
+          amount: r.amount,
+          direction: r.direction,
+        }));
+
+      const monthCounts = {};
+      for (const row of sheetRecords) {
+        if (!row.created_at) continue;
+        const d = new Date(row.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        monthCounts[key] = (monthCounts[key] || 0) + 1;
+      }
+      const monthKeys = Object.keys(monthCounts).sort();
+      const monthLabels = monthKeys.map((k) => {
+        const [y, m] = k.split("-");
+        return new Date(Number(y), Number(m) - 1).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+      });
+
+      const userCounts = {};
+      for (const row of sheetRecords) {
+        const user = rowUserField(row) || "Unknown";
+        userCounts[user] = (userCounts[user] || 0) + 1;
+      }
+      const userLabels = Object.keys(userCounts).sort((a, b) => userCounts[b] - userCounts[a]);
+      const userValues = userLabels.map((u) => userCounts[u]);
+
+      return {
+        totalIncoming,
+        totalOutgoing,
+        net,
+        entryCount,
+        topEntries,
+        monthLabels,
+        monthValues: monthKeys.map((k) => monthCounts[k]),
+        userLabels,
+        userValues,
+      };
+    }
+
+    function renderCharts() {
+      if (typeof Chart === "undefined") {
+        showToast({
+          title: "Charts unavailable",
+          description: "Chart.js failed to load. Refresh the page and try again.",
+          type: "error",
+        });
+        return;
+      }
+
+      destroyCharts();
+      const data = getAnalyticsData();
+
+      $("statIncoming").textContent = formatMoney(data.totalIncoming);
+      $("statOutgoing").textContent = formatMoney(data.totalOutgoing);
+      $("statNet").textContent = formatMoney(data.net);
+      $("statCount").textContent = String(data.entryCount);
+
+      const netEl = $("statNet");
+      netEl.classList.remove("positive", "negative");
+      if (data.net > 0) netEl.classList.add("positive");
+      else if (data.net < 0) netEl.classList.add("negative");
+
+      const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { font: { family: "Inter", size: 11 }, boxWidth: 12 } },
+        },
+      };
+
+      chartInstances.flowBar = new Chart($("chartFlowBar"), {
+        type: "bar",
+        data: {
+          labels: ["Incoming", "Outgoing"],
+          datasets: [{
+            data: [data.totalIncoming, data.totalOutgoing],
+            backgroundColor: [CHART_COLORS.incoming, CHART_COLORS.outgoing],
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          plugins: {
+            ...chartDefaults.plugins,
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => "£" + Number(v).toLocaleString(),
+                font: { family: "Inter", size: 10 },
+              },
+            },
+            x: { ticks: { font: { family: "Inter", size: 11 } } },
+          },
+        },
+      });
+
+      chartInstances.split = new Chart($("chartSplitDoughnut"), {
+        type: "doughnut",
+        data: {
+          labels: ["Incoming", "Outgoing"],
+          datasets: [{
+            data: [
+              data.totalIncoming || 0,
+              data.totalOutgoing || 0,
+            ],
+            backgroundColor: [CHART_COLORS.incoming, CHART_COLORS.outgoing],
+            borderWidth: 0,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          cutout: "58%",
+        },
+      });
+
+      chartInstances.topEntries = new Chart($("chartTopEntries"), {
+        type: "bar",
+        data: {
+          labels: data.topEntries.map((e) => e.label),
+          datasets: [{
+            label: "Amount",
+            data: data.topEntries.map((e) => e.amount),
+            backgroundColor: data.topEntries.map((e) =>
+              e.direction === "incoming" ? CHART_COLORS.incoming : CHART_COLORS.outgoing
+            ),
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          indexAxis: "y",
+          ...chartDefaults,
+          plugins: { ...chartDefaults.plugins, legend: { display: false } },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => "£" + Number(v).toLocaleString(),
+                font: { family: "Inter", size: 10 },
+              },
+            },
+            y: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+
+      chartInstances.activity = new Chart($("chartActivityLine"), {
+        type: "line",
+        data: {
+          labels: data.monthLabels.length ? data.monthLabels : ["No data"],
+          datasets: [{
+            label: "Entries added",
+            data: data.monthValues.length ? data.monthValues : [0],
+            borderColor: CHART_COLORS.navy,
+            backgroundColor: "rgba(31, 78, 121, 0.12)",
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: CHART_COLORS.navy,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "Inter", size: 10 } } },
+            x: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+
+      chartInstances.byUser = new Chart($("chartByUser"), {
+        type: "bar",
+        data: {
+          labels: data.userLabels.length ? data.userLabels : ["No data"],
+          datasets: [{
+            label: "Entries",
+            data: data.userValues.length ? data.userValues : [0],
+            backgroundColor: CHART_COLORS.navy,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          plugins: { ...chartDefaults.plugins, legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "Inter", size: 10 } } },
+            x: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+    }
 
     function setStatus(text, type = "") {
       const bar = $("statusBar");
@@ -1833,6 +2327,7 @@
       if (error) return;
       sheetRecords = data || [];
       renderAuditLog();
+      if (activeTab === "charts") renderCharts();
     }
 
     async function saveAll() {
@@ -1982,6 +2477,7 @@
           description: r.description,
           created_at: r.created_at,
           updated_at: r.updated_at,
+          [USER_COL]: rowUserField(r),
         }));
 
         rows = { incoming: [], outgoing: [] };
@@ -2007,6 +2503,7 @@
         renderBothTables();
         updateTotal();
         renderAuditLog();
+        if (activeTab === "charts") renderCharts();
         hasLoadedOnce = true;
       } finally {
         if (showOverlay) hide($("loadingOverlay"));
@@ -2016,11 +2513,13 @@
     function showApp() {
       hide($("loginView"));
       show($("appView"));
+      resetActiveTab();
     }
 
     function showLogin() {
       show($("loginView"));
       hide($("appView"));
+      resetActiveTab();
     }
 
     function openPasswordModal() {
@@ -2217,6 +2716,12 @@
 
     document.querySelectorAll(".btn-add").forEach((btn) => {
       btn.addEventListener("click", () => addRow(btn.dataset.direction));
+    });
+
+    $("tabSheet").addEventListener("click", () => setActiveTab("sheet"));
+    $("tabCharts").addEventListener("click", () => setActiveTab("charts"));
+    document.querySelectorAll(".tab-picker-btn").forEach((btn) => {
+      btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
     });
 
     $("changePasswordBtn").addEventListener("click", openPasswordModal);
