@@ -1072,6 +1072,24 @@
     }
 
     .btn-download:hover { background: #047857; }
+
+    .passkey-item {
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .passkey-item:hover {
+      border-color: var(--navy);
+      box-shadow: 0 2px 8px rgba(31, 78, 121, 0.08);
+    }
+
+    .passkey-rename-btn:hover {
+      background: var(--row-a);
+      color: var(--navy);
+    }
+
+    .passkey-delete-btn:hover {
+      background: #fee2e2;
+    }
   </style>
 </head>
 <body>
@@ -1100,6 +1118,14 @@
         </div>
         <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
         <p class="login-error" id="loginError" role="alert"></p>
+        
+        <div id="loginPasskeySection" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+          <button type="button" class="btn-primary" id="signInWithPasskeyBtn" style="background: var(--navy);">
+            <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
+            Sign in with passkey
+          </button>
+        </div>
+        
         <button type="button" class="login-link" id="loginChangePasswordBtn">Change password</button>
       </form>
     </div>
@@ -1115,6 +1141,7 @@
       </div>
       <div class="app-header-right">
         <span class="header-user" id="headerUserName"></span>
+        <button type="button" class="btn-ghost" id="accountSettingsBtn">Account settings</button>
         <button type="button" class="btn-ghost" id="changePasswordBtn">Change password</button>
         <button type="button" class="btn-export" id="exportExcelBtn">Export Excel</button>
         <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
@@ -1291,6 +1318,39 @@
     </div>
   </div>
 
+  <div id="accountSettingsModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountSettingsModalTitle">
+    <div class="export-dialog" style="max-width: 500px;">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="accountSettingsModalTitle">Account settings</h2>
+          <p>Manage your security settings</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="accountSettingsCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div style="padding: 1rem 1.25rem;">
+        <div class="settings-section">
+          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Two-factor authentication</h3>
+          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">Add an extra layer of security with passkeys.</p>
+          
+          <div id="passkeySection">
+            <button type="button" class="btn-primary" id="registerPasskeyBtn" style="margin-top: 0;">
+              <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
+              Register passkey
+            </button>
+          </div>
+          
+          <div id="passkeyListSection" class="hidden" style="margin-top: 1.5rem;">
+            <h4 style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Your passkeys</h4>
+            <div id="passkeyList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-download" id="accountSettingsDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
   <div id="exportModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="export-dialog">
       <div class="export-dialog-header">
@@ -1319,7 +1379,11 @@
     const MIN_ROWS = 5;
     const CREATED_EPS_MS = 2500;
 
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        experimental: { passkey: true },
+      },
+    });
 
     let rows = { incoming: [], outgoing: [] };
     let extraBlankRows = { incoming: 0, outgoing: 0 };
@@ -2536,6 +2600,185 @@
       $("passwordError").textContent = "";
     }
 
+    function openAccountSettingsModal() {
+      loadPasskeys();
+      show($("accountSettingsModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeAccountSettingsModal() {
+      hide($("accountSettingsModal"));
+      document.body.style.overflow = "";
+    }
+
+    async function registerPasskey() {
+      const btn = $("registerPasskeyBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Registering...';
+
+      try {
+        const { data, error } = await sb.auth.registerPasskey();
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey registered",
+          description: "Your passkey has been successfully added to your account.",
+          type: "info",
+          icon: "fa-solid fa-fingerprint",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Passkey registration error:", err);
+        showToast({
+          title: "Registration failed",
+          description: err.message || "Failed to register passkey. Please try again.",
+          type: "error",
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i> Register passkey';
+      }
+    }
+
+    async function loadPasskeys() {
+      try {
+        const { data, error } = await sb.auth.passkey.list();
+        if (error) throw error;
+
+        const passkeys = data || [];
+        const listEl = $("passkeyList");
+        const listSection = $("passkeyListSection");
+
+        if (passkeys.length === 0) {
+          listSection.classList.add("hidden");
+          return;
+        }
+
+        listSection.classList.remove("hidden");
+        listEl.innerHTML = passkeys.map((pk) => `
+          <div class="passkey-item" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+              <i class="fa-solid fa-fingerprint" style="color: var(--navy); font-size: 1.125rem;"></i>
+              <div style="min-width: 0;">
+                <div class="passkey-name" style="font-size: 0.875rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-id="${pk.id}">${escapeHtml(pk.friendly_name || "Unnamed passkey")}</div>
+                <div style="font-size: 0.75rem; color: var(--muted);">Added ${pk.created_at ? new Date(pk.created_at).toLocaleDateString() : "recently"}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn-ghost passkey-rename-btn" data-id="${pk.id}" style="padding: 0.35rem 0.6rem; font-size: 0.75rem;" title="Rename">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button type="button" class="btn-ghost passkey-delete-btn" data-id="${pk.id}" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; color: var(--danger);" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+        // Add event listeners for rename and delete buttons
+        listEl.querySelectorAll(".passkey-rename-btn").forEach((btn) => {
+          btn.addEventListener("click", () => renamePasskey(btn.dataset.id));
+        });
+
+        listEl.querySelectorAll(".passkey-delete-btn").forEach((btn) => {
+          btn.addEventListener("click", () => deletePasskey(btn.dataset.id));
+        });
+      } catch (err) {
+        console.error("Failed to load passkeys:", err);
+      }
+    }
+
+    async function renamePasskey(passkeyId) {
+      const newName = prompt("Enter a new name for this passkey:");
+      if (!newName || newName.trim() === "") return;
+
+      try {
+        const { error } = await sb.auth.passkey.update({
+          passkeyId,
+          friendlyName: newName.trim().slice(0, 120),
+        });
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey renamed",
+          description: "The passkey name has been updated.",
+          type: "info",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Failed to rename passkey:", err);
+        showToast({
+          title: "Rename failed",
+          description: err.message || "Failed to rename passkey.",
+          type: "error",
+        });
+      }
+    }
+
+    async function deletePasskey(passkeyId) {
+      if (!confirm("Are you sure you want to delete this passkey? You will need to register it again to use it.")) return;
+
+      try {
+        const { error } = await sb.auth.passkey.delete({ passkeyId });
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey deleted",
+          description: "The passkey has been removed from your account.",
+          type: "info",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Failed to delete passkey:", err);
+        showToast({
+          title: "Delete failed",
+          description: err.message || "Failed to delete passkey.",
+          type: "error",
+        });
+      }
+    }
+
+    async function signInWithPasskey() {
+      const btn = $("signInWithPasskeyBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Signing in...';
+      }
+
+      try {
+        const { data, error } = await sb.auth.signInWithPasskey();
+        if (error) throw error;
+
+        const name = emailToDisplayName(data.user?.email);
+        setSignedInUser(name);
+        syncUserSelectToName(name);
+        auditExtras = [];
+        showApp();
+        await loadSheet();
+
+        showToast({
+          title: "Signed in with passkey",
+          description: "Welcome back!",
+          type: "info",
+          icon: "fa-solid fa-fingerprint",
+        });
+      } catch (err) {
+        console.error("Passkey sign-in error:", err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i> Sign in with passkey';
+        }
+        showToast({
+          title: "Sign-in failed",
+          description: err.message || "Failed to sign in with passkey. Please try again or use your password.",
+          type: "error",
+        });
+      }
+    }
+
     async function updatePassword(currentPassword, newPassword, confirmPassword) {
       if (newPassword !== confirmPassword) {
         throw new Error("New passwords do not match.");
@@ -2624,6 +2867,7 @@
         await loadSheet();
       } else {
         showLogin();
+        await checkForPasskeysAndShowOption();
       }
     }
 
@@ -2732,6 +2976,15 @@
       if (e.target === $("passwordModal")) closePasswordModal();
     });
 
+    $("accountSettingsBtn").addEventListener("click", openAccountSettingsModal);
+    $("accountSettingsCloseBtn").addEventListener("click", closeAccountSettingsModal);
+    $("accountSettingsDoneBtn").addEventListener("click", closeAccountSettingsModal);
+    $("accountSettingsModal").addEventListener("click", (e) => {
+      if (e.target === $("accountSettingsModal")) closeAccountSettingsModal();
+    });
+    $("registerPasskeyBtn").addEventListener("click", registerPasskey);
+    $("signInWithPasskeyBtn").addEventListener("click", signInWithPasskey);
+
     $("viewAuditBtn").addEventListener("click", openAuditModal);
     $("auditCloseBtn").addEventListener("click", closeAuditModal);
     $("auditDoneBtn").addEventListener("click", closeAuditModal);
@@ -2752,6 +3005,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       if (!$("passwordModal").classList.contains("hidden")) closePasswordModal();
+      else if (!$("accountSettingsModal").classList.contains("hidden")) closeAccountSettingsModal();
       else if (!$("auditModal").classList.contains("hidden")) closeAuditModal();
       else if (!$("exportModal").classList.contains("hidden")) closeExportModal();
     });
