@@ -6,11 +6,14 @@
     <title>Supabase Passkey Auth Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
     <div id="app" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">Supabase Passkey Auth</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+            <i class="fas fa-key text-indigo-600 mr-2"></i> Passkey Auth
+        </h1>
         
         <div id="status-box" class="hidden p-4 rounded-lg mb-6 text-sm font-medium"></div>
 
@@ -24,19 +27,25 @@
                 <input type="password" id="supabase-key" value="sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR" class="w-full mt-1 p-2 border rounded-md">
             </div>
 
-            <hr class="my-4">
+            <input type="email" id="email-input" placeholder="Email (for initial sign-up)" class="w-full mt-1 p-2 border rounded-md">
+            <input type="password" id="password-input" placeholder="Password" class="w-full mt-1 p-2 border rounded-md">
 
+            <button onclick="signUpEmail()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-user-plus mr-2"></i> Sign Up / In
+            </button>
             <button onclick="registerPasskey()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
-                Register New Passkey
+                <i class="fas fa-fingerprint mr-2"></i> Register Passkey
             </button>
             <button onclick="signInPasskey()" class="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition">
-                Sign In with Passkey
+                <i class="fas fa-sign-in-alt mr-2"></i> Sign In w/ Passkey
             </button>
         </div>
 
         <div id="user-info" class="hidden space-y-4">
-            <p class="text-green-600 font-semibold">Logged in successfully!</p>
-            <button onclick="signOut()" class="w-full text-red-600 underline">Sign Out</button>
+            <p class="text-green-600 font-semibold"><i class="fas fa-check-circle"></i> Authenticated!</p>
+            <button onclick="signOut()" class="w-full text-red-600 underline">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
         </div>
     </div>
 
@@ -48,7 +57,10 @@
             const url = document.getElementById('supabase-url').value;
             const key = document.getElementById('supabase-key').value;
             if (!url || !key) return null;
-            return client = supabase.createClient(url, key);
+            
+            return client = supabase.createClient(url, key, {
+                auth: { experimental: { passkey: true } }
+            });
         }
 
         function showMessage(msg, type = 'info') {
@@ -59,20 +71,29 @@
             box.classList.remove('hidden');
         }
 
+        async function signUpEmail() {
+            const supabaseClient = initClient();
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (signInError) return showMessage(signInError.message, "error");
+                showMessage("Signed in!");
+            } else {
+                showMessage("Signed up! Please confirm your email if required.");
+            }
+        }
+
         async function registerPasskey() {
             const supabaseClient = initClient();
             if (!supabaseClient) return showMessage("Please enter URL and Key", "error");
             
             try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: 'user_' + Math.floor(Math.random() * 10000) + '@example.com',
-                    password: Math.random().toString(36).substring(7),
-                    options: {
-                        channel: 'passkey'
-                    }
-                });
+                const { data, error } = await supabaseClient.auth.registerPasskey();
                 if (error) throw error;
-                showMessage("Follow the browser prompt to save your Passkey.");
+                showMessage("Passkey registered: " + data.id);
             } catch (err) {
                 showMessage(err.message, "error");
             }
@@ -83,11 +104,7 @@
             if (!supabaseClient) return showMessage("Please enter URL and Key", "error");
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    options: {
-                        channel: 'passkey'
-                    }
-                });
+                const { data, error } = await supabaseClient.auth.signInWithPasskey();
                 if (error) throw error;
                 
                 document.getElementById('auth-form').classList.add('hidden');
