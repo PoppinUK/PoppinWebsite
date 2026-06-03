@@ -41,11 +41,14 @@
     </div>
 
     <script>
-        function getClient() {
+        let client = null;
+
+        function initClient() {
+            if (client) return client;
             const url = document.getElementById('supabase-url').value;
             const key = document.getElementById('supabase-key').value;
             if (!url || !key) return null;
-            return supabase.createClient(url, key);
+            return client = supabase.createClient(url, key);
         }
 
         function showMessage(msg, type = 'info') {
@@ -57,30 +60,30 @@
         }
 
         async function registerPasskey() {
-            const client = getClient();
-            if (!client) return showMessage("Please enter URL and Key", "error");
+            const supabaseClient = initClient();
+            if (!supabaseClient) return showMessage("Please enter URL and Key", "error");
             
             try {
-                const { data, error } = await client.auth.signUp({
-                    email: 'user_' + Math.floor(Math.random() * 1000) + '@example.com',
-                    password: Math.random().toString(36),
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: 'user_' + Math.floor(Math.random() * 10000) + '@example.com',
+                    password: Math.random().toString(36).substring(7),
                     options: {
                         channel: 'passkey'
                     }
                 });
                 if (error) throw error;
-                showMessage("Passkey registration initiated.");
+                showMessage("Follow the browser prompt to save your Passkey.");
             } catch (err) {
                 showMessage(err.message, "error");
             }
         }
 
         async function signInPasskey() {
-            const client = getClient();
-            if (!client) return showMessage("Please enter URL and Key", "error");
+            const supabaseClient = initClient();
+            if (!supabaseClient) return showMessage("Please enter URL and Key", "error");
 
             try {
-                const { data, error } = await client.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     options: {
                         channel: 'passkey'
                     }
@@ -96,7 +99,6 @@
         }
 
         async function signOut() {
-            const client = getClient();
             if (client) {
                 await client.auth.signOut();
                 window.location.reload();
