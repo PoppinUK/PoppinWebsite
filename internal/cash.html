@@ -1104,6 +1104,105 @@
       border-radius: 999px;
       margin-left: 0.5rem;
     }
+
+    /* Settings modal with side menu */
+    .settings-dialog {
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .settings-sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 1rem 0;
+      background: #f8fafc;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.6rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-left: 3px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .settings-nav-item:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .settings-nav-item.active {
+      background: #e8f2fa;
+      color: var(--navy);
+      border-left-color: var(--navy);
+    }
+
+    .settings-nav-item i {
+      font-size: 0.9rem;
+      width: 18px;
+      text-align: center;
+    }
+
+    .settings-content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .settings-panel {
+      display: none;
+    }
+
+    .settings-panel.active {
+      display: block;
+    }
+
+    .settings-panel h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--navy);
+    }
+
+    .settings-panel p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-save {
+      padding: 0.55rem 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-save:hover { background: var(--navy-dark); }
+    .btn-save:disabled { opacity: 0.55; cursor: wait; }
   </style>
 </head>
 <body>
@@ -1301,7 +1400,7 @@
   </div>
 
   <div id="accountSettingsModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountSettingsModalTitle">
-    <div class="export-dialog" style="max-width: 500px;">
+    <div class="export-dialog settings-dialog">
       <div class="export-dialog-header">
         <div>
           <h2 id="accountSettingsModalTitle">Account settings</h2>
@@ -1309,60 +1408,79 @@
         </div>
         <button type="button" class="btn-close-modal" id="accountSettingsCloseBtn" aria-label="Close">×</button>
       </div>
-      <div style="padding: 1rem 1.25rem;">
-        <div class="settings-section" style="margin-bottom: 1.5rem;">
-          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Account Email</h3>
-          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">Used for authentication only. Cannot be edited.</p>
-          <div class="field">
-            <input type="email" id="accountEmail" disabled />
-          </div>
-        </div>
+      <div class="settings-body">
+        <nav class="settings-sidebar" role="tablist" aria-label="Settings sections">
+          <button type="button" class="settings-nav-item active" data-panel="profile" role="tab" aria-selected="true" aria-controls="profilePanel">
+            <i class="fa-solid fa-user"></i>
+            Profile
+          </button>
+          <button type="button" class="settings-nav-item" data-panel="security" role="tab" aria-selected="false" aria-controls="securityPanel">
+            <i class="fa-solid fa-shield"></i>
+            Security
+          </button>
+          <button type="button" class="settings-nav-item" data-panel="passkeys" role="tab" aria-selected="false" aria-controls="passkeysPanel">
+            <i class="fa-solid fa-fingerprint"></i>
+            Passkeys
+          </button>
+        </nav>
+        <div class="settings-content">
+          <div id="profilePanel" class="settings-panel active" role="tabpanel" aria-labelledby="profileTab">
+            <h3>Profile</h3>
+            <p>Manage your account information</p>
+            
+            <div class="field">
+              <label for="accountEmail">Account Email</label>
+              <input type="email" id="accountEmail" readonly />
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">Used for authentication only. Cannot be edited.</p>
+            </div>
 
-        <div class="settings-section" style="margin-bottom: 1.5rem;">
-          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Display Name</h3>
-          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">This name will be visible publicly on the login screen.</p>
-          <div class="field">
-            <input type="text" id="displayName" placeholder="Enter your display name" />
+            <div class="field">
+              <label for="displayName">Display Name</label>
+              <input type="text" id="displayName" placeholder="Enter your display name" />
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">This name will be visible publicly on the login screen.</p>
+            </div>
           </div>
-        </div>
 
-        <div class="settings-section" style="margin-bottom: 1.5rem;">
-          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Change Password</h3>
-          <div class="field">
-            <label for="currentPassword">Current password</label>
-            <input type="password" id="currentPassword" autocomplete="current-password" />
+          <div id="securityPanel" class="settings-panel" role="tabpanel" aria-labelledby="securityTab">
+            <h3>Security</h3>
+            <p>Change your password to keep your account secure</p>
+            
+            <div class="field">
+              <label for="currentPassword">Current password</label>
+              <input type="password" id="currentPassword" autocomplete="current-password" />
+            </div>
+            <div class="field">
+              <label for="newPassword">New password</label>
+              <input type="password" id="newPassword" autocomplete="new-password" minlength="8" />
+            </div>
+            <div class="field">
+              <label for="confirmPassword">Confirm new password</label>
+              <input type="password" id="confirmPassword" autocomplete="new-password" minlength="8" />
+            </div>
+            <p class="login-error" id="passwordError" role="alert"></p>
+            <button type="button" class="btn-primary" id="updatePasswordBtn" style="margin-top: 0.5rem;">Update password</button>
           </div>
-          <div class="field">
-            <label for="newPassword">New password</label>
-            <input type="password" id="newPassword" autocomplete="new-password" minlength="8" />
-          </div>
-          <div class="field">
-            <label for="confirmPassword">Confirm new password</label>
-            <input type="password" id="confirmPassword" autocomplete="new-password" minlength="8" />
-          </div>
-          <p class="login-error" id="passwordError" role="alert"></p>
-          <button type="button" class="btn-primary" id="updatePasswordBtn" style="margin-top: 0.5rem;">Update password</button>
-        </div>
 
-        <div class="settings-section">
-          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Passkeys <span class="beta-badge">Beta</span></h3>
-          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">Add an extra layer of security with passkeys.</p>
-          
-          <div id="passkeySection">
-            <button type="button" class="btn-primary" id="registerPasskeyBtn" style="margin-top: 0;">
-              <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
-              Register passkey
-            </button>
-          </div>
-          
-          <div id="passkeyListSection" class="hidden" style="margin-top: 1.5rem;">
-            <h4 style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Your passkeys</h4>
-            <div id="passkeyList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+          <div id="passkeysPanel" class="settings-panel" role="tabpanel" aria-labelledby="passkeysTab">
+            <h3>Passkeys <span class="beta-badge">Beta</span></h3>
+            <p>Add an extra layer of security with passkeys.</p>
+            
+            <div id="passkeySection">
+              <button type="button" class="btn-primary" id="registerPasskeyBtn" style="margin-top: 0;">
+                <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
+                Register passkey
+              </button>
+            </div>
+            
+            <div id="passkeyListSection" class="hidden" style="margin-top: 1.5rem;">
+              <h4 style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Your passkeys</h4>
+              <div id="passkeyList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="export-dialog-footer">
-        <button type="button" class="btn-download" id="accountSettingsDoneBtn">Done</button>
+        <button type="button" class="btn-save" id="accountSettingsSaveBtn">Save changes</button>
       </div>
     </div>
   </div>
@@ -2613,16 +2731,64 @@
       document.body.style.overflow = "hidden";
     }
 
-    function closeAccountSettingsModal() {
+    function switchSettingsPanel(panelName) {
+      const navItems = document.querySelectorAll(".settings-nav-item");
+      const panels = document.querySelectorAll(".settings-panel");
+      
+      navItems.forEach(item => {
+        item.classList.remove("active");
+        item.setAttribute("aria-selected", "false");
+        if (item.dataset.panel === panelName) {
+          item.classList.add("active");
+          item.setAttribute("aria-selected", "true");
+        }
+      });
+      
+      panels.forEach(panel => {
+        panel.classList.remove("active");
+        if (panel.id === panelName + "Panel") {
+          panel.classList.add("active");
+        }
+      });
+    }
+
+    async function saveAccountSettings() {
       const displayName = $("displayName").value;
-      if (displayName && displayName !== currentUserName) {
-        sb.auth.updateUser({ data: { display_name: displayName } }).then(() => {
+      const saveBtn = $("accountSettingsSaveBtn");
+      
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+      
+      try {
+        if (displayName && displayName !== currentUserName) {
+          const { error } = await sb.auth.updateUser({ data: { display_name: displayName } });
+          if (error) throw error;
+          
           currentUserName = displayName;
           $("headerUserName").textContent = displayName;
-        }).catch(err => {
-          console.error("Failed to update display name:", err);
+        }
+        
+        showToast({
+          title: "Settings saved",
+          description: "Your account settings have been updated successfully.",
+          type: "info"
         });
+        
+        closeAccountSettingsModal();
+      } catch (err) {
+        console.error("Failed to save settings:", err);
+        showToast({
+          title: "Save failed",
+          description: "Could not save your settings. Please try again.",
+          type: "error"
+        });
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save changes";
       }
+    }
+
+    function closeAccountSettingsModal() {
       hide($("accountSettingsModal"));
       document.body.style.overflow = "";
       $("currentPassword").value = "";
@@ -2975,10 +3141,17 @@
 
     $("accountSettingsBtn").addEventListener("click", openAccountSettingsModal);
     $("accountSettingsCloseBtn").addEventListener("click", closeAccountSettingsModal);
-    $("accountSettingsDoneBtn").addEventListener("click", closeAccountSettingsModal);
+    $("accountSettingsSaveBtn").addEventListener("click", saveAccountSettings);
     $("accountSettingsModal").addEventListener("click", (e) => {
       if (e.target === $("accountSettingsModal")) closeAccountSettingsModal();
     });
+
+    document.querySelectorAll(".settings-nav-item").forEach(item => {
+      item.addEventListener("click", () => {
+        switchSettingsPanel(item.dataset.panel);
+      });
+    });
+
     $("registerPasskeyBtn").addEventListener("click", registerPasskey);
     $("signInWithPasskeyBtn").addEventListener("click", signInWithPasskey);
 
