@@ -1090,6 +1090,20 @@
     .passkey-delete-btn:hover {
       background: #fee2e2;
     }
+
+    .beta-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.45rem;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      margin-left: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -1142,7 +1156,6 @@
       <div class="app-header-right">
         <span class="header-user" id="headerUserName"></span>
         <button type="button" class="btn-ghost" id="accountSettingsBtn">Account settings</button>
-        <button type="button" class="btn-ghost" id="changePasswordBtn">Change password</button>
         <button type="button" class="btn-export" id="exportExcelBtn">Export Excel</button>
         <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
       </div>
@@ -1287,49 +1300,52 @@
     </div>
   </div>
 
-  <div id="passwordModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
-    <div class="export-dialog" style="max-width: 420px;">
-      <div class="export-dialog-header">
-        <div>
-          <h2 id="passwordModalTitle">Change password</h2>
-          <p>Update your portal sign-in password</p>
-        </div>
-        <button type="button" class="btn-close-modal" id="passwordCloseBtn" aria-label="Close">×</button>
-      </div>
-      <form id="passwordForm" style="padding: 1rem 1.25rem 0;">
-        <div class="field">
-          <label for="currentPassword">Current password</label>
-          <input type="password" id="currentPassword" required autocomplete="current-password" />
-        </div>
-        <div class="field">
-          <label for="newPassword">New password</label>
-          <input type="password" id="newPassword" required autocomplete="new-password" minlength="8" />
-        </div>
-        <div class="field">
-          <label for="confirmPassword">Confirm new password</label>
-          <input type="password" id="confirmPassword" required autocomplete="new-password" minlength="8" />
-        </div>
-        <p class="login-error" id="passwordError" role="alert"></p>
-      </form>
-      <div class="export-dialog-footer">
-        <button type="button" class="btn-ghost" id="passwordCancelBtn">Cancel</button>
-        <button type="submit" form="passwordForm" class="btn-download" id="passwordSaveBtn">Update password</button>
-      </div>
-    </div>
-  </div>
-
   <div id="accountSettingsModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountSettingsModalTitle">
     <div class="export-dialog" style="max-width: 500px;">
       <div class="export-dialog-header">
         <div>
           <h2 id="accountSettingsModalTitle">Account settings</h2>
-          <p>Manage your security settings</p>
+          <p>Manage your account and security settings</p>
         </div>
         <button type="button" class="btn-close-modal" id="accountSettingsCloseBtn" aria-label="Close">×</button>
       </div>
       <div style="padding: 1rem 1.25rem;">
+        <div class="settings-section" style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Account Email</h3>
+          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">Used for authentication only. Cannot be edited.</p>
+          <div class="field">
+            <input type="email" id="accountEmail" disabled />
+          </div>
+        </div>
+
+        <div class="settings-section" style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Display Name</h3>
+          <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">This name will be visible publicly on the login screen.</p>
+          <div class="field">
+            <input type="text" id="displayName" placeholder="Enter your display name" />
+          </div>
+        </div>
+
+        <div class="settings-section" style="margin-bottom: 1.5rem;">
+          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Change Password</h3>
+          <div class="field">
+            <label for="currentPassword">Current password</label>
+            <input type="password" id="currentPassword" autocomplete="current-password" />
+          </div>
+          <div class="field">
+            <label for="newPassword">New password</label>
+            <input type="password" id="newPassword" autocomplete="new-password" minlength="8" />
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Confirm new password</label>
+            <input type="password" id="confirmPassword" autocomplete="new-password" minlength="8" />
+          </div>
+          <p class="login-error" id="passwordError" role="alert"></p>
+          <button type="button" class="btn-primary" id="updatePasswordBtn" style="margin-top: 0.5rem;">Update password</button>
+        </div>
+
         <div class="settings-section">
-          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Two-factor authentication</h3>
+          <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy);">Passkeys <span class="beta-badge">Beta</span></h3>
           <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 1rem;">Add an extra layer of security with passkeys.</p>
           
           <div id="passkeySection">
@@ -1552,7 +1568,7 @@
       if (typeof Chart === "undefined") {
         showToast({
           title: "Charts unavailable",
-          description: "Chart.js failed to load. Refresh the page and try again.",
+          description: "Chart.js failed to load. Refresh the page and try again. If the issue continues, contact your IT admin.",
           type: "error",
         });
         return;
@@ -2586,29 +2602,33 @@
       resetActiveTab();
     }
 
-    function openPasswordModal() {
-      $("passwordForm").reset();
-      $("passwordError").textContent = "";
-      show($("passwordModal"));
-      document.body.style.overflow = "hidden";
-    }
-
-    function closePasswordModal() {
-      hide($("passwordModal"));
-      document.body.style.overflow = "";
-      $("passwordForm").reset();
-      $("passwordError").textContent = "";
-    }
-
     function openAccountSettingsModal() {
+      const user = sb.auth.user;
+      if (user) {
+        $("accountEmail").value = user.email || "";
+        $("displayName").value = user.user_metadata?.display_name || currentUserName || "";
+      }
       loadPasskeys();
       show($("accountSettingsModal"));
       document.body.style.overflow = "hidden";
     }
 
     function closeAccountSettingsModal() {
+      const displayName = $("displayName").value;
+      if (displayName && displayName !== currentUserName) {
+        sb.auth.updateUser({ data: { display_name: displayName } }).then(() => {
+          currentUserName = displayName;
+          $("headerUserName").textContent = displayName;
+        }).catch(err => {
+          console.error("Failed to update display name:", err);
+        });
+      }
       hide($("accountSettingsModal"));
       document.body.style.overflow = "";
+      $("currentPassword").value = "";
+      $("newPassword").value = "";
+      $("confirmPassword").value = "";
+      $("passwordError").textContent = "";
     }
 
     async function registerPasskey() {
@@ -2760,10 +2780,10 @@
         await loadSheet();
 
         showToast({
-          title: "Signed in with passkey",
-          description: "Welcome back!",
+          title: "Passkey Sucess",
+          description: "Welcome Back, You now have access to the database!",
           type: "info",
-          icon: "fa-solid fa-fingerprint",
+          icon: "fa-regular fa-user",
         });
       } catch (err) {
         console.error("Passkey sign-in error:", err);
@@ -2904,46 +2924,29 @@
       await loadSheet();
     });
 
-    $("passwordForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    $("updatePasswordBtn").addEventListener("click", async () => {
       const errEl = $("passwordError");
-      const saveBtn = $("passwordSaveBtn");
+      const saveBtn = $("updatePasswordBtn");
       errEl.textContent = "";
       saveBtn.disabled = true;
 
       const current = $("currentPassword").value;
       const next = $("newPassword").value;
       const confirm = $("confirmPassword").value;
-      const onLoginScreen = $("appView").classList.contains("hidden");
 
       try {
-        if (onLoginScreen) {
-          const portalUser = getSelectedPortalUser();
-          if (!portalUser) {
-            throw new Error("Select your name on the sign-in screen first.");
-          }
-          if (next !== confirm) throw new Error("New passwords do not match.");
-          if (next.length < 8) throw new Error("Password must be at least 8 characters.");
+        if (next !== confirm) throw new Error("New passwords do not match.");
+        if (next.length < 8) throw new Error("Password must be at least 8 characters.");
 
-          const { error: signInErr } = await sb.auth.signInWithPassword({
-            email: portalUser.email,
-            password: current,
-          });
-          if (signInErr) throw new Error("Current password is incorrect.");
+        await updatePassword(current, next, confirm);
 
-          const { error } = await sb.auth.updateUser({ password: next });
-          if (error) throw error;
-          await sb.auth.signOut();
-        } else {
-          await updatePassword(current, next, confirm);
-        }
+        $("currentPassword").value = "";
+        $("newPassword").value = "";
+        $("confirmPassword").value = "";
 
-        closePasswordModal();
         showToast({
           title: "Password updated",
-          description: onLoginScreen
-            ? "You can now sign in with your new password."
-            : "Your sign-in password has been changed successfully.",
+          description: "Your sign-in password has been changed successfully.",
           type: "info",
         });
       } catch (err) {
@@ -2968,13 +2971,7 @@
       btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
     });
 
-    $("changePasswordBtn").addEventListener("click", openPasswordModal);
-    $("loginChangePasswordBtn").addEventListener("click", openPasswordModal);
-    $("passwordCloseBtn").addEventListener("click", closePasswordModal);
-    $("passwordCancelBtn").addEventListener("click", closePasswordModal);
-    $("passwordModal").addEventListener("click", (e) => {
-      if (e.target === $("passwordModal")) closePasswordModal();
-    });
+    $("loginChangePasswordBtn").addEventListener("click", openAccountSettingsModal);
 
     $("accountSettingsBtn").addEventListener("click", openAccountSettingsModal);
     $("accountSettingsCloseBtn").addEventListener("click", closeAccountSettingsModal);
@@ -3004,8 +3001,7 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-      if (!$("passwordModal").classList.contains("hidden")) closePasswordModal();
-      else if (!$("accountSettingsModal").classList.contains("hidden")) closeAccountSettingsModal();
+      if (!$("accountSettingsModal").classList.contains("hidden")) closeAccountSettingsModal();
       else if (!$("auditModal").classList.contains("hidden")) closeAuditModal();
       else if (!$("exportModal").classList.contains("hidden")) closeExportModal();
     });
