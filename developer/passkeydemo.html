@@ -6,14 +6,10 @@
     <title>Supabase Passkey Auth Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
 
-    <div id="app" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 fade-in">
+    <div id="app" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">Supabase Passkey Auth</h1>
         
         <div id="status-box" class="hidden p-4 rounded-lg mb-6 text-sm font-medium"></div>
@@ -45,7 +41,12 @@
     </div>
 
     <script>
-        let supabase = null;
+        function getClient() {
+            const url = document.getElementById('supabase-url').value;
+            const key = document.getElementById('supabase-key').value;
+            if (!url || !key) return null;
+            return supabase.createClient(url, key);
+        }
 
         function showMessage(msg, type = 'info') {
             const box = document.getElementById('status-box');
@@ -55,32 +56,35 @@
             box.classList.remove('hidden');
         }
 
-        function initSupabase() {
-            const url = document.getElementById('supabase-url').value;
-            const key = document.getElementById('supabase-key').value;
-            if (!url || !key) return null;
-            return supabase = supabase.createClient(url, key);
-        }
-
         async function registerPasskey() {
-            if (!initSupabase()) return showMessage("Please enter URL and Key", "error");
+            const client = getClient();
+            if (!client) return showMessage("Please enter URL and Key", "error");
             
             try {
-                const { data, error } = await supabase.auth.signUpWithPasskey({
-                    username: 'user_' + Math.floor(Math.random() * 1000) 
+                const { data, error } = await client.auth.signUp({
+                    email: 'user_' + Math.floor(Math.random() * 1000) + '@example.com',
+                    password: Math.random().toString(36),
+                    options: {
+                        channel: 'passkey'
+                    }
                 });
                 if (error) throw error;
-                showMessage("Passkey registered! You can now sign in.");
+                showMessage("Passkey registration initiated.");
             } catch (err) {
                 showMessage(err.message, "error");
             }
         }
 
         async function signInPasskey() {
-            if (!initSupabase()) return showMessage("Please enter URL and Key", "error");
+            const client = getClient();
+            if (!client) return showMessage("Please enter URL and Key", "error");
 
             try {
-                const { data, error } = await supabase.auth.signInWithPasskey();
+                const { data, error } = await client.auth.signInWithPassword({
+                    options: {
+                        channel: 'passkey'
+                    }
+                });
                 if (error) throw error;
                 
                 document.getElementById('auth-form').classList.add('hidden');
@@ -92,8 +96,11 @@
         }
 
         async function signOut() {
-            await supabase.auth.signOut();
-            window.location.reload();
+            const client = getClient();
+            if (client) {
+                await client.auth.signOut();
+                window.location.reload();
+            }
         }
     </script>
 </body>
