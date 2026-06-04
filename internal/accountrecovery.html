@@ -273,7 +273,7 @@
     <!-- Step 4: Enter OTP -->
     <div id="step4" class="step">
       <h1>Enter OTP</h1>
-      <p class="subtitle">Enter the 6-digit code sent to your email</p>
+      <p class="subtitle">Enter the 8-digit code sent to your email</p>
       
       <div class="info-box">
         <p style="margin-bottom: 0.5rem;"><strong>Important:</strong></p>
@@ -285,7 +285,7 @@
       <form id="otpForm">
         <div class="field">
           <label for="otp">OTP Code</label>
-          <input type="text" id="otp" placeholder="123456" required autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" />
+          <input type="text" id="otp" placeholder="12345678" required autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" />
         </div>
         <button type="submit" class="btn-primary" id="otpBtn">Verify OTP</button>
         <button type="button" class="btn-secondary" id="resendOtpBtn" disabled>Resend OTP (2:00)</button>
@@ -573,8 +573,8 @@
       
       errorEl.textContent = '';
       
-      if (!otp || otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-        errorEl.textContent = 'Please enter a valid 6-digit OTP code.';
+      if (!otp || otp.length !== 8 || !/^\d{8}$/.test(otp)) {
+        errorEl.textContent = 'Please enter a valid 8-digit OTP code.';
         return;
       }
       
