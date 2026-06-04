@@ -1430,14 +1430,14 @@
             
             <div class="field">
               <label for="accountEmail">Account Email</label>
-              <input type="email" id="accountEmail" readonly />
+              <input type="email" id="accountEmail" disabled />
               <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">Used for authentication only. Cannot be edited.</p>
             </div>
 
             <div class="field">
               <label for="displayName">Display Name</label>
               <input type="text" id="displayName" placeholder="Enter your display name" />
-              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">This name will be visible publicly on the login screen.</p>
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">This name will be visible publicly on the login screen. Speak to your IT admin if you wish to change it.</p>
             </div>
           </div>
 
@@ -2724,7 +2724,7 @@
       const user = sb.auth.user;
       if (user) {
         $("accountEmail").value = user.email || "";
-        $("displayName").value = user.user_metadata?.display_name || currentUserName || "";
+        $("displayName").value = emailToDisplayName(user.email) || "";
       }
       loadPasskeys();
       show($("accountSettingsModal"));
