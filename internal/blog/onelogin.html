@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poppin One Login — Poppin Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pop-red: #ff2e63;
+      --pop-yellow: #ffd93d;
+      --navy: #1f4e79;
+      --navy-dark: #163a5c;
+      --text: #1a2332;
+      --muted: #64748b;
+      --surface: #ffffff;
+      --page: #f1f5f9;
+      --border: #d4e0ec;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--page);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--navy);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .meta {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .content {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
+    }
+
+    .content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .content p {
+      margin-bottom: 1.25rem;
+      color: var(--text);
+    }
+
+    .content ul {
+      margin-bottom: 1.25rem;
+      padding-left: 1.5rem;
+    }
+
+    .content li {
+      margin-bottom: 0.5rem;
+    }
+
+    .content strong {
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .highlight-box {
+      background: #e8f2fa;
+      border-left: 4px solid var(--navy);
+      padding: 1.25rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+
+      .content {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .content h2 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/internal/cash.html" class="back-link">
+        <span>←</span> Back to Internal Fund Sheet
+      </a>
+      <h1>Poppin One Login</h1>
+      <p class="meta">Coming Soon — One login for all Poppin services</p>
+    </header>
+
+    <article class="content">
+      <p>We're excited to announce <strong>Poppin One Login</strong> — a unified authentication system that will allow Poppin Staff to sign in once and access all Poppin services seamlessly.</p>
+
+      <h2>What is Poppin One Login?</h2>
+      <p>Poppin One Login is our new single sign-on (SSO) solution designed specifically for Poppin Staff. Instead of managing separate credentials for each internal service, you'll use one account to access everything.</p>
+
+      <div class="highlight-box">
+        <p><strong>Coming Soon:</strong> This feature is currently in development and will be rolled out to all staff members in the near future.</p>
+      </div>
+
+      <h2>Benefits</h2>
+      <ul>
+        <li><strong>One set of credentials</strong> — Use the same email and password across all Poppin services</li>
+        <li><strong>Faster access</strong> — No more switching between different login screens</li>
+        <li><strong>Enhanced security</strong> — Centralized authentication with improved security measures</li>
+        <li><strong>Seamless experience</strong> — Move between services without re-authenticating</li>
+        <li><strong>Easier management</strong> — Update your password once, and it applies everywhere</li>
+      </ul>
+
+      <h2>Services That Will Use Poppin One Login</h2>
+      <p>Once launched, Poppin One Login will be the authentication method for:</p>
+      <ul>
+        <li>Internal Fund Sheet</li>
+        <li>Chocoluxe Money Management</li>
+        <li>Other internal tools and services</li>
+      </ul>
+
+      <h2>What You Need to Do</h2>
+      <p>For now, continue using your existing login methods for each service. When Poppin One Login is ready, we'll provide clear instructions on how to migrate your account and start using the new system.</p>
+
+      <h2>Questions?</h2>
+      <p>If you have questions about Poppin One Login, please contact your IT administrator. We'll share more details as we get closer to the launch date.</p>
+    </article>
+  </div>
+</body>
+</html>
