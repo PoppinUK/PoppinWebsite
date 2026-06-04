@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poppin — Account Recovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1f4e79;
+      --navy-dark: #163a5c;
+      --border: #d4e0ec;
+      --text: #1a2332;
+      --muted: #64748b;
+      --surface: #ffffff;
+      --page: #f1f5f9;
+      --danger: #dc2626;
+      --success: #059669;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--page);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .recovery-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
+    }
+
+    .logo-wrap {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-wrap img {
+      display: block;
+      height: 40px;
+      max-width: 160px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.12);
+    }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.75rem;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-primary:hover { background: var(--navy-dark); }
+    .btn-primary:disabled { opacity: 0.55; cursor: wait; }
+
+    .btn-secondary {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    .error {
+      margin-top: 0.85rem;
+      font-size: 0.8125rem;
+      color: var(--danger);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    .success {
+      margin-top: 0.85rem;
+      font-size: 0.8125rem;
+      color: var(--success);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    .hidden { display: none !important; }
+
+    .step {
+      display: none;
+    }
+
+    .step.active { display: block; }
+
+    .back-link {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .back-link:hover { color: var(--navy); }
+
+    .info-box {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: #92400e;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 480px) {
+      .recovery-card {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="recovery-card">
+    <div class="logo-wrap">
+      <img src="../text.png" alt="Poppin" width="160" height="40" />
+    </div>
+
+    <!-- Step 1: Email -->
+    <div id="step1" class="step active">
+      <h1>Account Recovery</h1>
+      <p class="subtitle">Enter your email to begin password recovery</p>
+      
+      <form id="emailForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="your.email@poppin.internal" required autocomplete="email" />
+        </div>
+        <button type="submit" class="btn-primary" id="emailBtn">Continue</button>
+        <p class="error" id="emailError" role="alert"></p>
+      </form>
+      
+      <button type="button" class="back-link" onclick="window.location.href='/internal/cash.html'">Back to login</button>
+    </div>
+
+    <!-- Step 2: PopCode -->
+    <div id="step2" class="step">
+      <h1>Verify Your Identity</h1>
+      <p class="subtitle">Enter your PopCode to continue</p>
+      
+      <form id="popcodeForm">
+        <div class="field">
+          <label for="popcode">PopCode</label>
+          <input type="text" id="popcode" placeholder="Enter your 15-character PopCode" required autocomplete="off" maxlength="15" />
+        </div>
+        <button type="submit" class="btn-primary" id="popcodeBtn">Verify</button>
+        <p class="error" id="popcodeError" role="alert"></p>
+      </form>
+      
+      <div class="info-box">
+        <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i>
+        Forgot your PopCode? Contact your IT Admin.
+      </div>
+      
+      <button type="button" class="back-link" id="backToEmail">Back</button>
+    </div>
+
+    <!-- Step 3: Reset Password -->
+    <div id="step3" class="step">
+      <h1>Reset Password</h1>
+      <p class="subtitle">Enter your new password</p>
+      
+      <form id="passwordForm">
+        <div class="field">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" placeholder="New password" required autocomplete="new-password" minlength="8" />
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm New Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm new password" required autocomplete="new-password" minlength="8" />
+        </div>
+        <button type="submit" class="btn-primary" id="passwordBtn">Reset Password</button>
+        <p class="error" id="passwordError" role="alert"></p>
+        <p class="success" id="passwordSuccess" role="alert"></p>
+      </form>
+      
+      <button type="button" class="back-link" id="backToPopcode">Back</button>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div id="step4" class="step">
+      <h1>Password Reset Successful</h1>
+      <p class="subtitle">Your password has been updated. You can now sign in with your new password.</p>
+      
+      <button type="button" class="btn-primary" onclick="window.location.href='/internal/cash.html'">Sign In</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://jijawenoxizwwnpgnbsw.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR";
+    
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    let userEmail = '';
+    
+    const $ = (id) => document.getElementById(id);
+    
+    function showStep(stepNum) {
+      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+      $(`step${stepNum}`).classList.add('active');
+    }
+    
+    // Step 1: Email
+    $('emailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = $('email').value.trim();
+      const errorEl = $('emailError');
+      const btn = $('emailBtn');
+      
+      errorEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      
+      try {
+        // Check if email exists in profiles
+        const { data, error } = await sb
+          .from('profiles')
+          .select('email')
+          .eq('email', email)
+          .single();
+        
+        if (error || !data) {
+          errorEl.textContent = 'Email not found. Please check your email and try again.';
+          btn.disabled = false;
+          btn.textContent = 'Continue';
+          return;
+        }
+        
+        userEmail = email;
+        showStep(2);
+      } catch (err) {
+        errorEl.textContent = 'An error occurred. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+      }
+    });
+    
+    // Step 2: PopCode
+    $('popcodeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const popcode = $('popcode').value.trim();
+      const errorEl = $('popcodeError');
+      const btn = $('popcodeBtn');
+      
+      errorEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      
+      try {
+        // Verify PopCode
+        const { data, error } = await sb
+          .from('popcodes')
+          .select('code')
+          .eq('email', userEmail)
+          .eq('code', popcode)
+          .single();
+        
+        if (error || !data) {
+          errorEl.textContent = 'Invalid PopCode. Please check and try again.';
+          btn.disabled = false;
+          btn.textContent = 'Verify';
+          return;
+        }
+        
+        showStep(3);
+      } catch (err) {
+        errorEl.textContent = 'An error occurred. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+      }
+    });
+    
+    $('backToEmail').addEventListener('click', () => {
+      showStep(1);
+      $('popcode').value = '';
+      $('popcodeError').textContent = '';
+    });
+    
+    // Step 3: Reset Password
+    $('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPassword = $('newPassword').value;
+      const confirmPassword = $('confirmPassword').value;
+      const errorEl = $('passwordError');
+      const successEl = $('passwordSuccess');
+      const btn = $('passwordBtn');
+      
+      errorEl.textContent = '';
+      successEl.textContent = '';
+      
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match.';
+        return;
+      }
+      
+      if (newPassword.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = 'Resetting...';
+      
+      try {
+        // Reset password using Supabase admin API or through auth
+        // Since we can't directly reset password without admin rights, we'll need to use a different approach
+        // For now, we'll show a message that they need to contact IT admin
+        errorEl.textContent = 'Password reset requires admin assistance. Please contact your IT Admin.';
+        btn.disabled = false;
+        btn.textContent = 'Reset Password';
+      } catch (err) {
+        errorEl.textContent = 'An error occurred. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Reset Password';
+      }
+    });
+    
+    $('backToPopcode').addEventListener('click', () => {
+      showStep(2);
+      $('newPassword').value = '';
+      $('confirmPassword').value = '';
+      $('passwordError').textContent = '';
+      $('passwordSuccess').textContent = '';
+    });
+  </script>
+</body>
+</html>
