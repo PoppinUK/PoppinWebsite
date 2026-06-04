@@ -206,16 +206,24 @@
       <img src="../text.png" alt="Poppin" width="160" height="40" />
     </div>
 
-    <!-- Step 1: Email -->
+    <!-- Step 1: Email or Name -->
     <div id="step1" class="step active">
       <h1>Account Recovery</h1>
-      <p class="subtitle">Enter your email to begin password recovery</p>
+      <p class="subtitle">Enter your email or select your name to begin password recovery</p>
       
       <form id="emailForm">
         <div class="field">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="your.email@poppin.internal" required autocomplete="email" />
+          <input type="email" id="email" placeholder="your.email@poppin.internal" autocomplete="email" />
         </div>
+        
+        <div class="field">
+          <label for="nameSelect">Or select your name</label>
+          <select id="nameSelect" autocomplete="name">
+            <option value="" disabled selected>Loading names...</option>
+          </select>
+        </div>
+        
         <button type="submit" class="btn-primary" id="emailBtn">Continue</button>
         <p class="error" id="emailError" role="alert"></p>
       </form>
@@ -245,8 +253,25 @@
       <button type="button" class="back-link" id="backToEmail">Back</button>
     </div>
 
-    <!-- Step 3: Reset Password -->
+    <!-- Step 3: Real Email Address -->
     <div id="step3" class="step">
+      <h1>Where should we send the reset link?</h1>
+      <p class="subtitle">Since @poppin.internal isn't a real email, enter your personal email address</p>
+      
+      <form id="realEmailForm">
+        <div class="field">
+          <label for="realEmail">Your Email Address</label>
+          <input type="email" id="realEmail" placeholder="your.personal@email.com" required autocomplete="email" />
+        </div>
+        <button type="submit" class="btn-primary" id="realEmailBtn">Continue</button>
+        <p class="error" id="realEmailError" role="alert"></p>
+      </form>
+      
+      <button type="button" class="back-link" id="backToPopcode">Back</button>
+    </div>
+
+    <!-- Step 4: Reset Password -->
+    <div id="step4" class="step">
       <h1>Reset Password</h1>
       <p class="subtitle">Enter your new password</p>
       
@@ -264,15 +289,15 @@
         <p class="success" id="passwordSuccess" role="alert"></p>
       </form>
       
-      <button type="button" class="back-link" id="backToPopcode">Back</button>
+      <button type="button" class="back-link" id="backToRealEmail">Back</button>
     </div>
 
-    <!-- Step 4: Success -->
-    <div id="step4" class="step">
-      <h1>Password Reset Successful</h1>
-      <p class="subtitle">Your password has been updated. You can now sign in with your new password.</p>
+    <!-- Step 5: Success -->
+    <div id="step5" class="step">
+      <h1>Password Reset Email Sent</h1>
+      <p class="subtitle">Check your inbox to complete the password reset</p>
       
-      <button type="button" class="btn-primary" onclick="window.location.href='/internal/cash.html'">Sign In</button>
+      <button type="button" class="btn-primary" onclick="window.location.href='/internal/cash.html'">Back to Login</button>
     </div>
   </div>
 
@@ -283,6 +308,7 @@
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     let userEmail = '';
+    let userRealEmail = '';
     
     const $ = (id) => document.getElementById(id);
     
@@ -291,14 +317,63 @@
       $(`step${stepNum}`).classList.add('active');
     }
     
-    // Step 1: Email
+    function emailToDisplayName(email) {
+      if (!email) return "";
+      const lower = email.toLowerCase();
+      const match = lower.match(/^([^.]+)\.admin@poppin\.internal$/);
+      if (!match) return "";
+      const name = match[1];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    
+    // Load names from profiles
+    async function loadNames() {
+      try {
+        const { data, error } = await sb
+          .from('profiles')
+          .select('email')
+          .ilike('email', '%.admin@poppin.internal');
+        
+        if (error) throw error;
+        
+        const select = $('nameSelect');
+        select.innerHTML = '<option value="" disabled selected>Select your name</option>';
+        
+        data.forEach(profile => {
+          const displayName = emailToDisplayName(profile.email);
+          if (displayName) {
+            const option = document.createElement('option');
+            option.value = profile.email;
+            option.textContent = displayName;
+            select.appendChild(option);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load names:', err);
+      }
+    }
+    
+    loadNames();
+    
+    // Step 1: Email or Name
     $('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = $('email').value.trim();
+      const nameSelect = $('nameSelect');
+      const selectedEmail = nameSelect.value;
       const errorEl = $('emailError');
       const btn = $('emailBtn');
       
       errorEl.textContent = '';
+      
+      // Check if either email or name is provided
+      if (!email && !selectedEmail) {
+        errorEl.textContent = 'Please enter your email or select your name.';
+        return;
+      }
+      
+      const emailToUse = email || selectedEmail;
+      
       btn.disabled = true;
       btn.textContent = 'Checking...';
       
@@ -307,17 +382,17 @@
         const { data, error } = await sb
           .from('profiles')
           .select('email')
-          .eq('email', email)
+          .eq('email', emailToUse)
           .single();
         
         if (error || !data) {
-          errorEl.textContent = 'Email not found. Please check your email and try again.';
+          errorEl.textContent = 'Account not found. Please check and try again.';
           btn.disabled = false;
           btn.textContent = 'Continue';
           return;
         }
         
-        userEmail = email;
+        userEmail = emailToUse;
         showStep(2);
       } catch (err) {
         errorEl.textContent = 'An error occurred. Please try again.';
@@ -361,13 +436,40 @@
       }
     });
     
+    // Step 3: Real Email
+    $('realEmailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const realEmail = $('realEmail').value.trim();
+      const errorEl = $('realEmailError');
+      const btn = $('realEmailBtn');
+      
+      errorEl.textContent = '';
+      
+      if (!realEmail) {
+        errorEl.textContent = 'Please enter your email address.';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = 'Continuing...';
+      
+      userRealEmail = realEmail;
+      showStep(4);
+    });
+    
     $('backToEmail').addEventListener('click', () => {
       showStep(1);
       $('popcode').value = '';
       $('popcodeError').textContent = '';
     });
     
-    // Step 3: Reset Password
+    $('backToPopcode').addEventListener('click', () => {
+      showStep(2);
+      $('realEmail').value = '';
+      $('realEmailError').textContent = '';
+    });
+    
+    // Step 4: Reset Password
     $('passwordForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const newPassword = $('newPassword').value;
@@ -393,12 +495,26 @@
       btn.textContent = 'Resetting...';
       
       try {
-        // Reset password using Supabase admin API or through auth
-        // Since we can't directly reset password without admin rights, we'll need to use a different approach
-        // For now, we'll show a message that they need to contact IT admin
-        errorEl.textContent = 'Password reset requires admin assistance. Please contact your IT Admin.';
-        btn.disabled = false;
-        btn.textContent = 'Reset Password';
+        // Send password reset email to the user's real email address
+        const { error } = await sb.auth.resetPasswordForEmail(userRealEmail, {
+          redirectTo: `${window.location.origin}/internal/cash.html`,
+        });
+        
+        if (error) {
+          errorEl.textContent = error.message || 'Failed to send password reset email.';
+          btn.disabled = false;
+          btn.textContent = 'Reset Password';
+          return;
+        }
+        
+        // Show success message
+        successEl.textContent = 'Password reset email sent! Check your inbox to complete the reset.';
+        btn.textContent = 'Email Sent';
+        
+        // After a delay, show the final success step
+        setTimeout(() => {
+          showStep(5);
+        }, 3000);
       } catch (err) {
         errorEl.textContent = 'An error occurred. Please try again.';
         btn.disabled = false;
@@ -406,8 +522,8 @@
       }
     });
     
-    $('backToPopcode').addEventListener('click', () => {
-      showStep(2);
+    $('backToRealEmail').addEventListener('click', () => {
+      showStep(3);
       $('newPassword').value = '';
       $('confirmPassword').value = '';
       $('passwordError').textContent = '';
