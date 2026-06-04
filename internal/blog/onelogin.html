@@ -78,6 +78,15 @@
       box-shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
     }
 
+    .article-image {
+      width: 500px;
+      height: 500px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 2rem auto;
+      border-radius: var(--radius);
+    }
+
     .content h2 {
       font-size: 1.5rem;
       font-weight: 700;
@@ -127,6 +136,12 @@
         padding: 1.5rem;
       }
 
+      .article-image {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+
       h1 {
         font-size: 1.5rem;
       }
@@ -148,6 +163,8 @@
     </header>
 
     <article class="content">
+      <img src="/internal/blog/One Login.png" alt="Poppin One Login" class="article-image" />
+      
       <p>We're excited to announce <strong>Poppin One Login</strong> — a unified authentication system that will allow Poppin Staff to sign in once and access all Poppin services seamlessly.</p>
 
       <h2>What is Poppin One Login?</h2>
