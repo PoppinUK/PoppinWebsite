@@ -1436,7 +1436,7 @@
 
             <div class="field">
               <label for="displayName">Display Name</label>
-              <input type="text" id="displayName" placeholder="Enter your display name" />
+              <input type="text" id="displayName" placeholder="Enter your display name" disabled />
               <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">This name will be visible publicly on the login screen. Speak to your IT admin if you wish to change it.</p>
             </div>
           </div>
@@ -2720,8 +2720,8 @@
       resetActiveTab();
     }
 
-    function openAccountSettingsModal() {
-      const user = sb.auth.user;
+    async function openAccountSettingsModal() {
+      const { data: { user } } = await sb.auth.getUser();
       if (user) {
         $("accountEmail").value = user.email || "";
         $("displayName").value = emailToDisplayName(user.email) || "";
