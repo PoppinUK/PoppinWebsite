@@ -481,16 +481,13 @@
       btn.textContent = 'Sending OTP...';
       
       try {
-        // Send OTP using Supabase's signInWithOtp
-        const { error } = await sb.auth.signInWithOtp({
-          email: realEmail,
-          options: {
-            emailRedirectTo: `${window.location.origin}/internal/accountrecovery.html`,
-          },
+        // Send password reset email with OTP using Supabase's resetPasswordForEmail
+        const { error } = await sb.auth.resetPasswordForEmail(realEmail, {
+          redirectTo: `${window.location.origin}/internal/accountrecovery.html`,
         });
         
         if (error) {
-          errorEl.textContent = error.message || 'Failed to send OTP.';
+          errorEl.textContent = error.message || 'Failed to send password reset email.';
           btn.disabled = false;
           btn.textContent = 'Send OTP';
           return;
@@ -547,15 +544,12 @@
       btn.textContent = 'Sending...';
       
       try {
-        const { error } = await sb.auth.signInWithOtp({
-          email: userRealEmail,
-          options: {
-            emailRedirectTo: `${window.location.origin}/internal/accountrecovery.html`,
-          },
+        const { error } = await sb.auth.resetPasswordForEmail(userRealEmail, {
+          redirectTo: `${window.location.origin}/internal/accountrecovery.html`,
         });
         
         if (error) {
-          $('otpError').textContent = error.message || 'Failed to resend OTP.';
+          $('otpError').textContent = error.message || 'Failed to resend password reset email.';
           btn.disabled = false;
           btn.textContent = 'Resend OTP';
           return;
@@ -588,7 +582,7 @@
       btn.textContent = 'Verifying...';
       
       try {
-        // Verify OTP by attempting to verify the OTP
+        // Verify OTP for password reset
         const { data, error } = await sb.auth.verifyOtp({
           email: userRealEmail,
           token: otp,
