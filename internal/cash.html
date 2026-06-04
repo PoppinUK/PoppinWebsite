@@ -1214,6 +1214,145 @@
 
     .btn-save:hover { background: var(--navy-dark); }
     .btn-save:disabled { opacity: 0.55; cursor: wait; }
+
+    /* Mobile responsiveness improvements */
+    @media (max-width: 768px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      .app-header-left {
+        width: 100%;
+      }
+
+      .app-header-right {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .header-user {
+        flex: 1;
+      }
+
+      .app-tabs {
+        padding: 0 1rem;
+      }
+
+      .app-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+      }
+
+      .app-layout {
+        padding: 1rem;
+        padding-bottom: 4rem;
+      }
+
+      .tables-row {
+        grid-template-columns: 1fr;
+      }
+
+      .sheet-table {
+        font-size: 0.75rem;
+      }
+
+      .sheet-table thead th {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.6875rem;
+      }
+
+      .cell-input {
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .btn-remove-row {
+        width: 24px;
+        height: 24px;
+        font-size: 1rem;
+      }
+
+      .table-actions {
+        flex-direction: column;
+      }
+
+      .btn-add {
+        width: 100%;
+      }
+
+      .settings-dialog {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .settings-sidebar {
+        width: 160px;
+      }
+
+      .settings-nav-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+      }
+
+      .settings-content {
+        padding: 1rem;
+      }
+
+      .export-dialog {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .toast-container {
+        left: 0.5rem;
+        right: 0.5rem;
+        width: auto;
+      }
+
+      .status-bar {
+        font-size: 0.6875rem;
+        padding: 0.35rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-header h1 {
+        font-size: 0.8125rem;
+      }
+
+      .app-header-right {
+        gap: 0.5rem;
+      }
+
+      .btn-ghost,
+      .btn-export {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .header-user {
+        font-size: 0.75rem;
+      }
+
+      .settings-sidebar {
+        width: 140px;
+      }
+
+      .settings-nav-item i {
+        font-size: 0.8125rem;
+      }
+
+      .field input,
+      .field select {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.875rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1244,8 +1383,9 @@
         <p class="login-error" id="loginError" role="alert"></p>
         
         <div id="loginPasskeySection" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
-          <button type="button" class="btn-primary" id="signInWithPasskeyBtn" style="background: var(--navy);">
-            <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
+          <p style="font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 0.75rem;">Other login options</p>
+          <button type="button" class="btn-ghost" id="signInWithPasskeyBtn" style="width: 100%; background: #fff; border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i class="fa-solid fa-fingerprint"></i>
             Sign in with passkey
           </button>
         </div>
@@ -1453,11 +1593,13 @@
 
             <div class="field">
               <label for="popCode">PopCode</label>
-              <input type="text" id="popCode" disabled />
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="popCode" disabled style="flex: 1;" />
+                <button type="button" class="btn-ghost" id="regeneratePopCodeBtn">
+                  <i class="fa-solid fa-rotate"></i> Regenerate
+                </button>
+              </div>
               <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">A recovery and account management private key that can be used to verify your identity. Keep this safe and secure.</p>
-              <button type="button" class="btn-ghost" id="regeneratePopCodeBtn" style="margin-top: 0.5rem;">
-                <i class="fa-solid fa-rotate"></i> Regenerate
-              </button>
             </div>
           </div>
 
