@@ -211,6 +211,17 @@
       min-height: 1.2rem;
     }
 
+    .warning-box {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: #92400e;
+      line-height: 1.4;
+    }
+
     /* App shell */
     .app-header {
       display: flex;
@@ -1445,6 +1456,10 @@
             <h3>Security</h3>
             <p>Change your password to keep your account secure</p>
             
+            <div class="warning-box">
+              If you think your login information has been compromised, please contact your IT admin as soon as possible.
+            </div>
+            
             <div class="field">
               <label for="currentPassword">Current password</label>
               <input type="password" id="currentPassword" autocomplete="current-password" />
@@ -1464,6 +1479,10 @@
           <div id="passkeysPanel" class="settings-panel" role="tabpanel" aria-labelledby="passkeysTab">
             <h3>Passkeys <span class="beta-badge">Beta</span></h3>
             <p>Add an extra layer of security with passkeys.</p>
+            
+            <div class="warning-box">
+              Passkeys are a stronger alternative to passwords, which cannot be leaked or stolen. Please note this is an experimental, unsupported feature that may be removed without notice; continue to remember your password.
+            </div>
             
             <div id="passkeySection">
               <button type="button" class="btn-primary" id="registerPasskeyBtn" style="margin-top: 0;">
