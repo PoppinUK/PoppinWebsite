@@ -549,13 +549,27 @@
       
       try {
         // Verify PopCode
+        console.log('Verifying PopCode for email:', userEmail);
+        console.log('PopCode entered:', popcode);
+        
         const { data, error } = await sb
           .from('popcodes')
           .select('code')
           .eq('email', userEmail)
           .eq('code', popcode);
         
-        if (error || !data || data.length === 0) {
+        console.log('Query result:', data, error);
+        
+        if (error) {
+          console.error('Database error:', error);
+          errorEl.textContent = 'Database error: ' + error.message;
+          btn.disabled = false;
+          btn.textContent = 'Verify';
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          console.log('No PopCode found for this email');
           errorEl.textContent = 'Invalid PopCode. Please check and try again.';
           btn.disabled = false;
           btn.textContent = 'Verify';
@@ -564,6 +578,7 @@
         
         showStep(3);
       } catch (err) {
+        console.error('Exception:', err);
         errorEl.textContent = 'An error occurred. Please try again.';
         btn.disabled = false;
         btn.textContent = 'Verify';
