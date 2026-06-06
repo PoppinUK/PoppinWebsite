@@ -3,18 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Poppin — Account Recovery</title>
+  <title>Poppin — Internal Fund Sheet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      --pop-red: #ff2e63;
+      --pop-yellow: #ffd93d;
       --navy: #1f4e79;
       --navy-dark: #163a5c;
+      --sheet-header: #1f4e79;
+      --row-a: #e8f2fa;
+      --row-b: #ffffff;
+      --grid: #9eb4cc;
       --border: #d4e0ec;
       --text: #1a2332;
       --muted: #64748b;
@@ -22,6 +30,7 @@
       --page: #f1f5f9;
       --danger: #dc2626;
       --success: #059669;
+      --shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
       --radius: 12px;
     }
 
@@ -31,49 +40,70 @@
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Logo — never stretch */
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      line-height: 0;
+    }
+
+    .logo-wrap img {
+      display: block;
+      height: 32px;
+      width: auto;
+      max-width: 140px;
+      object-fit: contain;
+      object-position: left center;
+    }
+
+    .login-wrap .logo-wrap img { height: 40px; max-width: 160px; }
+
+    /* Login */
+    .login-wrap {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 217, 61, 0.35), transparent),
+        var(--page);
     }
 
-    .recovery-card {
+    .login-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 400px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 2.25rem;
-      box-shadow: 0 4px 24px rgba(31, 78, 121, 0.08);
+      box-shadow: var(--shadow);
     }
 
-    .logo-wrap {
+    .login-card .logo-wrap {
       display: flex;
       justify-content: center;
       width: 100%;
       margin-bottom: 1.5rem;
     }
 
-    .logo-wrap img {
-      display: block;
-      height: 40px;
-      max-width: 160px;
-      object-fit: contain;
-    }
-
-    h1 {
+    .login-card h1 {
       font-size: 1.25rem;
       font-weight: 700;
       text-align: center;
       letter-spacing: -0.02em;
-      margin-bottom: 0.35rem;
     }
 
-    .subtitle {
+    .login-card .subtitle {
       font-size: 0.875rem;
       color: var(--muted);
       text-align: center;
-      margin-bottom: 1.75rem;
+      margin: 0.35rem 0 1.75rem;
     }
 
     .field { margin-bottom: 1.1rem; }
@@ -104,6 +134,57 @@
       box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.12);
     }
 
+    .field input:disabled {
+      background: #f8fafc;
+      color: var(--muted);
+    }
+
+    .field select {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field select:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.12);
+    }
+
+    .field select option:disabled {
+      color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .login-link {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .login-link:hover { color: var(--navy); }
+
+    .header-user {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
     .btn-primary {
       width: 100%;
       margin-top: 0.25rem;
@@ -122,27 +203,7 @@
     .btn-primary:hover { background: var(--navy-dark); }
     .btn-primary:disabled { opacity: 0.55; cursor: wait; }
 
-    .btn-secondary {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.9375rem;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .btn-secondary:hover {
-      background: #f8fafc;
-      color: var(--text);
-    }
-
-    .error {
+    .login-error {
       margin-top: 0.85rem;
       font-size: 0.8125rem;
       color: var(--danger);
@@ -150,39 +211,7 @@
       min-height: 1.2rem;
     }
 
-    .success {
-      margin-top: 0.85rem;
-      font-size: 0.8125rem;
-      color: var(--success);
-      text-align: center;
-      min-height: 1.2rem;
-    }
-
-    .hidden { display: none !important; }
-
-    .step {
-      display: none;
-    }
-
-    .step.active { display: block; }
-
-    .back-link {
-      display: block;
-      margin-top: 1rem;
-      font-size: 0.8125rem;
-      color: var(--muted);
-      text-align: center;
-      background: none;
-      border: none;
-      font-family: inherit;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .back-link:hover { color: var(--navy); }
-
-    .info-box {
+    .warning-box {
       margin: 1rem 0;
       padding: 0.85rem 1rem;
       background: #fef3c7;
@@ -193,161 +222,1508 @@
       line-height: 1.4;
     }
 
+    /* App shell */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    .app-header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+
+    .app-header h1 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .app-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .app-tab {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .app-tab:hover { color: var(--text); }
+
+    .app-tab.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    .tab-picker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 360px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .tab-picker h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tab-picker p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      max-width: 360px;
+    }
+
+    .tab-picker-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-picker-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 140px;
+      padding: 1.35rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+
+    .tab-picker-btn:hover {
+      border-color: var(--navy);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(31, 78, 121, 0.12);
+    }
+
+    .tab-picker-btn i {
+      font-size: 1.5rem;
+      color: var(--navy);
+    }
+
+    .tab-picker-btn span {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .charts-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .charts-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 800px) {
+      .charts-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 420px) {
+      .charts-summary { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.375rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-card .stat-value.positive { color: var(--success); }
+    .stat-card .stat-value.negative { color: var(--danger); }
+    .stat-card .stat-value.incoming { color: var(--success); }
+    .stat-card .stat-value.outgoing { color: var(--danger); }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 800px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-card.wide { grid-column: 1 / -1; }
+
+    .chart-card h3 {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+
+    .chart-wrap.tall { height: 300px; }
+
+    .btn-ghost {
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-ghost:hover {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    .app-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      padding-bottom: 3.5rem;
+    }
+
+    .main-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .tables-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 700px) {
+      .tables-row { grid-template-columns: 1fr; }
+    }
+
+    .table-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 0.875rem;
+    }
+
+    .sheet-table caption {
+      caption-side: top;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.65rem;
+      background: var(--sheet-header);
+      color: #fff;
+    }
+
+    .sheet-table thead th {
+      background: var(--sheet-header);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid var(--grid);
+      text-align: left;
+    }
+
+    .sheet-table thead th.col-amount { width: 32%; }
+    .sheet-table thead th.col-remove {
+      width: 40px;
+      padding: 0;
+      text-align: center;
+    }
+
+    .sheet-table tbody td {
+      border: 1px solid var(--grid);
+      padding: 0;
+      height: 36px;
+      vertical-align: middle;
+    }
+
+    .sheet-table tbody tr:nth-child(odd) td { background: var(--row-a); }
+    .sheet-table tbody tr:nth-child(even) td { background: var(--row-b); }
+
+    .cell-input {
+      width: 100%;
+      height: 36px;
+      border: none;
+      background: transparent;
+      padding: 0 0.65rem;
+      font: inherit;
+      color: inherit;
+      outline: none;
+    }
+
+    .cell-input:focus {
+      background: #fffbeb;
+      box-shadow: inset 0 0 0 2px var(--pop-yellow);
+    }
+
+    .cell-input.amount { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .table-actions {
+      padding: 0.65rem 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-add {
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 0.4rem 0.75rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--navy);
+      transition: background 0.15s;
+    }
+
+    .btn-add:hover { background: var(--row-a); }
+
+    td.cell-remove {
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+      width: 40px;
+    }
+
+    .btn-remove-row {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 1.125rem;
+      line-height: 1;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-remove-row:hover {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .btn-remove-row:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-remove-row:disabled:hover {
+      background: transparent;
+      color: #94a3b8;
+    }
+
+    .total-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .total-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .total-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .total-card .value.negative { color: var(--danger); }
+    .total-card .value.positive { color: var(--success); }
+
+    /* Audit log */
+    .audit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-view-audit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--navy);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn-view-audit:hover {
+      background: var(--row-a);
+      border-color: var(--grid);
+    }
+
+    .btn-view-audit i {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    .audit-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      min-width: 1.25rem;
+      text-align: center;
+    }
+
+    .audit-modal-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.65rem 1rem 1rem;
+      min-height: 200px;
+      max-height: min(60vh, 520px);
+    }
+
+    .audit-empty {
+      padding: 2rem 1rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .audit-item {
+      display: flex;
+      gap: 0.65rem;
+      padding: 0.65rem 0.55rem;
+      border-radius: 8px;
+      transition: background 0.12s;
+    }
+
+    .audit-item:hover { background: #f8fafc; }
+
+    .audit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .audit-dot.created { background: var(--success); }
+    .audit-dot.updated { background: var(--navy); }
+    .audit-dot.deleted { background: var(--danger); }
+
+    .audit-item.audit-deleted .audit-action {
+      color: var(--danger);
+    }
+
+    .audit-body { flex: 1; min-width: 0; }
+
+    .audit-action {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .audit-action .tag {
+      display: inline-block;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+    }
+
+    .tag.incoming { background: #d1fae5; color: #065f46; }
+    .tag.outgoing { background: #fee2e2; color: #991b1b; }
+
+    .audit-detail {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .audit-time {
+      font-size: 0.6875rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }
+
+    .audit-user {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 0.2rem;
+    }
+
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.75rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      z-index: 50;
+    }
+
+    .status-bar.saving { color: var(--navy); }
+    .status-bar.error { color: var(--danger); }
+
+    .toast-container {
+      position: fixed;
+      bottom: 2.75rem;
+      left: 1rem;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      width: min(420px, calc(100vw - 2rem));
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+      pointer-events: auto;
+      transform: translateY(1.25rem);
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.hide {
+      transform: translateY(0.75rem);
+      opacity: 0;
+    }
+
+    .toast-info {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .toast-destructive {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .toast-error {
+      background: #991b1b;
+      color: #fff;
+    }
+
+    .toast-icon {
+      flex-shrink: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+    }
+
+    .toast-body {
+      flex: 1;
+      min-width: 0;
+      padding-top: 0.1rem;
+    }
+
+    .toast-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .toast-description {
+      font-size: 0.875rem;
+      line-height: 1.45;
+      margin-top: 0.35rem;
+      opacity: 0.92;
+    }
+
+    .toast-action {
+      flex-shrink: 0;
+      align-self: center;
+      padding: 0.55rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      font-family: inherit;
+      color: #dc2626;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      white-space: nowrap;
+    }
+
+    .toast-action:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    td.cell-remove-empty {
+      background: inherit !important;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(241, 245, 249, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .btn-export {
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-export:hover { background: var(--navy-dark); }
+
+    .export-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+    }
+
+    .export-dialog {
+      width: 100%;
+      max-width: 920px;
+      max-height: 90vh;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .export-dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .export-dialog-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .export-dialog-header p {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .btn-close-modal {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: var(--muted);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+
+    .btn-close-modal:hover { background: #e2e8f0; color: var(--text); }
+
+    .export-preview-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 1.25rem;
+      background: #f8fafc;
+    }
+
+    .export-preview-inner {
+      background: #fff;
+      border: 1px solid var(--grid);
+      border-radius: 6px;
+      overflow: auto;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    .preview-excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      table-layout: fixed;
+    }
+
+    .preview-excel-table th,
+    .preview-excel-table td {
+      border: 1px solid var(--grid);
+      padding: 0.4rem 0.55rem;
+      text-align: left;
+    }
+
+    .preview-excel-table .gap-col {
+      width: 24px;
+      min-width: 24px;
+      background: #f1f5f9;
+      border-top: none;
+      border-bottom: none;
+    }
+
+    .preview-excel-table .section-head {
+      background: var(--sheet-header);
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.75rem;
+    }
+
+    .preview-excel-table .col-head {
+      background: var(--sheet-header);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.6875rem;
+    }
+
+    .preview-excel-table tbody tr:nth-child(odd) td:not(.gap-col) { background: var(--row-a); }
+    .preview-excel-table tbody tr:nth-child(even) td:not(.gap-col) { background: var(--row-b); }
+
+    .preview-excel-table .amount-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .preview-excel-table .total-row td {
+      border-top: 2px solid var(--grid);
+      font-weight: 700;
+      background: #fff !important;
+    }
+
+    .preview-excel-table .total-row .amount-cell.negative { color: var(--danger); }
+    .preview-excel-table .total-row .amount-cell.positive { color: var(--success); }
+
+    .export-dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.65rem;
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .btn-download {
+      padding: 0.55rem 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-download:hover { background: #047857; }
+
+    .passkey-item {
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .passkey-item:hover {
+      border-color: var(--navy);
+      box-shadow: 0 2px 8px rgba(31, 78, 121, 0.08);
+    }
+
+    .passkey-rename-btn:hover {
+      background: var(--row-a);
+      color: var(--navy);
+    }
+
+    .passkey-delete-btn:hover {
+      background: #fee2e2;
+    }
+
+    .beta-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.45rem;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      margin-left: 0.5rem;
+    }
+
+    /* Settings modal with side menu */
+    .settings-dialog {
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .settings-sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 1rem 0;
+      background: #f8fafc;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 0.6rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      border-left: 3px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .settings-nav-item:hover {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .settings-nav-item.active {
+      background: #e8f2fa;
+      color: var(--navy);
+      border-left-color: var(--navy);
+    }
+
+    .settings-nav-item i {
+      font-size: 0.9rem;
+      width: 18px;
+      text-align: center;
+    }
+
+    .settings-content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .settings-panel {
+      display: none;
+    }
+
+    .settings-panel.active {
+      display: block;
+    }
+
+    .settings-panel h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--navy);
+    }
+
+    .settings-panel p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-save {
+      padding: 0.55rem 1.1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-save:hover { background: var(--navy-dark); }
+    .btn-save:disabled { opacity: 0.55; cursor: wait; }
+
+    /* Mobile responsiveness improvements */
+    @media (max-width: 768px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      .app-header-left {
+        width: 100%;
+      }
+
+      .app-header-right {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .header-user {
+        flex: 1;
+      }
+
+      .app-tabs {
+        padding: 0 1rem;
+      }
+
+      .app-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+      }
+
+      .app-layout {
+        padding: 1rem;
+        padding-bottom: 4rem;
+      }
+
+      .tables-row {
+        grid-template-columns: 1fr;
+      }
+
+      .sheet-table {
+        font-size: 0.75rem;
+      }
+
+      .sheet-table thead th {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.6875rem;
+      }
+
+      .cell-input {
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .btn-remove-row {
+        width: 24px;
+        height: 24px;
+        font-size: 1rem;
+      }
+
+      .table-actions {
+        flex-direction: column;
+      }
+
+      .btn-add {
+        width: 100%;
+      }
+
+      .settings-dialog {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .settings-sidebar {
+        width: 160px;
+      }
+
+      .settings-nav-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+      }
+
+      .settings-content {
+        padding: 1rem;
+      }
+
+      .export-dialog {
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .toast-container {
+        left: 0.5rem;
+        right: 0.5rem;
+        width: auto;
+      }
+
+      .status-bar {
+        font-size: 0.6875rem;
+        padding: 0.35rem 1rem;
+      }
+    }
+
     @media (max-width: 480px) {
-      .recovery-card {
-        padding: 1.5rem;
+      .app-header h1 {
+        font-size: 0.8125rem;
+      }
+
+      .app-header-right {
+        gap: 0.5rem;
+      }
+
+      .btn-ghost,
+      .btn-export {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .header-user {
+        font-size: 0.75rem;
+      }
+
+      .settings-sidebar {
+        width: 140px;
+      }
+
+      .settings-nav-item i {
+        font-size: 0.8125rem;
+      }
+
+      .field input,
+      .field select {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.875rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="recovery-card">
-    <div class="logo-wrap">
-      <img src="../text.png" alt="Poppin" width="160" height="40" />
-    </div>
 
-    <!-- Step 1: Email or Name -->
-    <div id="step1" class="step active">
-      <h1>Account Recovery</h1>
-      <p class="subtitle">Enter your email or select your name to begin password recovery</p>
-      
-      <div class="info-box" style="background: #fef3c7; border-color: #fcd34d; color: #92400e;">
-        <p style="margin-bottom: 0;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 0.5rem;"></i><strong>Notice:</strong> We are aware that once you input a new password, it fails to update it. We are working hard to fix this issue, and we thank you for your patience.</p>
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">Loading fund sheet…</div>
+
+  <section id="loginView" class="login-wrap">
+    <div class="login-card">
+      <div class="logo-wrap">
+        <img src="../text.png" alt="Poppin" width="160" height="40" />
       </div>
-      
-      <form id="emailForm">
+      <h1>Internal Fund Sheet</h1>
+      <p class="subtitle">Staff access — view and manage company funds</p>
+      <form id="loginForm">
         <div class="field">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="your.email@poppin.internal" autocomplete="email" />
-        </div>
-        
-        <div class="field">
-          <label for="nameSelect">Or select your name</label>
-          <select id="nameSelect" autocomplete="name">
-            <option value="" disabled selected>Loading names...</option>
+          <label for="userSelect">Who are you?</label>
+          <select id="userSelect" required autocomplete="username">
+            <option value="" disabled selected>Loading users...</option>
           </select>
         </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
+        <p class="login-error" id="loginError" role="alert"></p>
+        <a href="/internal/accountrecovery.html" class="login-link">Forgot password?</a>
+        <a href="/internal/privacy.html" class="login-link">Privacy Policy</a>
         
-        <button type="submit" class="btn-primary" id="emailBtn">Continue</button>
-        <p class="error" id="emailError" role="alert"></p>
-      </form>
-      
-      <button type="button" class="back-link" onclick="window.location.href='/internal/cash.html'">Back to login</button>
-    </div>
-
-    <!-- Step 2: PopCode -->
-    <div id="step2" class="step">
-      <h1>Verify Your Identity</h1>
-      <p class="subtitle">Enter your PopCode to continue</p>
-      
-      <form id="popcodeForm">
-        <div class="field">
-          <label for="popcode">PopCode</label>
-          <input type="text" id="popcode" placeholder="Enter your 15-character PopCode" required autocomplete="off" maxlength="15" />
+        <div id="loginPasskeySection" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+          <p style="font-size: 0.875rem; color: var(--muted); text-align: center; margin-bottom: 0.75rem; font-weight: 600;">Other login options</p>
+          <button type="button" class="btn-ghost" id="signInWithPasskeyBtn" style="width: 100%; background: #fff; border: 1px solid var(--border); color: var(--text); display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; font-size: 0.9375rem; font-weight: 600;">
+            <i class="fa-solid fa-fingerprint" style="font-size: 1.125rem;"></i>
+            Sign in with passkey
+          </button>
+          
+          <div style="margin-top: 0.75rem; padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; text-align: center;">
+            <p style="font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 0.35rem;">Poppin One Login</p>
+            <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem;">Coming Soon</p>
+            <a href="/internal/blog/onelogin.html" style="font-size: 0.8125rem; color: var(--navy); text-decoration: none; font-weight: 500;">Learn more</a>
+          </div>
         </div>
-        <button type="submit" class="btn-primary" id="popcodeBtn">Verify</button>
-        <p class="error" id="popcodeError" role="alert"></p>
       </form>
-      
-      <div class="info-box">
-        <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i>
-        Forgot your PopCode? Contact your IT Admin.
+    </div>
+  </section>
+
+  <div id="appView" class="hidden">
+    <header class="app-header">
+      <div class="app-header-left">
+        <div class="logo-wrap">
+          <img src="../text.png" alt="Poppin" width="140" height="32" />
+        </div>
+        <h1>Internal Fund Sheet</h1>
       </div>
-      
-      <button type="button" class="back-link" id="backToEmail">Back</button>
-    </div>
-
-    <!-- Step 3: Real Email Address -->
-    <div id="step3" class="step">
-      <h1>Where should we send the OTP?</h1>
-      <p class="subtitle">Since @poppin.internal isn't a real email, enter your personal email address</p>
-      
-      <form id="realEmailForm">
-        <div class="field">
-          <label for="realEmail">Your Email Address</label>
-          <input type="email" id="realEmail" placeholder="your.personal@email.com" required autocomplete="email" />
-        </div>
-        <button type="submit" class="btn-primary" id="realEmailBtn">Send OTP</button>
-        <p class="error" id="realEmailError" role="alert"></p>
-      </form>
-      
-      <button type="button" class="back-link" id="backToPopcode">Back</button>
-    </div>
-
-    <!-- Step 4: Enter OTP -->
-    <div id="step4" class="step">
-      <h1>Enter OTP</h1>
-      <p class="subtitle">Enter the 8-digit code sent to your email</p>
-      
-      <div class="info-box">
-        <p style="margin-bottom: 0.5rem;"><strong>Important:</strong></p>
-        <p style="margin-bottom: 0.5rem;">• The email will come from "Supabase Auth"</p>
-        <p style="margin-bottom: 0.5rem;">• It may take a few minutes to arrive</p>
-        <p style="margin-bottom: 0;">• Check your junk and spam folders</p>
+      <div class="app-header-right">
+        <span class="header-user" id="headerUserName"></span>
+        <button type="button" class="btn-ghost" id="accountSettingsBtn">Account settings</button>
+        <button type="button" class="btn-export" id="exportExcelBtn">Export Excel</button>
+        <button type="button" class="btn-ghost" id="signOutBtn">Sign out</button>
       </div>
-      
-      <form id="otpForm">
-        <div class="field">
-          <label for="otp">OTP Code</label>
-          <input type="text" id="otp" placeholder="12345678" required autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" />
+    </header>
+
+    <nav class="app-tabs" role="tablist" aria-label="Fund sheet views">
+      <button type="button" class="app-tab" id="tabSheet" role="tab" aria-selected="false" aria-controls="sheetPanel">Sheet</button>
+      <button type="button" class="app-tab" id="tabCharts" role="tab" aria-selected="false" aria-controls="chartsPanel">Charts</button>
+    </nav>
+
+    <div class="app-layout">
+      <section id="tabPicker" class="tab-picker">
+        <h2>Choose a view</h2>
+        <p>Select Fund Sheet to edit the fund sheet, or Charts to explore analytics.</p>
+        <div class="tab-picker-actions">
+          <button type="button" class="tab-picker-btn" data-tab="sheet">
+            <i class="fa-solid fa-table" aria-hidden="true"></i>
+            <span>Fund Sheet</span>
+          </button>
+          <button type="button" class="tab-picker-btn" data-tab="charts">
+            <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+            <span>Charts</span>
+          </button>
         </div>
-        <button type="submit" class="btn-primary" id="otpBtn">Verify OTP</button>
-        <button type="button" class="btn-secondary" id="resendOtpBtn" disabled>Resend OTP (2:00)</button>
-        <p class="error" id="otpError" role="alert"></p>
-      </form>
-      
-      <button type="button" class="back-link" id="backToRealEmail">Back</button>
+      </section>
+
+      <main id="sheetPanel" class="main-panel hidden" role="tabpanel" aria-labelledby="tabSheet">
+        <div class="tables-row">
+          <div class="table-card">
+            <table class="sheet-table" id="outgoingTable" aria-label="Outgoing funds">
+              <caption>Outgoing</caption>
+              <thead>
+                <tr>
+                  <th class="col-amount">Amount £</th>
+                  <th>Description</th>
+                  <th class="col-remove" aria-label="Remove row"></th>
+                </tr>
+              </thead>
+              <tbody id="outgoingBody"></tbody>
+            </table>
+            <div class="table-actions">
+              <button type="button" class="btn-add" data-direction="outgoing">+ Add row</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <table class="sheet-table" id="incomingTable" aria-label="Incoming funds">
+              <caption>Incoming</caption>
+              <thead>
+                <tr>
+                  <th class="col-amount">Amount £</th>
+                  <th>Description</th>
+                  <th class="col-remove" aria-label="Remove row"></th>
+                </tr>
+              </thead>
+              <tbody id="incomingBody"></tbody>
+            </table>
+            <div class="table-actions">
+              <button type="button" class="btn-add" data-direction="incoming">+ Add row</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="total-card">
+          <div class="label">Net balance</div>
+          <div class="value" id="totalValue">£0.00</div>
+        </div>
+
+        <div class="audit-card">
+          <button type="button" class="btn-view-audit" id="viewAuditBtn">
+            <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+            View audit log
+            <span class="audit-badge" id="auditCount">0</span>
+          </button>
+        </div>
+      </main>
+
+      <section id="chartsPanel" class="charts-panel hidden" role="tabpanel" aria-labelledby="tabCharts">
+        <div class="charts-summary">
+          <div class="stat-card">
+            <div class="stat-label">Total incoming</div>
+            <div class="stat-value incoming" id="statIncoming">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total outgoing</div>
+            <div class="stat-value outgoing" id="statOutgoing">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Net balance</div>
+            <div class="stat-value" id="statNet">£0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active entries</div>
+            <div class="stat-value" id="statCount">0</div>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Incoming vs outgoing</h3>
+            <div class="chart-wrap"><canvas id="chartFlowBar"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Fund split</h3>
+            <div class="chart-wrap"><canvas id="chartSplitDoughnut"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <h3>Top entries by amount</h3>
+            <div class="chart-wrap tall"><canvas id="chartTopEntries"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Activity by month</h3>
+            <div class="chart-wrap"><canvas id="chartActivityLine"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3>Entries by user</h3>
+            <div class="chart-wrap"><canvas id="chartByUser"></canvas></div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- Step 5: Reset Password -->
-    <div id="step5" class="step">
-      <h1>Reset Password</h1>
-      <p class="subtitle">Enter your new password</p>
-      
-      <form id="passwordForm">
-        <div class="field">
-          <label for="newPassword">New Password</label>
-          <input type="password" id="newPassword" placeholder="New password" required autocomplete="new-password" minlength="8" />
-        </div>
-        <div class="field">
-          <label for="confirmPassword">Confirm New Password</label>
-          <input type="password" id="confirmPassword" placeholder="Confirm new password" required autocomplete="new-password" minlength="8" />
-        </div>
-        <button type="submit" class="btn-primary" id="passwordBtn">Reset Password</button>
-        <p class="error" id="passwordError" role="alert"></p>
-        <p class="success" id="passwordSuccess" role="alert"></p>
-      </form>
-      
-      <button type="button" class="back-link" id="backToOtp">Back</button>
-    </div>
+    <footer class="status-bar" id="statusBar">
+      <span id="statusText">Ready</span>
+      <span id="statusUser"></span>
+    </footer>
+  </div>
 
-    <!-- Step 6: Success -->
-    <div id="step6" class="step">
-      <h1>Password Reset Successful</h1>
-      <p class="subtitle">Your password has been updated. You can now sign in with your new password.</p>
-      
-      <button type="button" class="btn-primary" onclick="window.location.href='/internal/cash.html'">Sign In</button>
+  <div id="auditModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="auditModalTitle">
+    <div class="export-dialog">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="auditModalTitle">Audit log</h2>
+          <p id="auditModalSubtitle">Activity on this fund sheet</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="auditCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="audit-modal-list" id="auditList">
+        <p class="audit-empty">No activity yet</p>
+      </div>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-ghost" id="auditDoneBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="accountSettingsModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="accountSettingsModalTitle">
+    <div class="export-dialog settings-dialog">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="accountSettingsModalTitle">Account settings</h2>
+          <p>Manage your account and security settings</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="accountSettingsCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="settings-body">
+        <nav class="settings-sidebar" role="tablist" aria-label="Settings sections">
+          <button type="button" class="settings-nav-item active" data-panel="profile" role="tab" aria-selected="true" aria-controls="profilePanel">
+            <i class="fa-solid fa-user"></i>
+            Profile
+          </button>
+          <button type="button" class="settings-nav-item" data-panel="security" role="tab" aria-selected="false" aria-controls="securityPanel">
+            <i class="fa-solid fa-shield"></i>
+            Security
+          </button>
+          <button type="button" class="settings-nav-item" data-panel="passkeys" role="tab" aria-selected="false" aria-controls="passkeysPanel">
+            <i class="fa-solid fa-fingerprint"></i>
+            Passkeys
+          </button>
+        </nav>
+        <div class="settings-content">
+          <div id="profilePanel" class="settings-panel active" role="tabpanel" aria-labelledby="profileTab">
+            <h3>Profile</h3>
+            <p>View your account information</p>
+            
+            <div class="field">
+              <label for="accountEmail">Account Email</label>
+              <input type="email" id="accountEmail" disabled />
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">Used for authentication only. Cannot be edited.</p>
+            </div>
+
+            <div class="field">
+              <label for="displayName">Display Name</label>
+              <input type="text" id="displayName" placeholder="Enter your display name" disabled />
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">This name will be visible publicly on the login screen. Speak to your IT admin if you wish to change it.</p>
+            </div>
+
+            <div class="field">
+              <label for="popCode">PopCode</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="popCode" disabled style="flex: 1;" />
+                <button type="button" class="btn-ghost" id="regeneratePopCodeBtn">
+                  <i class="fa-solid fa-rotate"></i> Regenerate
+                </button>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem;">A recovery and account management private key that can be used to verify your identity. Keep this safe and secure.</p>
+            </div>
+          </div>
+
+          <div id="securityPanel" class="settings-panel" role="tabpanel" aria-labelledby="securityTab">
+            <h3>Security</h3>
+            <p>Change your password to keep your account secure</p>
+            
+            <div class="warning-box">
+              <i class="fa-solid fa-triangle-exclamation" style="margin-right: 0.5rem;"></i>
+              If you think your login information has been compromised, please contact your IT admin as soon as possible.
+            </div>
+            
+            <div class="field">
+              <label for="currentPassword">Current password</label>
+              <input type="password" id="currentPassword" autocomplete="current-password" />
+            </div>
+            <div class="field">
+              <label for="newPassword">New password</label>
+              <input type="password" id="newPassword" autocomplete="new-password" minlength="8" />
+            </div>
+            <div class="field">
+              <label for="confirmPassword">Confirm new password</label>
+              <input type="password" id="confirmPassword" autocomplete="new-password" minlength="8" />
+            </div>
+            <p class="login-error" id="passwordError" role="alert"></p>
+            <button type="button" class="btn-primary" id="updatePasswordBtn" style="margin-top: 0.5rem;">Update password</button>
+          </div>
+
+          <div id="passkeysPanel" class="settings-panel" role="tabpanel" aria-labelledby="passkeysTab">
+            <h3>Passkeys <span class="beta-badge">Beta</span></h3>
+            <p>Add an extra layer of security with passkeys.</p>
+            
+            <div class="warning-box">
+              <i class="fa-solid fa-triangle-exclamation" style="margin-right: 0.5rem;"></i>
+              Passkeys are a stronger alternative to passwords, which cannot be leaked or stolen. Please note this is an experimental, unsupported feature that may be removed without notice; continue to remember your password.
+            </div>
+            
+            <div id="passkeySection">
+              <button type="button" class="btn-primary" id="registerPasskeyBtn" style="margin-top: 0;">
+                <i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i>
+                Register passkey
+              </button>
+            </div>
+            
+            <div id="passkeyListSection" class="hidden" style="margin-top: 1.5rem;">
+              <h4 style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">Your passkeys</h4>
+              <div id="passkeyList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-save" id="accountSettingsSaveBtn">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="export-modal hidden" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+    <div class="export-dialog">
+      <div class="export-dialog-header">
+        <div>
+          <h2 id="exportModalTitle">Excel preview</h2>
+          <p id="exportFilename">poppin-fund-sheet.xlsx</p>
+        </div>
+        <button type="button" class="btn-close-modal" id="exportCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="export-preview-wrap">
+        <div class="export-preview-inner" id="exportPreview"></div>
+      </div>
+      <div class="export-dialog-footer">
+        <button type="button" class="btn-ghost" id="exportCancelBtn">Cancel</button>
+        <button type="button" class="btn-download" id="exportDownloadBtn">Download Excel</button>
+      </div>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://jijawenoxizwwnpgnbsw.supabase.co";
     const SUPABASE_KEY = "sb_publishable_qxvoI4ZBtt2qV3qWicrhaw_eZKvLPRR";
-    
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    let userEmail = '';
-    let userRealEmail = '';
-    let resendTimer = null;
-    let resendSeconds = 120;
-    
+    const TABLE = "internalfundsheet";
+    const USER_COL = "User";
+
+    const MIN_ROWS = 5;
+    const CREATED_EPS_MS = 2500;
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        experimental: { passkey: true },
+      },
+    });
+
+    let rows = { incoming: [], outgoing: [] };
+    let extraBlankRows = { incoming: 0, outgoing: 0 };
+    let auditExtras = [];
+    let sheetRecords = [];
+    let saveTimer = null;
+    let hasLoadedOnce = false;
+    let isSaving = false;
+    let pendingExport = null;
+    let pendingRemoveSaveTimer = null;
+    let currentUserName = "";
+    let activeTab = null;
+    let chartInstances = {};
+
     const $ = (id) => document.getElementById(id);
-    
-    function showStep(stepNum) {
-      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-      $(`step${stepNum}`).classList.add('active');
+
+    const CHART_COLORS = {
+      incoming: "#059669",
+      outgoing: "#dc2626",
+      navy: "#1f4e79",
+      yellow: "#ffd93d",
+      muted: "#94a3b8",
+    };
+
+    function rowUserField(row) {
+      return row?.[USER_COL] ?? row?.user ?? "";
     }
-    
+
     function emailToDisplayName(email) {
       if (!email) return "";
       const lower = email.toLowerCase();
@@ -356,9 +1732,1499 @@
       const name = match[1];
       return name.charAt(0).toUpperCase() + name.slice(1);
     }
-    
-    // Load names from profiles
-    async function loadNames() {
+
+    function generatePopCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let code = '';
+      for (let i = 0; i < 15; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    async function ensureUserHasPopCode() {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+
+      // Check if user already has a PopCode
+      const { data: popCodeData, error: popCodeError } = await sb
+        .from('popcodes')
+        .select('code')
+        .eq('email', user.email)
+        .single();
+
+      if (popCodeError && popCodeError.code !== 'PGRST116') {
+        // Error other than "not found"
+        console.error('Error checking PopCode:', popCodeError);
+        return;
+      }
+
+      // If no PopCode exists, generate one
+      if (!popCodeData) {
+        const newCode = generatePopCode();
+        const { error: insertError } = await sb
+          .from('popcodes')
+          .insert({ email: user.email, code: newCode });
+
+        if (insertError) {
+          console.error('Error creating PopCode:', insertError);
+        }
+      }
+    }
+
+    function getSelectedPortalUser() {
+      const select = $("userSelect");
+      const selectedOption = select.selectedOptions[0];
+      if (!selectedOption || selectedOption.disabled || selectedOption.value === "none") return null;
+      const email = selectedOption.dataset.email;
+      const name = selectedOption.textContent;
+      if (!email || !name) return null;
+      return { name, email };
+    }
+
+    function setSignedInUser(displayName) {
+      currentUserName = displayName;
+      $("headerUserName").textContent = displayName ? `Signed in as ${displayName}` : "";
+      $("statusUser").textContent = displayName || "";
+      if (displayName) {
+        sessionStorage.setItem("poppin_fund_user", displayName);
+      } else {
+        sessionStorage.removeItem("poppin_fund_user");
+      }
+    }
+
+    function resolveUserFromSession(session) {
+      const stored = sessionStorage.getItem("poppin_fund_user");
+      if (stored) return stored;
+      return emailToDisplayName(session?.user?.email);
+    }
+
+    function syncUserSelectToName(name) {
+      const select = $("userSelect");
+      for (const option of select.options) {
+        if (option.textContent === name && !option.disabled) {
+          select.value = option.value;
+          return;
+        }
+      }
+    }
+
+    function show(el) { el.classList.remove("hidden"); }
+    function hide(el) { el.classList.add("hidden"); }
+
+    function updateTabUi() {
+      const isSheet = activeTab === "sheet";
+      const isCharts = activeTab === "charts";
+      const hasTab = isSheet || isCharts;
+
+      $("tabSheet").classList.toggle("active", isSheet);
+      $("tabCharts").classList.toggle("active", isCharts);
+      $("tabSheet").setAttribute("aria-selected", isSheet ? "true" : "false");
+      $("tabCharts").setAttribute("aria-selected", isCharts ? "true" : "false");
+
+      if (hasTab) hide($("tabPicker"));
+      else show($("tabPicker"));
+
+      $("sheetPanel").classList.toggle("hidden", !isSheet);
+      $("chartsPanel").classList.toggle("hidden", !isCharts);
+    }
+
+    function setActiveTab(tab) {
+      if (tab !== "sheet" && tab !== "charts") return;
+      activeTab = tab;
+      updateTabUi();
+      if (tab === "charts") renderCharts();
+    }
+
+    function resetActiveTab() {
+      activeTab = null;
+      destroyCharts();
+      updateTabUi();
+    }
+
+    function destroyCharts() {
+      Object.values(chartInstances).forEach((chart) => chart?.destroy());
+      chartInstances = {};
+    }
+
+    function getAnalyticsData() {
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const totalIncoming = incoming.reduce((s, r) => s + r.amount, 0);
+      const totalOutgoing = outgoing.reduce((s, r) => s + r.amount, 0);
+      const net = totalIncoming - totalOutgoing;
+      const entryCount = incoming.length + outgoing.length;
+
+      const topEntries = [...incoming, ...outgoing]
+        .filter((r) => r.amount > 0)
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 8)
+        .map((r) => ({
+          label: (r.description || "(no description)").slice(0, 28),
+          amount: r.amount,
+          direction: r.direction,
+        }));
+
+      const monthCounts = {};
+      for (const row of sheetRecords) {
+        if (!row.created_at) continue;
+        const d = new Date(row.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        monthCounts[key] = (monthCounts[key] || 0) + 1;
+      }
+      const monthKeys = Object.keys(monthCounts).sort();
+      const monthLabels = monthKeys.map((k) => {
+        const [y, m] = k.split("-");
+        return new Date(Number(y), Number(m) - 1).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+      });
+
+      const userCounts = {};
+      for (const row of sheetRecords) {
+        const user = rowUserField(row) || "Unknown";
+        userCounts[user] = (userCounts[user] || 0) + 1;
+      }
+      const userLabels = Object.keys(userCounts).sort((a, b) => userCounts[b] - userCounts[a]);
+      const userValues = userLabels.map((u) => userCounts[u]);
+
+      return {
+        totalIncoming,
+        totalOutgoing,
+        net,
+        entryCount,
+        topEntries,
+        monthLabels,
+        monthValues: monthKeys.map((k) => monthCounts[k]),
+        userLabels,
+        userValues,
+      };
+    }
+
+    function renderCharts() {
+      if (typeof Chart === "undefined") {
+        showToast({
+          title: "Charts unavailable",
+          description: "Chart.js failed to load. Refresh the page and try again. If the issue continues, contact your IT admin.",
+          type: "error",
+        });
+        return;
+      }
+
+      destroyCharts();
+      const data = getAnalyticsData();
+
+      $("statIncoming").textContent = formatMoney(data.totalIncoming);
+      $("statOutgoing").textContent = formatMoney(data.totalOutgoing);
+      $("statNet").textContent = formatMoney(data.net);
+      $("statCount").textContent = String(data.entryCount);
+
+      const netEl = $("statNet");
+      netEl.classList.remove("positive", "negative");
+      if (data.net > 0) netEl.classList.add("positive");
+      else if (data.net < 0) netEl.classList.add("negative");
+
+      const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { font: { family: "Inter", size: 11 }, boxWidth: 12 } },
+        },
+      };
+
+      chartInstances.flowBar = new Chart($("chartFlowBar"), {
+        type: "bar",
+        data: {
+          labels: ["Incoming", "Outgoing"],
+          datasets: [{
+            data: [data.totalIncoming, data.totalOutgoing],
+            backgroundColor: [CHART_COLORS.incoming, CHART_COLORS.outgoing],
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          plugins: {
+            ...chartDefaults.plugins,
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => "£" + Number(v).toLocaleString(),
+                font: { family: "Inter", size: 10 },
+              },
+            },
+            x: { ticks: { font: { family: "Inter", size: 11 } } },
+          },
+        },
+      });
+
+      chartInstances.split = new Chart($("chartSplitDoughnut"), {
+        type: "doughnut",
+        data: {
+          labels: ["Incoming", "Outgoing"],
+          datasets: [{
+            data: [
+              data.totalIncoming || 0,
+              data.totalOutgoing || 0,
+            ],
+            backgroundColor: [CHART_COLORS.incoming, CHART_COLORS.outgoing],
+            borderWidth: 0,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          cutout: "58%",
+        },
+      });
+
+      chartInstances.topEntries = new Chart($("chartTopEntries"), {
+        type: "bar",
+        data: {
+          labels: data.topEntries.map((e) => e.label),
+          datasets: [{
+            label: "Amount",
+            data: data.topEntries.map((e) => e.amount),
+            backgroundColor: data.topEntries.map((e) =>
+              e.direction === "incoming" ? CHART_COLORS.incoming : CHART_COLORS.outgoing
+            ),
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          indexAxis: "y",
+          ...chartDefaults,
+          plugins: { ...chartDefaults.plugins, legend: { display: false } },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => "£" + Number(v).toLocaleString(),
+                font: { family: "Inter", size: 10 },
+              },
+            },
+            y: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+
+      chartInstances.activity = new Chart($("chartActivityLine"), {
+        type: "line",
+        data: {
+          labels: data.monthLabels.length ? data.monthLabels : ["No data"],
+          datasets: [{
+            label: "Entries added",
+            data: data.monthValues.length ? data.monthValues : [0],
+            borderColor: CHART_COLORS.navy,
+            backgroundColor: "rgba(31, 78, 121, 0.12)",
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: CHART_COLORS.navy,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "Inter", size: 10 } } },
+            x: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+
+      chartInstances.byUser = new Chart($("chartByUser"), {
+        type: "bar",
+        data: {
+          labels: data.userLabels.length ? data.userLabels : ["No data"],
+          datasets: [{
+            label: "Entries",
+            data: data.userValues.length ? data.userValues : [0],
+            backgroundColor: CHART_COLORS.navy,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          ...chartDefaults,
+          plugins: { ...chartDefaults.plugins, legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "Inter", size: 10 } } },
+            x: { ticks: { font: { family: "Inter", size: 10 } } },
+          },
+        },
+      });
+    }
+
+    function setStatus(text, type = "") {
+      const bar = $("statusBar");
+      bar.className = "status-bar" + (type ? " " + type : "");
+      $("statusText").textContent = text;
+    }
+
+    function dismissToast(el) {
+      if (!el || !el.parentNode) return;
+      el.classList.remove("show");
+      el.classList.add("hide");
+      setTimeout(() => el.remove(), 280);
+    }
+
+    const TOAST_ICONS = {
+      info: "fa-solid fa-circle-check",
+      destructive: "fa-solid fa-trash-can",
+      error: "fa-solid fa-circle-xmark",
+    };
+
+    function showToast(opts) {
+      const title = opts.title || opts.message || "Notice";
+      const description = opts.description || "";
+      const type = opts.type === "destructive" ? "destructive" : opts.type === "error" ? "error" : "info";
+      const onAction = opts.onAction || opts.undo || null;
+      const hasAction = typeof onAction === "function";
+      const ms = opts.duration ?? (hasAction ? 10000 : 5000);
+      const iconClass = opts.icon || TOAST_ICONS[type];
+
+      const el = document.createElement("div");
+      el.className = `toast toast-${type}`;
+      el.setAttribute("role", type === "error" ? "alert" : "status");
+
+      el.innerHTML = `
+        <div class="toast-icon" aria-hidden="true"><i class="${iconClass}"></i></div>
+        <div class="toast-body">
+          <div class="toast-title">${escapeHtml(title)}</div>
+          ${description ? `<div class="toast-description">${escapeHtml(description)}</div>` : ""}
+        </div>
+      `;
+
+      let dismissTimer = setTimeout(() => dismissToast(el), ms);
+
+      if (hasAction) {
+        const actionBtn = document.createElement("button");
+        actionBtn.type = "button";
+        actionBtn.className = "toast-action";
+        actionBtn.textContent = opts.actionLabel || "Undo";
+        actionBtn.addEventListener("click", () => {
+          clearTimeout(dismissTimer);
+          onAction();
+          dismissToast(el);
+        });
+        el.appendChild(actionBtn);
+      }
+
+      $("toastContainer").appendChild(el);
+      requestAnimationFrame(() => el.classList.add("show"));
+      return el;
+    }
+
+    function parseAmount(raw) {
+      if (raw == null) return 0;
+      const cleaned = String(raw).replace(/[£,\s]/g, "").trim();
+      if (!cleaned) return 0;
+      const n = parseFloat(cleaned);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatMoney(n) {
+      const sign = n < 0 ? "-" : "";
+      return sign + "£" + Math.abs(n).toFixed(2);
+    }
+
+    function formatAuditTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    function blankRow(direction, sortOrder) {
+      return {
+        id: null,
+        direction,
+        amount: 0,
+        description: "",
+        sort_order: sortOrder,
+      };
+    }
+
+    function buildAuditEntries(records) {
+      const entries = [];
+
+      for (const row of records) {
+        const created = new Date(row.created_at);
+        const updated = new Date(row.updated_at);
+        const desc = (row.description || "").trim() || "(no description)";
+        const amt = formatMoney(Number(row.amount) || 0);
+        const dir = row.direction === "incoming" ? "incoming" : "outgoing";
+
+        const userName = rowUserField(row);
+
+        entries.push({
+          type: "created",
+          at: created,
+          direction: dir,
+          amount: amt,
+          description: desc,
+          id: row.id,
+          user: userName,
+        });
+
+        if (updated.getTime() - created.getTime() > CREATED_EPS_MS) {
+          entries.push({
+            type: "updated",
+            at: updated,
+            direction: dir,
+            amount: amt,
+            description: desc,
+            id: row.id,
+            user: userName,
+          });
+        }
+      }
+
+      for (const extra of auditExtras) {
+        entries.push(extra);
+      }
+
+      entries.sort((a, b) => b.at - a.at);
+      return entries;
+    }
+
+    function logRowDeletion(direction, data) {
+      if (!data.amount && !data.description && !data.id) return;
+      auditExtras.push({
+        type: "deleted",
+        at: new Date(),
+        direction,
+        amount: formatMoney(data.amount),
+        description: (data.description || "").trim() || "(no description)",
+        user: currentUserName,
+      });
+      auditExtras = auditExtras.slice(-80);
+    }
+
+    function renderAuditLog() {
+      const entries = buildAuditEntries(sheetRecords);
+      $("auditCount").textContent = String(entries.length);
+
+      const list = $("auditList");
+      if (!entries.length) {
+        list.innerHTML = '<p class="audit-empty">No activity yet</p>';
+        return;
+      }
+
+      const actionLabel = {
+        created: "Entry added",
+        updated: "Entry updated",
+        deleted: "Row deleted",
+      };
+
+      list.innerHTML = entries
+        .map((e) => {
+          const tagClass = e.direction === "incoming" ? "incoming" : "outgoing";
+          const tagText = e.direction === "incoming" ? "In" : "Out";
+          const deletedClass = e.type === "deleted" ? " audit-deleted" : "";
+          return `
+            <div class="audit-item${deletedClass}">
+              <span class="audit-dot ${e.type}" aria-hidden="true"></span>
+              <div class="audit-body">
+                <div class="audit-action">
+                  <span class="tag ${tagClass}">${tagText}</span>
+                  ${actionLabel[e.type] || e.type}
+                </div>
+                <div class="audit-detail">${escapeHtml(e.amount)} · ${escapeHtml(e.description)}</div>
+                ${e.user ? `<div class="audit-user">${escapeHtml(e.user)}</div>` : ""}
+                <div class="audit-time">${formatAuditTime(e.at)}</div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function openAuditModal() {
+      renderAuditLog();
+      show($("auditModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeAuditModal() {
+      hide($("auditModal"));
+      document.body.style.overflow = "";
+    }
+
+    function padRows(list, direction) {
+      const out = [...list].sort((a, b) => a.sort_order - b.sort_order);
+      const target = MIN_ROWS + extraBlankRows[direction];
+      while (out.length < target) {
+        out.push(blankRow(direction, out.length));
+      }
+      return out;
+    }
+
+    function tbodyIdForDirection(direction) {
+      return direction === "incoming" ? "incomingBody" : "outgoingBody";
+    }
+
+    function rowHasContent(tr) {
+      if (!tr) return false;
+      const amount = parseAmount(tr.querySelector('[data-field="amount"]')?.value);
+      const description = (tr.querySelector('[data-field="description"]')?.value || "").trim();
+      return !!(amount || description || tr.dataset.id);
+    }
+
+    function renderBothTables() {
+      renderTable("outgoing", "outgoingBody");
+      renderTable("incoming", "incomingBody");
+    }
+
+    function addRow(direction) {
+      extraBlankRows[direction]++;
+      renderTable(direction, tbodyIdForDirection(direction));
+      updateTotal();
+      const label = direction === "incoming" ? "incoming" : "outgoing";
+      showToast({
+        title: "Row added",
+        description: `A new row was added to the ${label} table.`,
+        type: "info",
+      });
+    }
+
+    function getTrRowData(tr) {
+      return {
+        amount: parseAmount(tr.querySelector('[data-field="amount"]').value),
+        description: (tr.querySelector('[data-field="description"]').value || "").trim(),
+        id: tr.dataset.id || null,
+      };
+    }
+
+    function captureRowAt(direction, index) {
+      const tbodyId = tbodyIdForDirection(direction);
+      const tr = $(tbodyId).querySelectorAll("tr")[index];
+      return {
+        direction,
+        index,
+        data: getTrRowData(tr),
+        extraBlankRows: extraBlankRows[direction],
+      };
+    }
+
+    function createRowElement(direction, rowData, index, canRemoveAny) {
+      const tr = document.createElement("tr");
+      tr.dataset.direction = direction;
+      tr.dataset.index = String(index);
+      if (rowData.id) tr.dataset.id = rowData.id;
+
+      const canRemove =
+        canRemoveAny ||
+        rowData.amount ||
+        rowData.description ||
+        rowData.id;
+
+      const amountDisplay = rowData.amount
+        ? "£ " + Math.abs(rowData.amount).toFixed(2)
+        : "";
+
+      tr.innerHTML = `
+        <td>
+          <input type="text" class="cell-input amount" data-field="amount"
+            value="${amountDisplay}"
+            placeholder="£ 0.00" inputmode="decimal" />
+        </td>
+        <td>
+          <input type="text" class="cell-input" data-field="description"
+            value="${escapeHtml(rowData.description || "")}" placeholder="" />
+        </td>
+        <td class="cell-remove${canRemove ? "" : " cell-remove-empty"}">${canRemove
+          ? `<button type="button" class="btn-remove-row"
+              aria-label="Remove row ${index + 1}" title="Remove row">×</button>`
+          : ""}</td>
+      `;
+      return tr;
+    }
+
+    function insertRowAt(snapshot) {
+      const direction = snapshot.direction;
+      const tbodyId = tbodyIdForDirection(direction);
+      const tbody = $(tbodyId);
+      const ref = tbody.querySelectorAll("tr")[snapshot.index] || null;
+      const canRemoveAny = tbody.querySelectorAll("tr").length + 1 > MIN_ROWS;
+
+      extraBlankRows[direction] = snapshot.extraBlankRows;
+
+      const tr = createRowElement(direction, snapshot.data, snapshot.index, canRemoveAny);
+
+      if (ref) {
+        tbody.insertBefore(tr, ref);
+      } else {
+        tbody.appendChild(tr);
+      }
+
+      bindCellEvents(tbody);
+      refreshRemoveButtons();
+      updateTotal();
+    }
+
+    function scheduleSaveAfterRemove() {
+      clearTimeout(saveTimer);
+      clearTimeout(pendingRemoveSaveTimer);
+      pendingRemoveSaveTimer = setTimeout(() => {
+        pendingRemoveSaveTimer = null;
+        queueSaveFromDom();
+      }, 600);
+    }
+
+    function removeRowAtIndex(index, direction) {
+      const tbodyId = tbodyIdForDirection(direction);
+      const trs = $(tbodyId).querySelectorAll("tr");
+      if (index < 0 || index >= trs.length) return;
+
+      const canRemove = trs.length > MIN_ROWS || rowHasContent(trs[index]);
+      if (!canRemove) return;
+
+      const snapshot = captureRowAt(direction, index);
+      const label = direction === "incoming" ? "incoming" : "outgoing";
+
+      trs[index].remove();
+
+      const remaining = $(tbodyId).querySelectorAll("tr").length;
+      if (remaining < MIN_ROWS + extraBlankRows[direction]) {
+        extraBlankRows[direction] = Math.max(0, remaining - MIN_ROWS);
+      }
+
+      refreshRemoveButtons();
+      updateTotal();
+      logRowDeletion(direction, snapshot.data);
+      renderAuditLog();
+      scheduleSaveAfterRemove();
+
+      showToast({
+        title: "Row removed",
+        description: `This row was removed from the ${label} table.`,
+        type: "destructive",
+        actionLabel: "Undo",
+        onAction: async () => {
+          clearTimeout(pendingRemoveSaveTimer);
+          pendingRemoveSaveTimer = null;
+          clearTimeout(saveTimer);
+          insertRowAt(snapshot);
+
+          const tr = $(tbodyId).querySelectorAll("tr")[snapshot.index];
+          if (tr?.dataset.id && snapshot.data.id) {
+            const { data: found } = await sb
+              .from(TABLE)
+              .select("id")
+              .eq("id", snapshot.data.id)
+              .maybeSingle();
+            if (!found) delete tr.dataset.id;
+          }
+
+          queueSaveFromDom();
+          showToast({
+            title: "Row restored",
+            description: `The removed row has been added back to the ${label} table.`,
+            type: "info",
+          });
+        },
+      });
+    }
+
+    function updateRemoveCell(tr, index, canRemove) {
+      const cell = tr.querySelector(".cell-remove");
+      if (!cell) return;
+      cell.classList.toggle("cell-remove-empty", !canRemove);
+      if (canRemove) {
+        if (!cell.querySelector(".btn-remove-row")) {
+          cell.innerHTML = `<button type="button" class="btn-remove-row"
+            aria-label="Remove row ${index + 1}" title="Remove row">×</button>`;
+        }
+      } else {
+        cell.innerHTML = "";
+      }
+    }
+
+    function refreshRemoveButtons() {
+      ["outgoing", "incoming"].forEach((direction) => {
+        const trs = [...$(tbodyIdForDirection(direction)).querySelectorAll("tr")];
+        const canRemoveAny = trs.length > MIN_ROWS;
+
+        trs.forEach((tr, index) => {
+          const canRemove = canRemoveAny || rowHasContent(tr);
+          updateRemoveCell(tr, index, canRemove);
+        });
+      });
+    }
+
+    function renderTable(direction, tbodyId) {
+      const tbody = $(tbodyId);
+      tbody.innerHTML = "";
+      const list = padRows(rows[direction], direction);
+      const canRemoveAny = list.length > MIN_ROWS;
+
+      list.forEach((row, index) => {
+        const tr = createRowElement(
+          direction,
+          {
+            amount: row.amount,
+            description: row.description || "",
+            id: row.id,
+          },
+          index,
+          canRemoveAny
+        );
+        tbody.appendChild(tr);
+      });
+
+      bindCellEvents(tbody);
+    }
+
+    function bindRemoveButtonsOnce() {
+      if (bindRemoveButtonsOnce.done) return;
+      bindRemoveButtonsOnce.done = true;
+
+      ["outgoing", "incoming"].forEach((direction) => {
+        const id = tbodyIdForDirection(direction);
+        $(id).addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-remove-row");
+          if (!btn || btn.disabled) return;
+          const tr = btn.closest("tr");
+          const index = [...$(id).querySelectorAll("tr")].indexOf(tr);
+          if (index >= 0) removeRowAtIndex(index, direction);
+        });
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function bindCellEvents(tbody) {
+      tbody.querySelectorAll(".cell-input").forEach((input) => {
+        input.addEventListener("focus", () => {
+          if (input.dataset.field === "amount" && input.value) {
+            const n = parseAmount(input.value);
+            input.value = n ? n.toFixed(2) : "";
+          }
+        });
+
+        input.addEventListener("blur", () => {
+          if (input.dataset.field === "amount") {
+            const n = parseAmount(input.value);
+            input.value = n ? "£ " + n.toFixed(2) : "";
+          }
+          queueSaveFromDom();
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+          }
+        });
+      });
+    }
+
+    function assignIdsToDom(direction, savedRows) {
+      const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
+      let idx = 0;
+      tbody.querySelectorAll("tr").forEach((tr) => {
+        const amount = parseAmount(tr.querySelector('[data-field="amount"]').value);
+        const description = (tr.querySelector('[data-field="description"]').value || "").trim();
+        if (!amount && !description && !tr.dataset.id) return;
+        const saved = savedRows[idx++];
+        if (saved?.id) tr.dataset.id = saved.id;
+      });
+    }
+
+    function readDomRows(direction) {
+      const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
+      const result = [];
+      tbody.querySelectorAll("tr").forEach((tr, index) => {
+        const amount = parseAmount(tr.querySelector('[data-field="amount"]').value);
+        const description = (tr.querySelector('[data-field="description"]').value || "").trim();
+        const id = tr.dataset.id || null;
+        if (!amount && !description && !id) return;
+        result.push({ id, direction, amount, description, sort_order: index });
+      });
+      return result;
+    }
+
+    function updateTotal() {
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const total = incoming.reduce((s, r) => s + r.amount, 0) - outgoing.reduce((s, r) => s + r.amount, 0);
+      const el = $("totalValue");
+      el.textContent = formatMoney(total);
+      el.classList.remove("negative", "positive");
+      if (total < 0) el.classList.add("negative");
+      else if (total > 0) el.classList.add("positive");
+      return total;
+    }
+
+    function readAllDisplayRows(direction) {
+      const tbody = direction === "incoming" ? $("incomingBody") : $("outgoingBody");
+      return [...tbody.querySelectorAll("tr")].map((tr) => ({
+        amount: parseAmount(tr.querySelector('[data-field="amount"]').value),
+        description: (tr.querySelector('[data-field="description"]').value || "").trim(),
+      }));
+    }
+
+    function formatExcelAmount(n) {
+      if (!n) return "";
+      return n;
+    }
+
+    function buildExportWorkbook() {
+      const outRows = readAllDisplayRows("outgoing");
+      const inRows = readAllDisplayRows("incoming");
+      const rowCount = Math.max(outRows.length, inRows.length, MIN_ROWS);
+      const total = updateTotal();
+
+      const aoa = [
+        ["Outgoing", "", "", "Incoming", ""],
+        ["Amount £", "Description", "", "Amount £", "Description"],
+      ];
+
+      for (let i = 0; i < rowCount; i++) {
+        const o = outRows[i] || { amount: 0, description: "" };
+        const n = inRows[i] || { amount: 0, description: "" };
+        aoa.push([
+          formatExcelAmount(o.amount),
+          o.description,
+          "",
+          formatExcelAmount(n.amount),
+          n.description,
+        ]);
+      }
+
+      aoa.push([]);
+      aoa.push(["", "", "", "Total:", total]);
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+        { s: { r: 0, c: 3 }, e: { r: 0, c: 4 } },
+      ];
+      ws["!cols"] = [{ wch: 14 }, { wch: 30 }, { wch: 3 }, { wch: 14 }, { wch: 30 }];
+
+      for (let i = 2; i < 2 + rowCount; i++) {
+        [0, 3].forEach((col) => {
+          const val = aoa[i][col];
+          if (val === "" || val == null) return;
+          const addr = XLSX.utils.encode_cell({ r: i, c: col });
+          if (ws[addr]) {
+            ws[addr].t = "n";
+            ws[addr].z = '"£"#,##0.00';
+          }
+        });
+      }
+
+      const totalAddr = XLSX.utils.encode_cell({ r: aoa.length - 1, c: 4 });
+      if (ws[totalAddr]) {
+        ws[totalAddr].t = "n";
+        ws[totalAddr].z = '"£"#,##0.00';
+      }
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Fund Sheet");
+
+      const date = new Date().toISOString().slice(0, 10);
+      const filename = `poppin-fund-sheet-${date}.xlsx`;
+
+      return { wb, aoa, total, filename, rowCount };
+    }
+
+    function renderExportPreviewHtml({ total, rowCount }) {
+      const outRows = readAllDisplayRows("outgoing");
+      const inRows = readAllDisplayRows("incoming");
+      const count = Math.max(rowCount, outRows.length, inRows.length);
+
+      let bodyRows = "";
+      for (let i = 0; i < count; i++) {
+        const o = outRows[i] || { amount: 0, description: "" };
+        const n = inRows[i] || { amount: 0, description: "" };
+        const oAmt = o.amount ? formatMoney(o.amount) : "";
+        const nAmt = n.amount ? formatMoney(n.amount) : "";
+        bodyRows += `
+          <tr>
+            <td class="amount-cell">${escapeHtml(oAmt)}</td>
+            <td>${escapeHtml(o.description)}</td>
+            <td class="gap-col"></td>
+            <td class="amount-cell">${escapeHtml(nAmt)}</td>
+            <td>${escapeHtml(n.description)}</td>
+          </tr>
+        `;
+      }
+
+      const totalClass =
+        total < 0 ? "negative" : total > 0 ? "positive" : "";
+
+      return `
+        <table class="preview-excel-table">
+          <thead>
+            <tr>
+              <th class="section-head" colspan="2">Outgoing</th>
+              <th class="gap-col"></th>
+              <th class="section-head" colspan="2">Incoming</th>
+            </tr>
+            <tr>
+              <th class="col-head">Amount £</th>
+              <th class="col-head">Description</th>
+              <th class="gap-col"></th>
+              <th class="col-head">Amount £</th>
+              <th class="col-head">Description</th>
+            </tr>
+          </thead>
+          <tbody>${bodyRows}</tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="3"></td>
+              <td><strong>Total:</strong></td>
+              <td class="amount-cell ${totalClass}"><strong>${formatMoney(total)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    }
+
+    function openExportModal() {
+      if (typeof XLSX === "undefined") {
+        showToast({
+          title: "Export unavailable",
+          description: "The Excel library failed to load. Refresh the page and try again.",
+          type: "error",
+        });
+        return;
+      }
+
+      const data = buildExportWorkbook();
+      pendingExport = data;
+      $("exportFilename").textContent = data.filename;
+      $("exportPreview").innerHTML = renderExportPreviewHtml(data);
+      show($("exportModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeExportModal() {
+      hide($("exportModal"));
+      document.body.style.overflow = "";
+      pendingExport = null;
+    }
+
+    function downloadExportFile() {
+      if (!pendingExport?.wb) return;
+      XLSX.writeFile(pendingExport.wb, pendingExport.filename);
+      showToast({
+        title: "Excel downloaded",
+        description: "Your fund sheet export has been saved to your device.",
+        type: "info",
+        icon: "fa-solid fa-file-excel",
+      });
+      closeExportModal();
+    }
+
+    function queueSaveFromDom() {
+      updateTotal();
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveAll, 600);
+    }
+
+    async function refreshAuditFromDb() {
+      const { data, error } = await sb
+        .from(TABLE)
+        .select(`id, direction, amount, description, created_at, updated_at, ${USER_COL}`)
+        .order("updated_at", { ascending: false });
+
+      if (error) return;
+      sheetRecords = data || [];
+      renderAuditLog();
+      if (activeTab === "charts") renderCharts();
+    }
+
+    async function saveAll() {
+      if (isSaving) return;
+      const incoming = readDomRows("incoming");
+      const outgoing = readDomRows("outgoing");
+      const toSave = [...incoming, ...outgoing];
+
+      isSaving = true;
+      setStatus("Saving…", "saving");
+
+      try {
+        const { data: existing, error: fetchErr } = await sb
+          .from(TABLE)
+          .select(`id, direction, amount, description, sort_order, created_at, updated_at, ${USER_COL}`);
+        if (fetchErr) throw fetchErr;
+
+        const keepIds = new Set(toSave.filter((r) => r.id).map((r) => r.id));
+        const toDeleteIds = (existing || [])
+          .map((r) => r.id)
+          .filter((id) => !keepIds.has(id));
+
+        let deletedSnapshot = null;
+
+        if (toDeleteIds.length) {
+          const deletedRows = (existing || []).filter((r) => toDeleteIds.includes(r.id));
+          deletedSnapshot = deletedRows.map((r) => ({
+            direction: r.direction,
+            amount: Number(r.amount) || 0,
+            description: r.description || "",
+            sort_order: r.sort_order ?? 0,
+            [USER_COL]: rowUserField(r) || currentUserName,
+          }));
+
+          for (const row of deletedRows) {
+            auditExtras.push({
+              type: "deleted",
+              at: new Date(),
+              direction: row.direction === "incoming" ? "incoming" : "outgoing",
+              amount: formatMoney(Number(row.amount) || 0),
+              description: (row.description || "").trim() || "(no description)",
+              id: row.id,
+              user: rowUserField(row) || currentUserName,
+            });
+          }
+          auditExtras = auditExtras.slice(-50);
+
+          const { error: delErr } = await sb.from(TABLE).delete().in("id", toDeleteIds);
+          if (delErr) throw delErr;
+        }
+
+        for (const row of toSave) {
+          const payload = {
+            direction: row.direction,
+            amount: row.amount,
+            description: row.description,
+            sort_order: row.sort_order,
+            [USER_COL]: currentUserName,
+          };
+
+          if (row.id) {
+            const { error } = await sb.from(TABLE).update(payload).eq("id", row.id);
+            if (error) throw error;
+          } else {
+            const { data: inserted, error } = await sb
+              .from(TABLE)
+              .insert(payload)
+              .select("id")
+              .single();
+            if (error) throw error;
+            row.id = inserted.id;
+          }
+        }
+
+        assignIdsToDom("incoming", incoming);
+        assignIdsToDom("outgoing", outgoing);
+        rows.incoming = incoming;
+        rows.outgoing = outgoing;
+
+        await refreshAuditFromDb();
+        setStatus("Ready", "");
+
+        if (deletedSnapshot?.length) {
+          const n = deletedSnapshot.length;
+          showToast({
+            title: n === 1 ? "Entry deleted" : `${n} entries deleted`,
+            description:
+              n === 1
+                ? "One saved record was removed from the fund sheet."
+                : `${n} saved records were removed from the fund sheet.`,
+            type: "destructive",
+            actionLabel: "Undo",
+            onAction: async () => {
+              try {
+                const { error } = await sb.from(TABLE).insert(deletedSnapshot);
+                if (error) throw error;
+                auditExtras = auditExtras.filter((e) => e.type !== "deleted");
+                await loadSheet();
+                showToast({
+                  title: n === 1 ? "Entry restored" : `${n} entries restored`,
+                  description: "Deleted records have been added back to the fund sheet.",
+                  type: "info",
+                });
+              } catch (undoErr) {
+                showToast({
+                  title: "Undo failed",
+                  description: undoErr.message,
+                  type: "error",
+                });
+              }
+            },
+          });
+        } else {
+          showToast({
+            title: "Changes saved",
+            description: "Your updates have been saved to the fund sheet.",
+            type: "info",
+          });
+        }
+      } catch (err) {
+        setStatus("Save failed", "error");
+        showToast({
+          title: "Save failed",
+          description: err.message,
+          type: "error",
+        });
+      } finally {
+        isSaving = false;
+      }
+    }
+
+    async function loadSheet() {
+      const showOverlay = !hasLoadedOnce;
+      if (showOverlay) show($("loadingOverlay"));
+      try {
+        const { data, error } = await sb
+          .from(TABLE)
+          .select(`id, direction, amount, description, sort_order, created_at, updated_at, ${USER_COL}`)
+          .order("sort_order", { ascending: true });
+
+        if (error) throw error;
+
+        sheetRecords = (data || []).map((r) => ({
+          id: r.id,
+          direction: r.direction,
+          amount: r.amount,
+          description: r.description,
+          created_at: r.created_at,
+          updated_at: r.updated_at,
+          [USER_COL]: rowUserField(r),
+        }));
+
+        rows = { incoming: [], outgoing: [] };
+        extraBlankRows = { incoming: 0, outgoing: 0 };
+
+        (data || []).forEach((r) => {
+          const dir = r.direction === "incoming" ? "incoming" : "outgoing";
+          rows[dir].push({
+            id: r.id,
+            direction: dir,
+            amount: Number(r.amount) || 0,
+            description: r.description || "",
+            sort_order: r.sort_order ?? 0,
+          });
+        });
+
+        for (const dir of ["incoming", "outgoing"]) {
+          if (rows[dir].length >= MIN_ROWS) {
+            extraBlankRows[dir] = rows[dir].length - MIN_ROWS + 1;
+          }
+        }
+
+        renderBothTables();
+        updateTotal();
+        renderAuditLog();
+        if (activeTab === "charts") renderCharts();
+        hasLoadedOnce = true;
+      } finally {
+        if (showOverlay) hide($("loadingOverlay"));
+      }
+    }
+
+    function showApp() {
+      hide($("loginView"));
+      show($("appView"));
+      resetActiveTab();
+    }
+
+    function showLogin() {
+      show($("loginView"));
+      hide($("appView"));
+      resetActiveTab();
+    }
+
+    async function openAccountSettingsModal() {
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        $("accountEmail").value = user.email || "";
+        $("displayName").value = emailToDisplayName(user.email) || "";
+        
+        // Load PopCode from database
+        const { data: popCodeData, error: popCodeError } = await sb
+          .from('popcodes')
+          .select('code')
+          .eq('email', user.email)
+          .single();
+        
+        if (popCodeData && popCodeData.code) {
+          $("popCode").value = popCodeData.code;
+        } else {
+          // Generate a new PopCode if none exists
+          const newCode = generatePopCode();
+          $("popCode").value = newCode;
+          await sb.from('popcodes').insert({ email: user.email, code: newCode });
+        }
+      }
+      loadPasskeys();
+      show($("accountSettingsModal"));
+      document.body.style.overflow = "hidden";
+    }
+
+    function switchSettingsPanel(panelName) {
+      const navItems = document.querySelectorAll(".settings-nav-item");
+      const panels = document.querySelectorAll(".settings-panel");
+      
+      navItems.forEach(item => {
+        item.classList.remove("active");
+        item.setAttribute("aria-selected", "false");
+        if (item.dataset.panel === panelName) {
+          item.classList.add("active");
+          item.setAttribute("aria-selected", "true");
+        }
+      });
+      
+      panels.forEach(panel => {
+        panel.classList.remove("active");
+        if (panel.id === panelName + "Panel") {
+          panel.classList.add("active");
+        }
+      });
+    }
+
+    async function saveAccountSettings() {
+      const displayName = $("displayName").value;
+      const saveBtn = $("accountSettingsSaveBtn");
+      
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+      
+      try {
+        if (displayName && displayName !== currentUserName) {
+          const { error } = await sb.auth.updateUser({ data: { display_name: displayName } });
+          if (error) throw error;
+          
+          currentUserName = displayName;
+          $("headerUserName").textContent = displayName;
+        }
+        
+        showToast({
+          title: "Settings saved",
+          description: "Your account settings have been updated successfully.",
+          type: "info"
+        });
+        
+        closeAccountSettingsModal();
+      } catch (err) {
+        console.error("Failed to save settings:", err);
+        showToast({
+          title: "Save failed",
+          description: "Could not save your settings. Please try again.",
+          type: "error"
+        });
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save changes";
+      }
+    }
+
+    function closeAccountSettingsModal() {
+      hide($("accountSettingsModal"));
+      document.body.style.overflow = "";
+      $("currentPassword").value = "";
+      $("newPassword").value = "";
+      $("confirmPassword").value = "";
+      $("passwordError").textContent = "";
+    }
+
+    async function registerPasskey() {
+      const btn = $("registerPasskeyBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Registering...';
+
+      try {
+        const { data, error } = await sb.auth.registerPasskey();
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey registered",
+          description: "Your passkey has been successfully added to your account.",
+          type: "info",
+          icon: "fa-solid fa-fingerprint",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Passkey registration error:", err);
+        showToast({
+          title: "Registration failed",
+          description: err.message || "Failed to register passkey. Please try again.",
+          type: "error",
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i> Register passkey';
+      }
+    }
+
+    async function loadPasskeys() {
+      try {
+        const { data, error } = await sb.auth.passkey.list();
+        if (error) throw error;
+
+        const passkeys = data || [];
+        const listEl = $("passkeyList");
+        const listSection = $("passkeyListSection");
+
+        if (passkeys.length === 0) {
+          listSection.classList.add("hidden");
+          return;
+        }
+
+        listSection.classList.remove("hidden");
+        listEl.innerHTML = passkeys.map((pk) => `
+          <div class="passkey-item" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0;">
+              <i class="fa-solid fa-fingerprint" style="color: var(--navy); font-size: 1.125rem;"></i>
+              <div style="min-width: 0;">
+                <div class="passkey-name" style="font-size: 0.875rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-id="${pk.id}">${escapeHtml(pk.friendly_name || "Unnamed passkey")}</div>
+                <div style="font-size: 0.75rem; color: var(--muted);">Added ${pk.created_at ? new Date(pk.created_at).toLocaleDateString() : "recently"}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn-ghost passkey-rename-btn" data-id="${pk.id}" style="padding: 0.35rem 0.6rem; font-size: 0.75rem;" title="Rename">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button type="button" class="btn-ghost passkey-delete-btn" data-id="${pk.id}" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; color: var(--danger);" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+        // Add event listeners for rename and delete buttons
+        listEl.querySelectorAll(".passkey-rename-btn").forEach((btn) => {
+          btn.addEventListener("click", () => renamePasskey(btn.dataset.id));
+        });
+
+        listEl.querySelectorAll(".passkey-delete-btn").forEach((btn) => {
+          btn.addEventListener("click", () => deletePasskey(btn.dataset.id));
+        });
+      } catch (err) {
+        console.error("Failed to load passkeys:", err);
+      }
+    }
+
+    async function renamePasskey(passkeyId) {
+      const newName = prompt("Enter a new name for this passkey:");
+      if (!newName || newName.trim() === "") return;
+
+      try {
+        const { error } = await sb.auth.passkey.update({
+          passkeyId,
+          friendlyName: newName.trim().slice(0, 120),
+        });
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey renamed",
+          description: "The passkey name has been updated.",
+          type: "info",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Failed to rename passkey:", err);
+        showToast({
+          title: "Rename failed",
+          description: err.message || "Failed to rename passkey.",
+          type: "error",
+        });
+      }
+    }
+
+    async function deletePasskey(passkeyId) {
+      if (!confirm("Are you sure you want to delete this passkey? You will need to register it again to use it.")) return;
+
+      try {
+        const { error } = await sb.auth.passkey.delete({ passkeyId });
+        if (error) throw error;
+
+        showToast({
+          title: "Passkey deleted",
+          description: "The passkey has been removed from your account.",
+          type: "info",
+        });
+
+        await loadPasskeys();
+      } catch (err) {
+        console.error("Failed to delete passkey:", err);
+        showToast({
+          title: "Delete failed",
+          description: err.message || "Failed to delete passkey.",
+          type: "error",
+        });
+      }
+    }
+
+    async function signInWithPasskey() {
+      const btn = $("signInWithPasskeyBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Signing in...';
+      }
+
+      try {
+        const { data, error } = await sb.auth.signInWithPasskey();
+        if (error) throw error;
+
+        const name = emailToDisplayName(data.user?.email);
+        setSignedInUser(name);
+        syncUserSelectToName(name);
+        auditExtras = [];
+        showApp();
+        await ensureUserHasPopCode();
+        await loadSheet();
+
+        showToast({
+          title: "Passkey Sucess",
+          description: "Welcome Back, You now have access to the database!",
+          type: "info",
+          icon: "fa-regular fa-user",
+        });
+      } catch (err) {
+        console.error("Passkey sign-in error:", err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-fingerprint" style="margin-right: 0.5rem;"></i> Sign in with passkey';
+        }
+        showToast({
+          title: "Sign-in failed",
+          description: err.message || "Failed to sign in with passkey. Please try again or use your password.",
+          type: "error",
+        });
+      }
+    }
+
+    async function updatePassword(currentPassword, newPassword, confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        throw new Error("New passwords do not match.");
+      }
+      if (newPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters.");
+      }
+
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user?.email) {
+        throw new Error("You must be signed in to change your password.");
+      }
+
+      const { error: signInErr } = await sb.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      if (signInErr) {
+        throw new Error("Current password is incorrect.");
+      }
+
+      const { error } = await sb.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+    }
+
+    async function loadUsersFromSupabase() {
       try {
         const { data, error } = await sb
           .from('profiles')
@@ -367,313 +3233,226 @@
         
         if (error) throw error;
         
-        const select = $('nameSelect');
-        select.innerHTML = '<option value="" disabled selected>Select your name</option>';
+        const users = (data || []).map(user => {
+          const name = emailToDisplayName(user.email);
+          return { name, email: user.email };
+        }).filter(u => u.name);
         
-        data.forEach(profile => {
-          const displayName = emailToDisplayName(profile.email);
-          if (displayName) {
-            const option = document.createElement('option');
-            option.value = profile.email;
-            option.textContent = displayName;
-            select.appendChild(option);
-          }
-        });
+        return users;
       } catch (err) {
-        console.error('Failed to load names:', err);
+        console.error('Failed to load users:', err);
+        return [];
       }
     }
-    
-    loadNames();
-    
-    // Step 1: Email or Name
-    $('emailForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = $('email').value.trim();
-      const nameSelect = $('nameSelect');
-      const selectedEmail = nameSelect.value;
-      const errorEl = $('emailError');
-      const btn = $('emailBtn');
+
+    async function populateUserDropdown() {
+      const users = await loadUsersFromSupabase();
+      const select = $("userSelect");
       
-      errorEl.textContent = '';
+      select.innerHTML = '<option value="" disabled selected>Select your name</option>';
       
-      // Check if either email or name is provided
-      if (!email && !selectedEmail) {
-        errorEl.textContent = 'Please enter your email or select your name.';
-        return;
+      users.sort((a, b) => a.name.localeCompare(b.name)).forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.email;
+        option.textContent = user.name;
+        option.dataset.email = user.email;
+        select.appendChild(option);
+      });
+      
+      if (users.length === 0) {
+        const option = document.createElement('option');
+        option.value = "none";
+        option.disabled = true;
+        option.textContent = "No users found. Please contact an administrator.";
+        select.appendChild(option);
+      } else {
+        const option = document.createElement('option');
+        option.value = "none";
+        option.disabled = true;
+        option.textContent = "Name not listed? You may not have access to this document. Speak to James for more information.";
+        select.appendChild(option);
       }
-      
-      const emailToUse = email || selectedEmail;
-      
-      btn.disabled = true;
-      btn.textContent = 'Checking...';
-      
-      try {
-        // Check if email exists in profiles
-        const { data, error } = await sb
-          .from('profiles')
-          .select('email')
-          .eq('email', emailToUse)
-          .single();
-        
-        if (error || !data) {
-          errorEl.textContent = 'Account not found. Please check and try again.';
-          btn.disabled = false;
-          btn.textContent = 'Continue';
-          return;
-        }
-        
-        userEmail = emailToUse;
-        showStep(2);
-      } catch (err) {
-        errorEl.textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Continue';
-      }
-    });
-    
-    // Step 2: PopCode
-    $('popcodeForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const popcode = $('popcode').value.trim();
-      const errorEl = $('popcodeError');
-      const btn = $('popcodeBtn');
-      
-      errorEl.textContent = '';
-      btn.disabled = true;
-      btn.textContent = 'Verifying...';
-      
-      try {
-        // Verify PopCode
-        const { data, error } = await sb
-          .from('popcodes')
-          .select('code')
-          .eq('email', userEmail)
-          .eq('code', popcode)
-          .single();
-        
-        if (error || !data) {
-          errorEl.textContent = 'Invalid PopCode. Please check and try again.';
-          btn.disabled = false;
-          btn.textContent = 'Verify';
-          return;
-        }
-        
-        showStep(3);
-      } catch (err) {
-        errorEl.textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Verify';
-      }
-    });
-    
-    // Step 3: Real Email - Send OTP
-    $('realEmailForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const realEmail = $('realEmail').value.trim();
-      const errorEl = $('realEmailError');
-      const btn = $('realEmailBtn');
-      
-      errorEl.textContent = '';
-      
-      if (!realEmail) {
-        errorEl.textContent = 'Please enter your email address.';
-        return;
-      }
-      
-      btn.disabled = true;
-      btn.textContent = 'Sending OTP...';
-      
-      try {
-        // Send password reset email with OTP using Supabase's resetPasswordForEmail
-        const { error } = await sb.auth.resetPasswordForEmail(realEmail, {
-          redirectTo: `${window.location.origin}/internal/accountrecovery.html`,
-        });
-        
-        if (error) {
-          errorEl.textContent = error.message || 'Failed to send password reset email.';
-          btn.disabled = false;
-          btn.textContent = 'Send OTP';
-          return;
-        }
-        
-        userRealEmail = realEmail;
-        showStep(4);
-        startResendTimer();
-      } catch (err) {
-        errorEl.textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Send OTP';
-      }
-    });
-    
-    $('backToEmail').addEventListener('click', () => {
-      showStep(1);
-      $('popcode').value = '';
-      $('popcodeError').textContent = '';
-    });
-    
-    $('backToPopcode').addEventListener('click', () => {
-      showStep(2);
-      $('realEmail').value = '';
-      $('realEmailError').textContent = '';
-    });
-    
-    // Resend timer function
-    function startResendTimer() {
-      resendSeconds = 120;
-      const resendBtn = $('resendOtpBtn');
-      resendBtn.disabled = true;
-      
-      if (resendTimer) clearInterval(resendTimer);
-      
-      resendTimer = setInterval(() => {
-        resendSeconds--;
-        const minutes = Math.floor(resendSeconds / 60);
-        const seconds = resendSeconds % 60;
-        resendBtn.textContent = `Resend OTP (${minutes}:${seconds.toString().padStart(2, '0')})`;
-        
-        if (resendSeconds <= 0) {
-          clearInterval(resendTimer);
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'Resend OTP';
-        }
-      }, 1000);
     }
-    
-    // Resend OTP button
-    $('resendOtpBtn').addEventListener('click', async () => {
-      const btn = $('resendOtpBtn');
-      btn.disabled = true;
-      btn.textContent = 'Sending...';
-      
-      try {
-        const { error } = await sb.auth.resetPasswordForEmail(userRealEmail, {
-          redirectTo: `${window.location.origin}/internal/accountrecovery.html`,
-        });
-        
-        if (error) {
-          $('otpError').textContent = error.message || 'Failed to resend password reset email.';
-          btn.disabled = false;
-          btn.textContent = 'Resend OTP';
-          return;
+
+    async function initSession() {
+      await populateUserDropdown();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const name = resolveUserFromSession(session);
+        if (name) {
+          setSignedInUser(name);
+          syncUserSelectToName(name);
         }
-        
-        $('otpError').textContent = '';
-        startResendTimer();
-      } catch (err) {
-        $('otpError').textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Resend OTP';
+        showApp();
+        await ensureUserHasPopCode();
+        await loadSheet();
+      } else {
+        showLogin();
+        await checkForPasskeysAndShowOption();
       }
-    });
-    
-    // Step 4: Verify OTP
-    $('otpForm').addEventListener('submit', async (e) => {
+    }
+
+    $("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const otp = $('otp').value.trim();
-      const errorEl = $('otpError');
-      const btn = $('otpBtn');
-      
-      errorEl.textContent = '';
-      
-      if (!otp || otp.length !== 8 || !/^\d{8}$/.test(otp)) {
-        errorEl.textContent = 'Please enter a valid 8-digit OTP code.';
+      const btn = $("loginBtn");
+      const errEl = $("loginError");
+      errEl.textContent = "";
+
+      const portalUser = getSelectedPortalUser();
+      if (!portalUser) {
+        errEl.textContent = "Please select your name to sign in.";
         return;
       }
-      
+
       btn.disabled = true;
-      btn.textContent = 'Verifying...';
-      
-      try {
-        // Verify OTP for password reset
-        const { data, error } = await sb.auth.verifyOtp({
-          email: userRealEmail,
-          token: otp,
-          type: 'email',
-        });
-        
-        if (error) {
-          errorEl.textContent = 'Invalid OTP. Please check and try again.';
-          btn.disabled = false;
-          btn.textContent = 'Verify OTP';
-          return;
-        }
-        
-        // OTP verified, proceed to password reset
-        showStep(5);
-      } catch (err) {
-        errorEl.textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Verify OTP';
-      }
-    });
-    
-    $('backToRealEmail').addEventListener('click', () => {
-      showStep(3);
-      $('otp').value = '';
-      $('otpError').textContent = '';
-      if (resendTimer) clearInterval(resendTimer);
-    });
-    
-    // Step 5: Reset Password
-    $('passwordForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const newPassword = $('newPassword').value;
-      const confirmPassword = $('confirmPassword').value;
-      const errorEl = $('passwordError');
-      const successEl = $('passwordSuccess');
-      const btn = $('passwordBtn');
-      
-      errorEl.textContent = '';
-      successEl.textContent = '';
-      
-      if (newPassword !== confirmPassword) {
-        errorEl.textContent = 'Passwords do not match.';
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: portalUser.email,
+        password: $("password").value,
+      });
+
+      btn.disabled = false;
+
+      if (error) {
+        errEl.textContent = error.message;
         return;
       }
-      
-      if (newPassword.length < 8) {
-        errorEl.textContent = 'Password must be at least 8 characters.';
+
+      setSignedInUser(portalUser.name);
+      $("password").value = "";
+      auditExtras = [];
+      showApp();
+      await ensureUserHasPopCode();
+      await loadSheet();
+    });
+
+    $("updatePasswordBtn").addEventListener("click", async () => {
+      const errEl = $("passwordError");
+      const saveBtn = $("updatePasswordBtn");
+      errEl.textContent = "";
+      saveBtn.disabled = true;
+
+      const current = $("currentPassword").value;
+      const next = $("newPassword").value;
+      const confirm = $("confirmPassword").value;
+
+      try {
+        if (next !== confirm) throw new Error("New passwords do not match.");
+        if (next.length < 8) throw new Error("Password must be at least 8 characters.");
+
+        await updatePassword(current, next, confirm);
+
+        $("currentPassword").value = "";
+        $("newPassword").value = "";
+        $("confirmPassword").value = "";
+
+        showToast({
+          title: "Password updated",
+          description: "Your sign-in password has been changed successfully.",
+          type: "info",
+        });
+      } catch (err) {
+        errEl.textContent = err.message;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    $("signOutBtn").addEventListener("click", () => {
+      sb.auth.signOut();
+      window.location.href = "/actions/internal/logout.html";
+    });
+
+    document.querySelectorAll(".btn-add").forEach((btn) => {
+      btn.addEventListener("click", () => addRow(btn.dataset.direction));
+    });
+
+    $("tabSheet").addEventListener("click", () => setActiveTab("sheet"));
+    $("tabCharts").addEventListener("click", () => setActiveTab("charts"));
+    document.querySelectorAll(".tab-picker-btn").forEach((btn) => {
+      btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+    });
+
+    $("accountSettingsBtn").addEventListener("click", openAccountSettingsModal);
+    $("accountSettingsCloseBtn").addEventListener("click", closeAccountSettingsModal);
+    $("accountSettingsSaveBtn").addEventListener("click", saveAccountSettings);
+    $("accountSettingsModal").addEventListener("click", (e) => {
+      if (e.target === $("accountSettingsModal")) closeAccountSettingsModal();
+    });
+
+    $("regeneratePopCodeBtn").addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to regenerate your PopCode? This will invalidate your previous code.")) {
         return;
       }
-      
-      btn.disabled = true;
-      btn.textContent = 'Resetting...';
-      
-      try {
-        // Call the Edge Function to reset the password
-        const { error: functionError } = await sb.functions.invoke('reset-password', {
-          body: {
-            internalEmail: userEmail,
-            newPassword: newPassword,
-          },
+
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+
+      const newCode = generatePopCode();
+      $("popCode").value = newCode;
+
+      // Update the database
+      const { error } = await sb
+        .from('popcodes')
+        .upsert({ email: user.email, code: newCode }, { onConflict: 'email' });
+
+      if (error) {
+        showToast({
+          title: "Error",
+          description: "Failed to regenerate PopCode. Please try again.",
+          type: "error",
         });
-        
-        if (functionError) {
-          errorEl.textContent = functionError.message || 'Failed to reset password.';
-          btn.disabled = false;
-          btn.textContent = 'Reset Password';
-          return;
-        }
-        
-        // Password reset successful
-        showStep(6);
-      } catch (err) {
-        console.error('Password reset error:', err);
-        errorEl.textContent = 'An error occurred. Please try again.';
-        btn.disabled = false;
-        btn.textContent = 'Reset Password';
+      } else {
+        showToast({
+          title: "PopCode Regenerated",
+          description: "Your new PopCode has been generated and saved.",
+          type: "info",
+        });
       }
     });
-    
-    $('backToOtp').addEventListener('click', () => {
-      showStep(4);
-      $('newPassword').value = '';
-      $('confirmPassword').value = '';
-      $('passwordError').textContent = '';
-      $('passwordSuccess').textContent = '';
+
+    document.querySelectorAll(".settings-nav-item").forEach(item => {
+      item.addEventListener("click", () => {
+        switchSettingsPanel(item.dataset.panel);
+      });
     });
+
+    $("registerPasskeyBtn").addEventListener("click", registerPasskey);
+    $("signInWithPasskeyBtn").addEventListener("click", signInWithPasskey);
+
+    $("viewAuditBtn").addEventListener("click", openAuditModal);
+    $("auditCloseBtn").addEventListener("click", closeAuditModal);
+    $("auditDoneBtn").addEventListener("click", closeAuditModal);
+
+    $("auditModal").addEventListener("click", (e) => {
+      if (e.target === $("auditModal")) closeAuditModal();
+    });
+
+    $("exportExcelBtn").addEventListener("click", openExportModal);
+    $("exportCloseBtn").addEventListener("click", closeExportModal);
+    $("exportCancelBtn").addEventListener("click", closeExportModal);
+    $("exportDownloadBtn").addEventListener("click", downloadExportFile);
+
+    $("exportModal").addEventListener("click", (e) => {
+      if (e.target === $("exportModal")) closeExportModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!$("accountSettingsModal").classList.contains("hidden")) closeAccountSettingsModal();
+      else if (!$("auditModal").classList.contains("hidden")) closeAuditModal();
+      else if (!$("exportModal").classList.contains("hidden")) closeExportModal();
+    });
+
+    sb.auth.onAuthStateChange((_event, session) => {
+      if (!session && !$("appView").classList.contains("hidden")) {
+        setSignedInUser("");
+        showLogin();
+      }
+    });
+
+    bindRemoveButtonsOnce();
+    initSession();
   </script>
 </body>
 </html>
