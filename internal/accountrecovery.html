@@ -206,33 +206,74 @@
       <img src="../text.png" alt="Poppin" width="160" height="40" />
     </div>
 
-    <!-- Step 1: Email or Name -->
+    <!-- Step 1: Email or Name Selection -->
     <div id="step1" class="step active">
       <h1>Account Recovery</h1>
-      <p class="subtitle">Enter your email or select your name to begin password recovery</p>
+      <p class="subtitle">Choose how you'd like to identify yourself</p>
       
       <div class="info-box" style="background: #fef3c7; border-color: #fcd34d; color: #92400e;">
         <p style="margin-bottom: 0;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 0.5rem;"></i><strong>Notice:</strong> We are aware that once you input a new password, it fails to update it. We are working hard to fix this issue, and we thank you for your patience.</p>
       </div>
       
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <div class="selection-card" onclick="selectEmailOption()" style="flex: 1; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;">
+          <i class="fa-solid fa-envelope" style="font-size: 2rem; color: var(--navy); margin-bottom: 0.75rem;"></i>
+          <h3 style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem;">I know my login email</h3>
+          <p style="font-size: 0.8125rem; color: var(--muted); margin: 0;">Enter your email address directly</p>
+        </div>
+        
+        <div class="selection-card" onclick="selectNameOption()" style="flex: 1; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;">
+          <i class="fa-solid fa-user" style="font-size: 2rem; color: var(--navy); margin-bottom: 0.75rem;"></i>
+          <h3 style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem;">I don't know my login email</h3>
+          <p style="font-size: 0.8125rem; color: var(--muted); margin: 0;">You can choose your name from a dropdown instead.</p>
+        </div>
+      </div>
+      
+      <style>
+        .selection-card:hover {
+          border-color: var(--navy);
+          box-shadow: 0 4px 12px rgba(31, 78, 121, 0.15);
+          transform: translateY(-2px);
+        }
+      </style>
+      
+      <button type="button" class="back-link" onclick="window.location.href='/internal/cash.html'" style="margin-top: 1.5rem;">Back to login</button>
+    </div>
+
+    <!-- Step 1a: Email Input -->
+    <div id="step1a" class="step">
+      <h1>Enter Your Email</h1>
+      <p class="subtitle">Enter your login email address</p>
+      
       <form id="emailForm">
         <div class="field">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="your.email@poppin.internal" autocomplete="email" />
+          <input type="email" id="email" placeholder="your.email@poppin.internal" required autocomplete="email" />
         </div>
-        
-        <div class="field">
-          <label for="nameSelect">Or select your name</label>
-          <select id="nameSelect" autocomplete="name">
-            <option value="" disabled selected>Loading names...</option>
-          </select>
-        </div>
-        
         <button type="submit" class="btn-primary" id="emailBtn">Continue</button>
         <p class="error" id="emailError" role="alert"></p>
       </form>
       
-      <button type="button" class="back-link" onclick="window.location.href='/internal/cash.html'">Back to login</button>
+      <button type="button" class="back-link" id="backToSelection">Back</button>
+    </div>
+
+    <!-- Step 1b: Name Selection -->
+    <div id="step1b" class="step">
+      <h1>Select Your Name</h1>
+      <p class="subtitle">Choose your name from the dropdown</p>
+      
+      <form id="nameForm">
+        <div class="field">
+          <label for="nameSelect">Your Name</label>
+          <select id="nameSelect" required autocomplete="name">
+            <option value="" disabled selected>Loading names...</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" id="nameBtn">Continue</button>
+        <p class="error" id="nameError" role="alert"></p>
+      </form>
+      
+      <button type="button" class="back-link" id="backToSelection2">Back</button>
     </div>
 
     <!-- Step 2: PopCode -->
@@ -345,7 +386,8 @@
     
     function showStep(stepNum) {
       document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-      $(`step${stepNum}`).classList.add('active');
+      const stepEl = $(`step${stepNum}`);
+      if (stepEl) stepEl.classList.add('active');
     }
     
     function emailToDisplayName(email) {
@@ -386,24 +428,28 @@
     
     loadNames();
     
-    // Step 1: Email or Name
+    // Card selection functions
+    function selectEmailOption() {
+      showStep('1a');
+    }
+    
+    function selectNameOption() {
+      showStep('1b');
+    }
+    
+    // Step 1a: Email Input
     $('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = $('email').value.trim();
-      const nameSelect = $('nameSelect');
-      const selectedEmail = nameSelect.value;
       const errorEl = $('emailError');
       const btn = $('emailBtn');
       
       errorEl.textContent = '';
       
-      // Check if either email or name is provided
-      if (!email && !selectedEmail) {
-        errorEl.textContent = 'Please enter your email or select your name.';
+      if (!email) {
+        errorEl.textContent = 'Please enter your email address.';
         return;
       }
-      
-      const emailToUse = email || selectedEmail;
       
       btn.disabled = true;
       btn.textContent = 'Checking...';
@@ -413,7 +459,7 @@
         const { data, error } = await sb
           .from('profiles')
           .select('email')
-          .eq('email', emailToUse)
+          .eq('email', email)
           .single();
         
         if (error || !data) {
@@ -423,13 +469,67 @@
           return;
         }
         
-        userEmail = emailToUse;
+        userEmail = email;
         showStep(2);
       } catch (err) {
         errorEl.textContent = 'An error occurred. Please try again.';
         btn.disabled = false;
         btn.textContent = 'Continue';
       }
+    });
+    
+    // Step 1b: Name Selection
+    $('nameForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nameSelect = $('nameSelect');
+      const selectedEmail = nameSelect.value;
+      const errorEl = $('nameError');
+      const btn = $('nameBtn');
+      
+      errorEl.textContent = '';
+      
+      if (!selectedEmail) {
+        errorEl.textContent = 'Please select your name.';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+      
+      try {
+        // Check if email exists in profiles
+        const { data, error } = await sb
+          .from('profiles')
+          .select('email')
+          .eq('email', selectedEmail)
+          .single();
+        
+        if (error || !data) {
+          errorEl.textContent = 'Account not found. Please check and try again.';
+          btn.disabled = false;
+          btn.textContent = 'Continue';
+          return;
+        }
+        
+        userEmail = selectedEmail;
+        showStep(2);
+      } catch (err) {
+        errorEl.textContent = 'An error occurred. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Continue';
+      }
+    });
+    
+    // Back buttons for new steps
+    $('backToSelection').addEventListener('click', () => {
+      showStep(1);
+      $('email').value = '';
+      $('emailError').textContent = '';
+    });
+    
+    $('backToSelection2').addEventListener('click', () => {
+      showStep(1);
+      $('nameError').textContent = '';
     });
     
     // Step 2: PopCode
