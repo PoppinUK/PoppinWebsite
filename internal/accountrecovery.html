@@ -642,13 +642,16 @@
       btn.textContent = 'Resetting...';
       
       try {
-        // Update the user's password using updateUser
-        const { error } = await sb.auth.updateUser({
-          password: newPassword,
+        // Call the Edge Function to reset the password
+        const { error: functionError } = await sb.functions.invoke('reset-password', {
+          body: {
+            internalEmail: userEmail,
+            newPassword: newPassword,
+          },
         });
         
-        if (error) {
-          errorEl.textContent = error.message || 'Failed to reset password.';
+        if (functionError) {
+          errorEl.textContent = functionError.message || 'Failed to reset password.';
           btn.disabled = false;
           btn.textContent = 'Reset Password';
           return;
@@ -657,6 +660,7 @@
         // Password reset successful
         showStep(6);
       } catch (err) {
+        console.error('Password reset error:', err);
         errorEl.textContent = 'An error occurred. Please try again.';
         btn.disabled = false;
         btn.textContent = 'Reset Password';
