@@ -553,10 +553,9 @@
           .from('popcodes')
           .select('code')
           .eq('email', userEmail)
-          .eq('code', popcode)
-          .single();
+          .eq('code', popcode);
         
-        if (error || !data) {
+        if (error || !data || data.length === 0) {
           errorEl.textContent = 'Invalid PopCode. Please check and try again.';
           btn.disabled = false;
           btn.textContent = 'Verify';
